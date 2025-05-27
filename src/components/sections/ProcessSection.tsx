@@ -6,7 +6,7 @@ const ProcessSection = () => {
   const steps = [
     {
       number: 1,
-      icon: "🖍️",
+      icon: "✏️",
       title: "Draw & Upload",
       description: "Kids grab their favorite black marker and create amazing artwork, then upload it to our platform."
     },
@@ -24,7 +24,7 @@ const ProcessSection = () => {
     },
     {
       number: 4,
-      icon: "💰",
+      icon: "💵",
       title: "Kids Get Paid",
       description: "Young creators earn money from each sale, encouraging their artistic journey."
     }

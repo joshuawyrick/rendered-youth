@@ -56,7 +56,7 @@ const HeroSection = () => {
           <div className="relative mx-auto max-w-4xl">
             <div className="bg-gray-100 rounded-2xl aspect-[16/9] flex items-center justify-center border-2 border-dashed border-ry-yellow">
               <div className="text-center">
-                <div className="text-6xl mb-4">✏️</div>
+                <div className="text-6xl mb-4">👕</div>
                 <p className="text-lg text-gray-600">Amazing kid art showcase coming soon!</p>
               </div>
             </div>

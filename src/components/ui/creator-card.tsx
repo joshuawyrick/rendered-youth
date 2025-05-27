@@ -33,7 +33,7 @@ const CreatorCard = ({ creator, className }: CreatorCardProps) => {
               className="w-full h-full rounded-full object-cover"
             />
           ) : (
-            <span className="text-2xl">👨‍🎨</span>
+            <span className="text-2xl">👤</span>
           )}
         </div>
       </div>

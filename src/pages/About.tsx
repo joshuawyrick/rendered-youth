@@ -10,19 +10,19 @@ const About = () => {
       name: "Sarah Johnson",
       role: "Founder & CEO",
       bio: "Former art teacher with 15 years of experience. Passionate about empowering young artists.",
-      avatar: "👩‍🎨"
+      avatar: "👤"
     },
     {
       name: "Mike Chen",
       role: "CTO",
       bio: "Software engineer and father of two. Believes technology should amplify creativity.",
-      avatar: "👨‍💻"
+      avatar: "👤"
     },
     {
       name: "Emily Rodriguez",
       role: "Head of Community",
       bio: "Youth mentor and advocate. Dedicated to creating safe spaces for young creators.",
-      avatar: "👩‍🏫"
+      avatar: "👤"
     }
   ];
 
@@ -74,7 +74,7 @@ const About = () => {
                 </p>
               </div>
               <div className="bg-ry-white rounded-2xl p-8 text-center">
-                <div className="text-6xl mb-4">🎨</div>
+                <div className="text-6xl mb-4">💵</div>
                 <h3 className="text-xl font-semibold text-ry-black mb-2">
                   Supporting Young Entrepreneurs
                 </h3>

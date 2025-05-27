@@ -49,7 +49,7 @@ const FeaturedSection = () => {
               {/* Design Image Placeholder */}
               <div className="aspect-square bg-gray-100 flex items-center justify-center border-b border-gray-200">
                 <div className="text-center">
-                  <div className="text-4xl mb-2">🎨</div>
+                  <div className="text-4xl mb-2">👕</div>
                   <p className="text-sm text-gray-500">{design.title}</p>
                 </div>
               </div>
