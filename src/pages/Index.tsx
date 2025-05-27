@@ -1,12 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import TopNav from '@/components/navigation/TopNav';
+import HeroSection from '@/components/sections/HeroSection';
+import ProcessSection from '@/components/sections/ProcessSection';
+import FeaturedSection from '@/components/sections/FeaturedSection';
+import Footer from '@/components/layout/Footer';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-ry-white">
+      <TopNav />
+      <main>
+        <HeroSection />
+        <ProcessSection />
+        <FeaturedSection />
+      </main>
+      <Footer />
     </div>
   );
 };
