@@ -99,6 +99,6 @@
   }
   
   a {
-    @apply text-ry-yellow hover:underline transition-all duration-200;
+    @apply text-ry-yellow hover:text-ry-white transition-all duration-200;
   }
 }

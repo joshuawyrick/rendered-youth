@@ -73,6 +73,9 @@ export default {
 				sm: 'calc(var(--radius) - 4px)',
 				'2xl': '1rem'
 			},
+			borderColor: {
+				DEFAULT: '#000000'
+			},
 			boxShadow: {
 				'md': '0 4px 6px rgba(0, 0, 0, 0.12)',
 				'xl': '0 8px 10px rgba(0, 0, 0, 0.18)'

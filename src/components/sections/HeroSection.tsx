@@ -1,8 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
+import { AgeFilterChips } from '@/components/ui/age-filter-chips';
 
 const HeroSection = () => {
+  const [selectedAge, setSelectedAge] = useState<string | undefined>();
+
+  const handleAgeChange = (age: string | undefined) => {
+    setSelectedAge(age);
+    if (age) {
+      // Navigate to creators page with age filter
+      window.location.href = `/creators?age=${age}`;
+    }
+  };
+
   return (
     <section className="bg-ry-white py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,13 +29,25 @@ const HeroSection = () => {
             become real T-shirts. Upload, create, and wear imagination.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <RYButton variant="primary" size="lg">
               Start Creating
             </RYButton>
             <RYButton variant="secondary" size="lg">
               Shop Designs
             </RYButton>
+          </div>
+
+          {/* Browse by Age Section */}
+          <div className="mb-20">
+            <h2 className="text-2xl md:text-3xl font-semibold text-ry-black mb-6">
+              Browse by Age
+            </h2>
+            <AgeFilterChips
+              selectedAge={selectedAge}
+              onAgeChange={handleAgeChange}
+              className="justify-center"
+            />
           </div>
         </div>
 
