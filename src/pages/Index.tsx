@@ -10,11 +10,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-ry-white">
       <TopNav />
-      <main>
-        <HeroSection />
-        <ProcessSection />
-        <FeaturedSection />
-      </main>
+      {/* Add top padding to account for fixed navbar */}
+      <div className="pt-16">
+        <main>
+          <HeroSection />
+          <ProcessSection />
+          <FeaturedSection />
+        </main>
+      </div>
       <Footer />
     </div>
   );

@@ -95,10 +95,10 @@
   }
 
   body {
-    @apply bg-ry-white text-ry-black font-sans;
+    @apply bg-ry-white text-ry-black antialiased font-sans;
   }
   
   a {
-    @apply text-ry-yellow hover:text-ry-white transition-all duration-200;
+    @apply text-ry-yellow hover:text-ry-white transition-colors duration-200;
   }
 }

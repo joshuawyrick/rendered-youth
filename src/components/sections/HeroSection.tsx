@@ -19,9 +19,9 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-ry-black mb-8">
-            Turn Your Kid's
-            <span className="block text-ry-yellow">Drawings Into</span>
-            <span className="block">Wearable Art</span>
+            Kid Art,
+            <span className="block text-ry-yellow">Grown-Up</span>
+            <span className="block">Tees</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
@@ -31,10 +31,10 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <RYButton variant="primary" size="lg">
-              Start Creating
+              Shop Designs
             </RYButton>
             <RYButton variant="secondary" size="lg">
-              Shop Designs
+              Become a Creator
             </RYButton>
           </div>
 

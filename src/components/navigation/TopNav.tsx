@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 
 const TopNav = () => {
   return (
-    <nav className="bg-ry-black shadow-md sticky top-0 z-50 h-16">
+    <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full">
           {/* Logo */}
@@ -25,10 +25,24 @@ const TopNav = () => {
                 <a href="/store" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
                   Shop
                 </a>
-                {/* Shop by Age dropdown would go here */}
+                {/* Shop by Age dropdown */}
+                <div className="absolute left-0 mt-1 w-48 bg-ry-white border border-ry-black rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="py-2">
+                    <a href="/store?age=4-7" className="block px-4 py-2 text-sm text-ry-black hover:bg-ry-yellow hover:text-ry-black">Ages 4-7</a>
+                    <a href="/store?age=8-10" className="block px-4 py-2 text-sm text-ry-black hover:bg-ry-yellow hover:text-ry-black">Ages 8-10</a>
+                    <a href="/store?age=11-13" className="block px-4 py-2 text-sm text-ry-black hover:bg-ry-yellow hover:text-ry-black">Ages 11-13</a>
+                    <a href="/store?age=14-17" className="block px-4 py-2 text-sm text-ry-black hover:bg-ry-yellow hover:text-ry-black">Ages 14-17</a>
+                  </div>
+                </div>
               </div>
               <a href="/creators" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
                 Creators
+              </a>
+              <a href="/how-it-works" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
+                How It Works
+              </a>
+              <a href="/about" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
+                About
               </a>
             </div>
           </div>
