@@ -34,29 +34,27 @@ export const useAuth = () => {
     try {
       console.log('Attempting to sign out...');
       
-      // Clear local state first
-      setUser(null);
-      setSession(null);
-      
-      // Then sign out from Supabase
+      // Sign out from Supabase first
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Sign out error:', error);
-        // Even if there's an error, we've cleared local state
-        // so the user appears signed out in the UI
       } else {
         console.log('Sign out successful');
       }
       
-      // Force redirect to home page after sign out attempt
-      window.location.href = '/';
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      
+      // Redirect to login page
+      window.location.href = '/auth';
     } catch (error) {
       console.error('Unexpected sign out error:', error);
       // Clear local state and redirect anyway
       setUser(null);
       setSession(null);
-      window.location.href = '/';
+      window.location.href = '/auth';
     }
   };
 
