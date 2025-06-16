@@ -5,7 +5,7 @@ import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { StatsWidget } from '@/components/ui/stats-widget';
-import { Upload, User, Eye, DollarSign, TrendingUp, Star } from 'lucide-react';
+import { Upload, User, Eye, DollarSign, TrendingUp, Star, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,9 +21,9 @@ const CreatorDashboard = () => {
     totalDesigns: 12
   };
 
-  // Fetch designs ready for review
-  const { data: reviewReadyDesigns = [] } = useQuery({
-    queryKey: ['review-ready-designs', user?.id],
+  // Fetch all designs for the user
+  const { data: allDesigns = [] } = useQuery({
+    queryKey: ['user-designs', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
       
@@ -34,14 +34,14 @@ const CreatorDashboard = () => {
           title,
           status,
           created_at,
-          design_mockups!inner(id)
+          design_mockups(id),
+          design_selections(selected_mockup_id)
         `)
         .eq('user_id', user.id)
-        .eq('status', 'mockups_ready')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching review ready designs:', error);
+        console.error('Error fetching designs:', error);
         return [];
       }
 
@@ -49,6 +49,56 @@ const CreatorDashboard = () => {
     },
     enabled: !!user?.id,
   });
+
+  // Filter designs by status
+  const pendingDesigns = allDesigns.filter(design => 
+    design.status === 'pending_review' || 
+    (design.status === 'mockups_ready' && !design.design_selections?.length)
+  );
+
+  const selectedDesigns = allDesigns.filter(design => 
+    design.design_selections?.length > 0
+  );
+
+  const publishedDesigns = allDesigns.filter(design => 
+    design.status === 'published'
+  );
+
+  const getStatusInfo = (design: any) => {
+    if (design.design_selections?.length > 0) {
+      return {
+        status: 'Selected',
+        color: 'bg-green-100 text-green-800',
+        icon: <CheckCircle className="h-4 w-4" />,
+        action: null
+      };
+    }
+    
+    if (design.status === 'mockups_ready' && design.design_mockups?.length > 0) {
+      return {
+        status: 'Ready to Review',
+        color: 'bg-blue-100 text-blue-800',
+        icon: <Star className="h-4 w-4" />,
+        action: (
+          <RYButton
+            variant="primary"
+            size="sm"
+            onClick={() => window.location.href = `/design-review?design=${design.id}`}
+          >
+            <Star className="h-4 w-4 mr-2" />
+            Review & Select
+          </RYButton>
+        )
+      };
+    }
+    
+    return {
+      status: 'Waiting for Admin',
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: <Clock className="h-4 w-4" />,
+      action: null
+    };
+  };
 
   const recentDesigns = [
     {
@@ -102,37 +152,48 @@ const CreatorDashboard = () => {
             </p>
           </div>
 
-          {/* Review Ready Section */}
-          {reviewReadyDesigns.length > 0 && (
+          {/* Pending Approvals Section */}
+          {pendingDesigns.length > 0 && (
             <div className="mb-12">
               <h2 className="text-2xl font-semibold text-ry-black mb-6 flex items-center">
-                <Star className="h-6 w-6 mr-2 text-ry-yellow" />
-                Designs Ready for Review! 🎉
+                <Clock className="h-6 w-6 mr-2 text-ry-yellow" />
+                Pending Approvals ({pendingDesigns.length})
               </h2>
               <div className="grid gap-4 mb-6">
-                {reviewReadyDesigns.map((design) => (
-                  <RYCard key={design.id} className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-ry-black mb-2">
-                          "{design.title}" is ready for your review!
-                        </h3>
-                        <p className="text-gray-600">
-                          We've created 4 awesome designs for you to choose from.
-                        </p>
+                {pendingDesigns.map((design) => {
+                  const statusInfo = getStatusInfo(design);
+                  return (
+                    <RYCard key={design.id} className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4 mb-2">
+                            <h3 className="text-lg font-semibold text-ry-black">
+                              {design.title}
+                            </h3>
+                            <div className={`px-3 py-1 text-sm rounded-lg font-medium flex items-center gap-2 ${statusInfo.color}`}>
+                              {statusInfo.icon}
+                              {statusInfo.status}
+                            </div>
+                          </div>
+                          <p className="text-gray-600">
+                            {statusInfo.status === 'Ready to Review' 
+                              ? 'Your design mockups are ready! Click to review and select your favorite.'
+                              : 'Your design is being reviewed by our team. We\'ll notify you when mockups are ready.'
+                            }
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Submitted on {new Date(design.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {statusInfo.action && (
+                          <div className="ml-4">
+                            {statusInfo.action}
+                          </div>
+                        )}
                       </div>
-                      <RYButton
-                        variant="primary"
-                        size="lg"
-                        onClick={() => window.location.href = `/design-review?design=${design.id}`}
-                        className="ml-4"
-                      >
-                        <Star className="h-5 w-5 mr-2" />
-                        Review Designs
-                      </RYButton>
-                    </div>
-                  </RYCard>
-                ))}
+                    </RYCard>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -151,12 +212,12 @@ const CreatorDashboard = () => {
             />
             <StatsWidget
               label="Pending Approvals"
-              value={stats.pendingApprovals.toString()}
+              value={pendingDesigns.length.toString()}
               icon={<Eye className="h-6 w-6" />}
             />
             <StatsWidget
               label="Total Designs"
-              value={stats.totalDesigns.toString()}
+              value={allDesigns.length.toString()}
               icon={<Upload className="h-6 w-6" />}
             />
           </div>

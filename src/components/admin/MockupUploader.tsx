@@ -86,10 +86,10 @@ const MockupUploader = ({ designId, onComplete, onCancel }: MockupUploaderProps)
 
       if (dbError) throw dbError;
 
-      // Update design status
+      // Update design status to 'mockups_ready'
       await supabase
         .from('designs')
-        .update({ status: 'review_ready' })
+        .update({ status: 'mockups_ready' })
         .eq('id', designId);
 
       // Send notification email
