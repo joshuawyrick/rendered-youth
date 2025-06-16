@@ -15,7 +15,11 @@ import {
   Eye
 } from 'lucide-react';
 
-const AdminStats = () => {
+interface AdminStatsProps {
+  onStatusClick?: (status: string) => void;
+}
+
+const AdminStats = ({ onStatusClick }: AdminStatsProps) => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
@@ -32,6 +36,12 @@ const AdminStats = () => {
       return data;
     },
   });
+
+  const handleStatusClick = (status: string) => {
+    if (onStatusClick) {
+      onStatusClick(status);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -57,30 +67,38 @@ const AdminStats = () => {
       <div>
         <h3 className="text-xl font-semibold text-ry-black mb-4">Design Management</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsWidget
-            label="Pending Review"
-            value={stats.pending_review_count?.toString() || '0'}
-            icon={<Clock className="h-6 w-6" />}
-            className="border-yellow-200 bg-yellow-50"
-          />
-          <StatsWidget
-            label="Ready for Creator Review"
-            value={stats.mockups_ready_count?.toString() || '0'}
-            icon={<Eye className="h-6 w-6" />}
-            className="border-blue-200 bg-blue-50"
-          />
-          <StatsWidget
-            label="Selected by Creator"
-            value={stats.selected_count?.toString() || '0'}
-            icon={<Star className="h-6 w-6" />}
-            className="border-purple-200 bg-purple-50"
-          />
-          <StatsWidget
-            label="Published Products"
-            value={stats.published_count?.toString() || '0'}
-            icon={<CheckCircle className="h-6 w-6" />}
-            className="border-green-200 bg-green-50"
-          />
+          <div onClick={() => handleStatusClick('pending_review')} className="cursor-pointer">
+            <StatsWidget
+              label="Pending Review"
+              value={stats.pending_review_count?.toString() || '0'}
+              icon={<Clock className="h-6 w-6" />}
+              className="border-yellow-200 bg-yellow-50 hover:shadow-lg transition-shadow"
+            />
+          </div>
+          <div onClick={() => handleStatusClick('mockups_ready')} className="cursor-pointer">
+            <StatsWidget
+              label="Ready for Creator Review"
+              value={stats.mockups_ready_count?.toString() || '0'}
+              icon={<Eye className="h-6 w-6" />}
+              className="border-blue-200 bg-blue-50 hover:shadow-lg transition-shadow"
+            />
+          </div>
+          <div onClick={() => handleStatusClick('selected')} className="cursor-pointer">
+            <StatsWidget
+              label="Selected by Creator"
+              value={stats.selected_count?.toString() || '0'}
+              icon={<Star className="h-6 w-6" />}
+              className="border-purple-200 bg-purple-50 hover:shadow-lg transition-shadow"
+            />
+          </div>
+          <div onClick={() => handleStatusClick('published')} className="cursor-pointer">
+            <StatsWidget
+              label="Published Products"
+              value={stats.published_count?.toString() || '0'}
+              icon={<CheckCircle className="h-6 w-6" />}
+              className="border-green-200 bg-green-50 hover:shadow-lg transition-shadow"
+            />
+          </div>
         </div>
       </div>
 
