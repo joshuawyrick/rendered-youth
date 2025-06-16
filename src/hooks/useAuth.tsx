@@ -11,8 +11,17 @@ export const useAuth = () => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (event === 'SIGNED_OUT') {
+          // Ensure we clear everything on sign out
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -38,6 +47,9 @@ export const useAuth = () => {
       setUser(null);
       setSession(null);
       
+      // Clear the session from localStorage manually
+      localStorage.removeItem('sb-rneamwxblioxlhisxaxr-auth-token');
+      
       // Sign out from Supabase with proper scope
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       
@@ -46,11 +58,6 @@ export const useAuth = () => {
       } else {
         console.log('Sign out successful');
       }
-      
-      // Force clear any remaining session data
-      await supabase.auth.getSession().then(() => {
-        // Just to ensure session is cleared
-      });
       
     } catch (error) {
       console.error('Unexpected sign out error:', error);
