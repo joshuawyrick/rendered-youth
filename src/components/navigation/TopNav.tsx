@@ -10,9 +10,13 @@ const TopNav = () => {
         <div className="flex justify-between items-center h-full">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-ry-yellow">
-              Rendered Youth
-            </h1>
+            <a href="/" className="block">
+              <img 
+                src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
+                alt="Rendered Youth" 
+                className="h-10 w-auto"
+              />
+            </a>
           </div>
 
           {/* Navigation Links */}
