@@ -5,9 +5,14 @@ import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { StatsWidget } from '@/components/ui/stats-widget';
-import { Upload, User, Eye, DollarSign, TrendingUp } from 'lucide-react';
+import { Upload, User, Eye, DollarSign, TrendingUp, Star } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const CreatorDashboard = () => {
+  const { user } = useAuth();
+
   // Mock data for demonstration
   const stats = {
     totalEarnings: 342.50,
@@ -15,6 +20,35 @@ const CreatorDashboard = () => {
     pendingApprovals: 2,
     totalDesigns: 12
   };
+
+  // Fetch designs ready for review
+  const { data: reviewReadyDesigns = [] } = useQuery({
+    queryKey: ['review-ready-designs', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('designs')
+        .select(`
+          id,
+          title,
+          status,
+          created_at,
+          design_mockups!inner(id)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'mockups_ready')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching review ready designs:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
 
   const recentDesigns = [
     {
@@ -67,6 +101,41 @@ const CreatorDashboard = () => {
               Welcome back! Here's how your designs are performing.
             </p>
           </div>
+
+          {/* Review Ready Section */}
+          {reviewReadyDesigns.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-semibold text-ry-black mb-6 flex items-center">
+                <Star className="h-6 w-6 mr-2 text-ry-yellow" />
+                Designs Ready for Review! 🎉
+              </h2>
+              <div className="grid gap-4 mb-6">
+                {reviewReadyDesigns.map((design) => (
+                  <RYCard key={design.id} className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-ry-black mb-2">
+                          "{design.title}" is ready for your review!
+                        </h3>
+                        <p className="text-gray-600">
+                          We've created 4 awesome designs for you to choose from.
+                        </p>
+                      </div>
+                      <RYButton
+                        variant="primary"
+                        size="lg"
+                        onClick={() => window.location.href = `/design-review?design=${design.id}`}
+                        className="ml-4"
+                      >
+                        <Star className="h-5 w-5 mr-2" />
+                        Review Designs
+                      </RYButton>
+                    </div>
+                  </RYCard>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">

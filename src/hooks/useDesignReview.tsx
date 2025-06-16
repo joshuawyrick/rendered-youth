@@ -93,6 +93,7 @@ export const useDesignReview = (designId: string | null) => {
 
     setSubmitting(true);
     try {
+      // Save the selection
       const { error } = await supabase
         .from('design_selections')
         .insert({
@@ -107,6 +108,20 @@ export const useDesignReview = (designId: string | null) => {
         .from('designs')
         .update({ status: 'selected' })
         .eq('id', designId);
+
+      // Notify admins of the selection
+      try {
+        await supabase.functions.invoke('notify-admin-selection', {
+          body: {
+            designId,
+            selectedMockupId: selectedMockup,
+          },
+        });
+        console.log('Admin notification sent successfully');
+      } catch (notificationError) {
+        console.error('Failed to send admin notification:', notificationError);
+        // Don't fail the whole process if notification fails
+      }
 
       setSubmitted(true);
       toast({
