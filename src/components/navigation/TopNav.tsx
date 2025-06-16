@@ -2,8 +2,11 @@
 import React from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { Search } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const TopNav = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
@@ -54,12 +57,42 @@ const TopNav = () => {
           {/* Right side buttons */}
           <div className="flex items-center space-x-4">
             <Search className="h-5 w-5 text-ry-yellow hover:text-ry-white cursor-pointer transition-colors" />
-            <RYButton variant="secondary" size="sm">
-              Upload Art
-            </RYButton>
-            <RYButton variant="primary" size="sm">
-              Sign In
-            </RYButton>
+            
+            {user ? (
+              <>
+                <RYButton 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => window.location.href = '/creator/upload'}
+                >
+                  Upload Art
+                </RYButton>
+                <RYButton 
+                  variant="primary" 
+                  size="sm"
+                  onClick={signOut}
+                >
+                  Sign Out
+                </RYButton>
+              </>
+            ) : (
+              <>
+                <RYButton 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => window.location.href = '/creator/upload'}
+                >
+                  Upload Art
+                </RYButton>
+                <RYButton 
+                  variant="primary" 
+                  size="sm"
+                  onClick={() => window.location.href = '/auth'}
+                >
+                  Sign In
+                </RYButton>
+              </>
+            )}
           </div>
         </div>
       </div>

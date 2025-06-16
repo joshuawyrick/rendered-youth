@@ -13,6 +13,8 @@ import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorUpload from "./pages/CreatorUpload";
 import CreatorSubmitted from "./pages/CreatorSubmitted";
 import CreatorProfile from "./pages/CreatorProfile";
+import Auth from "./pages/Auth";
+import DesignReview from "./pages/DesignReview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,10 +31,12 @@ const App = () => (
           <Route path="/creators" element={<Creators />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about" element={<About />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/upload" element={<CreatorUpload />} />
           <Route path="/creator/submitted" element={<CreatorSubmitted />} />
           <Route path="/creator/profile" element={<CreatorProfile />} />
+          <Route path="/design-review" element={<DesignReview />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

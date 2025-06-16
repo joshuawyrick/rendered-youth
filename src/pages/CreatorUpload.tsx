@@ -1,16 +1,29 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Upload, X } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const CreatorUpload = () => {
   const [title, setTitle] = useState('');
   const [inspiration, setInspiration] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/auth';
+    }
+  }, [user, loading]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -44,13 +57,21 @@ const CreatorUpload = () => {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
     if (!allowedTypes.includes(selectedFile.type)) {
-      alert('Please upload a JPG, PNG, or SVG file');
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a JPG, PNG, or SVG file",
+        variant: "destructive",
+      });
       return;
     }
 
     // Validate file size (25MB limit)
     if (selectedFile.size > 25 * 1024 * 1024) {
-      alert('File size must be less than 25MB');
+      toast({
+        title: "File too large",
+        description: "File size must be less than 25MB",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -61,25 +82,109 @@ const CreatorUpload = () => {
     setFile(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadFileToStorage = async (file: File): Promise<string> => {
+    const fileName = `${Date.now()}-${file.name}`;
+    const filePath = `designs/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('design-uploads')
+      .upload(filePath, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('design-uploads')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
-      alert('Please enter a title for your design');
+      toast({
+        title: "Missing title",
+        description: "Please enter a title for your design",
+        variant: "destructive",
+      });
       return;
     }
     
     if (!file) {
-      alert('Please upload your artwork');
+      toast({
+        title: "Missing artwork",
+        description: "Please upload your artwork",
+        variant: "destructive",
+      });
       return;
     }
 
-    // Here would be the actual upload logic
-    console.log('Submitting:', { title, inspiration, file });
-    
-    // Redirect to submission confirmation
-    window.location.href = '/creator/submitted';
+    if (!user) {
+      toast({
+        title: "Not signed in",
+        description: "Please sign in to upload your artwork",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Upload file to storage
+      const fileUrl = await uploadFileToStorage(file);
+
+      // Save design to database
+      const { data, error } = await supabase
+        .from('designs')
+        .insert({
+          user_id: user.id,
+          title: title.trim(),
+          inspiration: inspiration.trim() || null,
+          file_url: fileUrl,
+          file_name: file.name,
+          file_size: file.size,
+          status: 'pending_review'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Upload successful!",
+        description: "Your artwork has been submitted for review",
+      });
+
+      // Redirect to submission confirmation
+      window.location.href = '/creator/submitted';
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16 flex items-center justify-center min-h-screen">
+          <div className="text-2xl text-ry-black">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
 
   return (
     <div className="min-h-screen bg-ry-white">
@@ -110,6 +215,7 @@ const CreatorUpload = () => {
                 placeholder="Give your artwork a catchy name..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent text-lg"
                 required
+                disabled={uploading}
               />
             </RYCard>
 
@@ -124,6 +230,7 @@ const CreatorUpload = () => {
                 placeholder="Tell us what inspired this design... (optional)"
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent resize-none"
+                disabled={uploading}
               />
             </RYCard>
 
@@ -158,9 +265,10 @@ const CreatorUpload = () => {
                     accept="image/jpeg,image/png,image/svg+xml"
                     className="hidden"
                     id="file-upload"
+                    disabled={uploading}
                   />
                   <label htmlFor="file-upload">
-                    <RYButton type="button" variant="secondary" size="lg">
+                    <RYButton type="button" variant="secondary" size="lg" disabled={uploading}>
                       Choose File
                     </RYButton>
                   </label>
@@ -181,6 +289,7 @@ const CreatorUpload = () => {
                       type="button"
                       onClick={removeFile}
                       className="text-red-500 hover:text-red-700"
+                      disabled={uploading}
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -191,8 +300,13 @@ const CreatorUpload = () => {
 
             {/* Submit Button */}
             <div className="text-center">
-              <RYButton type="submit" variant="primary" size="lg">
-                Submit for Review
+              <RYButton 
+                type="submit" 
+                variant="primary" 
+                size="lg"
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Submit for Review'}
               </RYButton>
             </div>
           </form>

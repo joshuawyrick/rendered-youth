@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      design_mockups: {
+        Row: {
+          created_at: string
+          design_id: string
+          id: string
+          mockup_order: number
+          mockup_url: string
+        }
+        Insert: {
+          created_at?: string
+          design_id: string
+          id?: string
+          mockup_order?: number
+          mockup_url: string
+        }
+        Update: {
+          created_at?: string
+          design_id?: string
+          id?: string
+          mockup_order?: number
+          mockup_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_mockups_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_selections: {
+        Row: {
+          design_id: string
+          id: string
+          selected_at: string
+          selected_mockup_id: string
+        }
+        Insert: {
+          design_id: string
+          id?: string
+          selected_at?: string
+          selected_mockup_id: string
+        }
+        Update: {
+          design_id?: string
+          id?: string
+          selected_at?: string
+          selected_mockup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_selections_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_selections_selected_mockup_id_fkey"
+            columns: ["selected_mockup_id"]
+            isOneToOne: false
+            referencedRelation: "design_mockups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      designs: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size: number
+          file_url: string
+          id: string
+          inspiration: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size: number
+          file_url: string
+          id?: string
+          inspiration?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          file_url?: string
+          id?: string
+          inspiration?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
