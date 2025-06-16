@@ -26,6 +26,13 @@ const FileUploadZone = ({
   onFileSelect,
   onRemoveFile
 }: FileUploadZoneProps) => {
+  const handleButtonClick = () => {
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
+
   if (file) {
     return (
       <div className="border border-gray-300 rounded-lg p-4">
@@ -76,11 +83,15 @@ const FileUploadZone = ({
         id="file-upload"
         disabled={uploading}
       />
-      <label htmlFor="file-upload">
-        <RYButton type="button" variant="secondary" size="lg" disabled={uploading}>
-          Choose File
-        </RYButton>
-      </label>
+      <RYButton 
+        type="button" 
+        variant="secondary" 
+        size="lg" 
+        disabled={uploading}
+        onClick={handleButtonClick}
+      >
+        Choose File
+      </RYButton>
     </div>
   );
 };
