@@ -161,9 +161,149 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          created_at: string
+          creator_commission_rate: number
+          design_id: string
+          id: string
+          price: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_commission_rate?: number
+          design_id: string
+          id?: string
+          price?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_commission_rate?: number
+          design_id?: string
+          id?: string
+          price?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_distributions: {
+        Row: {
+          commission_amount: number
+          created_at: string
+          creator_user_id: string
+          id: string
+          payout_date: string | null
+          payout_status: string
+          period_end: string
+          period_start: string
+          total_sales_amount: number
+        }
+        Insert: {
+          commission_amount: number
+          created_at?: string
+          creator_user_id: string
+          id?: string
+          payout_date?: string | null
+          payout_status?: string
+          period_end: string
+          period_start: string
+          total_sales_amount: number
+        }
+        Update: {
+          commission_amount?: number
+          created_at?: string
+          creator_user_id?: string
+          id?: string
+          payout_date?: string | null
+          payout_status?: string
+          period_end?: string
+          period_start?: string
+          total_sales_amount?: number
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          admin_revenue: number
+          creator_commission: number
+          customer_email: string | null
+          customer_name: string | null
+          id: string
+          order_status: string
+          product_id: string
+          quantity: number
+          sale_date: string
+          total_amount: number
+          unit_price: number
+        }
+        Insert: {
+          admin_revenue: number
+          creator_commission: number
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          order_status?: string
+          product_id: string
+          quantity?: number
+          sale_date?: string
+          total_amount: number
+          unit_price: number
+        }
+        Update: {
+          admin_revenue?: number
+          creator_commission?: number
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          order_status?: string
+          product_id?: string
+          quantity?: number
+          sale_date?: string
+          total_amount?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_stats: {
+        Row: {
+          active_products_count: number | null
+          admin_revenue_last_30_days: number | null
+          creator_commissions_last_30_days: number | null
+          mockups_ready_count: number | null
+          pending_review_count: number | null
+          published_count: number | null
+          revenue_last_30_days: number | null
+          selected_count: number | null
+          units_sold_last_30_days: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
