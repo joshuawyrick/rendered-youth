@@ -15,6 +15,7 @@ import CreatorSubmitted from "./pages/CreatorSubmitted";
 import CreatorProfile from "./pages/CreatorProfile";
 import Auth from "./pages/Auth";
 import DesignReview from "./pages/DesignReview";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/creator/submitted" element={<CreatorSubmitted />} />
           <Route path="/creator/profile" element={<CreatorProfile />} />
           <Route path="/design-review" element={<DesignReview />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
