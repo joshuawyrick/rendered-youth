@@ -8,7 +8,8 @@ import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Eye, Check, X } from 'lucide-react';
+import { Upload, Eye, MoreHorizontal } from 'lucide-react';
+import DesignActionsDialog from '@/components/admin/DesignActionsDialog';
 
 interface Design {
   id: string;
@@ -23,6 +24,8 @@ const AdminDashboard = () => {
   const [designs, setDesigns] = useState<Design[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -74,75 +77,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateMockups = async (designId: string) => {
-    try {
-      // For demo purposes, create 4 mockup placeholders
-      const mockupUrls = [
-        'https://via.placeholder.com/400x400/FF6B6B/FFFFFF?text=Mockup+1',
-        'https://via.placeholder.com/400x400/4ECDC4/FFFFFF?text=Mockup+2',
-        'https://via.placeholder.com/400x400/45B7D1/FFFFFF?text=Mockup+3',
-        'https://via.placeholder.com/400x400/96CEB4/FFFFFF?text=Mockup+4'
-      ];
-
-      for (let i = 0; i < mockupUrls.length; i++) {
-        await supabase
-          .from('design_mockups')
-          .insert({
-            design_id: designId,
-            mockup_url: mockupUrls[i],
-            mockup_order: i + 1
-          });
-      }
-
-      // Update design status
-      await supabase
-        .from('designs')
-        .update({ status: 'review_ready' })
-        .eq('id', designId);
-
-      // Send notification email
-      await supabase.functions.invoke('send-review-notification', {
-        body: { designId }
-      });
-
-      toast({
-        title: "Mockups Created!",
-        description: "The creator has been notified that their design is ready for review",
-      });
-
-      fetchPendingDesigns();
-    } catch (error) {
-      console.error('Error creating mockups:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create mockups",
-        variant: "destructive",
-      });
-    }
+  const handleDesignClick = (design: Design) => {
+    setSelectedDesign(design);
+    setDialogOpen(true);
   };
 
-  const handleReject = async (designId: string) => {
-    try {
-      await supabase
-        .from('designs')
-        .update({ status: 'rejected' })
-        .eq('id', designId);
-
-      toast({
-        title: "Design Rejected",
-        description: "The design has been rejected",
-        variant: "destructive",
-      });
-
-      fetchPendingDesigns();
-    } catch (error) {
-      console.error('Error rejecting design:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reject design",
-        variant: "destructive",
-      });
-    }
+  const handleDialogComplete = () => {
+    fetchPendingDesigns();
   };
 
   if (!user || !isAdmin) {
@@ -185,7 +126,7 @@ const AdminDashboard = () => {
               Admin Dashboard
             </h1>
             <p className="text-xl text-gray-600">
-              Review and manage submitted designs
+              Review and create mockups for submitted designs
             </p>
           </div>
 
@@ -202,7 +143,7 @@ const AdminDashboard = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {designs.map((design) => (
-                <RYCard key={design.id} className="p-6">
+                <RYCard key={design.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                     <img
                       src={design.file_url}
@@ -225,35 +166,27 @@ const AdminDashboard = () => {
                       {design.status.replace('_', ' ')}
                     </Badge>
 
-                    <div className="flex gap-2">
+                    <div className="space-y-2">
                       <RYButton
                         variant="primary"
                         size="sm"
-                        onClick={() => handleCreateMockups(design.id)}
-                        className="flex-1"
+                        onClick={() => handleDesignClick(design)}
+                        className="w-full"
                       >
-                        <Check className="h-4 w-4 mr-1" />
-                        Create Mockups
+                        <MoreHorizontal className="h-4 w-4 mr-2" />
+                        Review & Create Mockups
                       </RYButton>
                       
                       <RYButton
                         variant="secondary"
                         size="sm"
-                        onClick={() => handleReject(design.id)}
+                        onClick={() => window.open(design.file_url, '_blank')}
+                        className="w-full"
                       >
-                        <X className="h-4 w-4" />
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Full Size
                       </RYButton>
                     </div>
-
-                    <RYButton
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => window.open(design.file_url, '_blank')}
-                      className="w-full"
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Full Size
-                    </RYButton>
                   </div>
                 </RYCard>
               ))}
@@ -261,6 +194,13 @@ const AdminDashboard = () => {
           )}
         </main>
       </div>
+
+      <DesignActionsDialog
+        design={selectedDesign}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onComplete={handleDialogComplete}
+      />
 
       <Footer />
     </div>
