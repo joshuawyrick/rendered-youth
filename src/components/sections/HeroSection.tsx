@@ -37,7 +37,12 @@ const HeroSection = () => {
             <RYButton variant="primary" size="lg">
               Shop Designs
             </RYButton>
-            <RYButton variant="secondary" size="lg" onClick={handleBecomeCreator}>
+            <RYButton 
+              variant="outline" 
+              size="lg" 
+              onClick={handleBecomeCreator}
+              className="bg-ry-black text-ry-white hover:bg-gray-800"
+            >
               Become a Creator
             </RYButton>
           </div>
