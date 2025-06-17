@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { Search, Settings, User, Menu, X } from 'lucide-react';
@@ -100,7 +101,7 @@ const TopNav = () => {
                 <img 
                   src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
                   alt="Rendered Youth" 
-                  className="h-8 sm:h-10 w-auto"
+                  className="h-12 sm:h-14 w-auto"
                 />
               </a>
             </div>
