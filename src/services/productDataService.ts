@@ -83,7 +83,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
         return {
           id: product.id,
           title: product.title,
-          description: product.description,
+          description: product.description || '',
           price: product.price,
           base_price: product.base_price,
           status: product.status,
