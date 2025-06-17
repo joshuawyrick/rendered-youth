@@ -1,13 +1,16 @@
 
 import React, { useState } from 'react';
+import AccountTypeSelection from './AccountTypeSelection';
 import AgeGate from './AgeGate';
 import ParentEmailCollection from './ParentEmailCollection';
 import TeenSignupForm from './TeenSignupForm';
 import AdultSignupForm from './AdultSignupForm';
+import CustomerSignupForm from './CustomerSignupForm';
 
-type OnboardingStep = 'age-gate' | 'parent-email' | 'pending-parent' | 'teen-signup' | 'adult-signup';
+type OnboardingStep = 'account-type' | 'age-gate' | 'parent-email' | 'pending-parent' | 'teen-signup' | 'adult-signup' | 'customer-signup';
 
 interface OnboardingData {
+  accountType?: 'creator' | 'customer';
   age?: number;
   isMinor?: boolean;
   requiresParentConsent?: boolean;
@@ -15,11 +18,21 @@ interface OnboardingData {
 }
 
 const OnboardingRouter = () => {
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('age-gate');
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>('account-type');
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
 
+  const handleAccountTypeSelected = (accountType: 'creator' | 'customer') => {
+    setOnboardingData({ accountType });
+    
+    if (accountType === 'customer') {
+      setCurrentStep('customer-signup');
+    } else {
+      setCurrentStep('age-gate');
+    }
+  };
+
   const handleAgeVerified = (data: OnboardingData) => {
-    setOnboardingData(data);
+    setOnboardingData(prev => ({ ...prev, ...data }));
     
     if (data.requiresParentConsent) {
       setCurrentStep('parent-email');
@@ -34,8 +47,16 @@ const OnboardingRouter = () => {
     setCurrentStep('pending-parent');
   };
 
+  const handleSignupComplete = () => {
+    // Redirect to home page after successful signup
+    window.location.href = '/';
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
+      case 'account-type':
+        return <AccountTypeSelection onAccountTypeSelected={handleAccountTypeSelected} />;
+      
       case 'age-gate':
         return <AgeGate onAgeVerified={handleAgeVerified} />;
       
@@ -72,8 +93,11 @@ const OnboardingRouter = () => {
       case 'adult-signup':
         return <AdultSignupForm age={onboardingData.age!} />;
       
+      case 'customer-signup':
+        return <CustomerSignupForm onSignupComplete={handleSignupComplete} />;
+      
       default:
-        return <AgeGate onAgeVerified={handleAgeVerified} />;
+        return <AccountTypeSelection onAccountTypeSelected={handleAccountTypeSelected} />;
     }
   };
 

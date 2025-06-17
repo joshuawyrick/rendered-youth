@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-interface AdultSignupFormProps {
-  age: number;
+interface CustomerSignupFormProps {
+  onSignupComplete: () => void;
 }
 
-const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
+const CustomerSignupForm = ({ onSignupComplete }: CustomerSignupFormProps) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,6 +29,7 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
     setLoading(true);
 
     try {
+      // Validate passwords match
       if (formData.password !== formData.confirmPassword) {
         toast({
           title: "Password Mismatch",
@@ -37,6 +39,7 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
         return;
       }
 
+      // Validate password length
       if (formData.password.length < 6) {
         toast({
           title: "Password Too Short",
@@ -48,6 +51,7 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
 
       const redirectUrl = `${window.location.origin}/`;
 
+      // Sign up user
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -56,14 +60,13 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
-            account_type: 'creator',
-            age_bracket: '18+',
-            is_minor: false
+            account_type: 'customer'
           }
         }
       });
 
       if (error) {
+        console.error('Signup error:', error);
         toast({
           title: "Signup Failed",
           description: error.message,
@@ -73,15 +76,13 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
       }
 
       if (data.user) {
-        // Update profile with creator account type and adult info
+        // Update profile with account type
         const { error: profileError } = await supabase
           .from('profiles')
           .update({ 
-            account_type: 'creator',
+            account_type: 'customer',
             first_name: formData.firstName,
-            last_name: formData.lastName,
-            age_bracket: '18+',
-            is_minor: false
+            last_name: formData.lastName
           })
           .eq('id', data.user.id);
 
@@ -90,11 +91,11 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
         }
 
         toast({
-          title: "Welcome, Creator!",
-          description: "Your creator account has been set up. Start uploading your designs!",
+          title: "Account Created!",
+          description: "Welcome to Rendered Youth! You can start shopping right away.",
         });
 
-        window.location.href = '/creator/dashboard';
+        onSignupComplete();
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -112,12 +113,12 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
     <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
       <RYCard className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🎨</div>
+          <div className="text-6xl mb-4">🛍️</div>
           <h1 className="text-3xl font-bold text-ry-black mb-2">
-            Create Your Creator Account
+            Create Your Account
           </h1>
           <p className="text-gray-600">
-            Join our community of talented creators
+            Join our community and start shopping unique designs
           </p>
         </div>
 
@@ -201,14 +202,12 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
           </RYButton>
         </form>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>As a creator, you can:</strong><br />
-            • Upload and submit your artwork<br />
-            • Track your design submissions<br />
-            • Earn 15% commission on sales<br />
-            • Access advanced creator tools<br />
-            • Build your creator profile
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <a href="/auth" className="text-ry-yellow hover:underline">
+              Sign in here
+            </a>
           </p>
         </div>
       </RYCard>
@@ -216,4 +215,4 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
   );
 };
 
-export default AdultSignupForm;
+export default CustomerSignupForm;

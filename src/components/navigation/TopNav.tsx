@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { Search, Settings, User, Menu, X } from 'lucide-react';
@@ -34,14 +33,14 @@ const TopNav = () => {
 
     setIsAdmin(!!adminData);
 
-    // Check if user is a creator (has uploaded designs)
-    const { data: designsData } = await supabase
-      .from('designs')
-      .select('id')
-      .eq('user_id', user.id)
-      .limit(1);
+    // Check if user is a creator by checking their profile account_type
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('account_type')
+      .eq('id', user.id)
+      .single();
 
-    setIsCreator(!!designsData && designsData.length > 0);
+    setIsCreator(profileData?.account_type === 'creator');
   };
 
   const toggleMobileMenu = () => {
@@ -123,14 +122,16 @@ const TopNav = () => {
             
             {user ? (
               <>
-                <RYButton 
-                  variant="secondary" 
-                  size="sm"
-                  onClick={() => window.location.href = '/creator/upload'}
-                  className="text-xs xl:text-sm"
-                >
-                  Upload Art
-                </RYButton>
+                {isCreator && (
+                  <RYButton 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => window.location.href = '/creator/upload'}
+                    className="text-xs xl:text-sm"
+                  >
+                    Upload Art
+                  </RYButton>
+                )}
                 <RYButton 
                   variant="primary" 
                   size="sm"
@@ -145,10 +146,10 @@ const TopNav = () => {
                 <RYButton 
                   variant="secondary" 
                   size="sm"
-                  onClick={() => window.location.href = '/creator/upload'}
+                  onClick={() => window.location.href = '/age-verification'}
                   className="text-xs xl:text-sm"
                 >
-                  Upload Art
+                  Become a Creator
                 </RYButton>
                 <RYButton 
                   variant="primary" 
@@ -275,42 +276,58 @@ const TopNav = () => {
 
               {/* Mobile action buttons */}
               <div className="px-3 py-4 space-y-3">
-                <RYButton 
-                  variant="secondary" 
-                  size="sm"
-                  onClick={() => {
-                    window.location.href = '/creator/upload';
-                    closeMobileMenu();
-                  }}
-                  className="w-full"
-                >
-                  Upload Art
-                </RYButton>
-                
                 {user ? (
-                  <RYButton 
-                    variant="primary" 
-                    size="sm"
-                    onClick={() => {
-                      signOut();
-                      closeMobileMenu();
-                    }}
-                    className="w-full"
-                  >
-                    Sign Out
-                  </RYButton>
+                  <>
+                    {isCreator && (
+                      <RYButton 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = '/creator/upload';
+                          closeMobileMenu();
+                        }}
+                        className="w-full"
+                      >
+                        Upload Art
+                      </RYButton>
+                    )}
+                    <RYButton 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => {
+                        signOut();
+                        closeMobileMenu();
+                      }}
+                      className="w-full"
+                    >
+                      Sign Out
+                    </RYButton>
+                  </>
                 ) : (
-                  <RYButton 
-                    variant="primary" 
-                    size="sm"
-                    onClick={() => {
-                      window.location.href = '/auth';
-                      closeMobileMenu();
-                    }}
-                    className="w-full"
-                  >
-                    Sign In
-                  </RYButton>
+                  <>
+                    <RYButton 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => {
+                        window.location.href = '/age-verification';
+                        closeMobileMenu();
+                      }}
+                      className="w-full"
+                    >
+                      Become a Creator
+                    </RYButton>
+                    <RYButton 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => {
+                        window.location.href = '/auth';
+                        closeMobileMenu();
+                      }}
+                      className="w-full"
+                    >
+                      Sign In
+                    </RYButton>
+                  </>
                 )}
               </div>
             </div>

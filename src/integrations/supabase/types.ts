@@ -439,6 +439,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           age_bracket: string | null
           created_at: string
           first_name: string | null
@@ -450,6 +451,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_type?: string
           age_bracket?: string | null
           created_at?: string
           first_name?: string | null
@@ -461,6 +463,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_type?: string
           age_bracket?: string | null
           created_at?: string
           first_name?: string | null
