@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -59,32 +60,35 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     });
   };
 
-  const removeImage = (imageUrl: string) => {
-    console.log('=== IMAGE REMOVAL DEBUG START ===');
-    console.log('Attempting to remove image with URL:', imageUrl.substring(0, 50) + '...');
+  const removeImage = (index: number) => {
+    console.log('=== IMAGE REMOVAL BY INDEX DEBUG START ===');
+    console.log('Attempting to remove image at index:', index);
     console.log('Current images array length:', images.length);
     
-    // Find the image to remove
-    const imageToRemove = images.find(img => img.url === imageUrl);
-    if (!imageToRemove) {
-      console.error('Image not found in array!');
+    if (index < 0 || index >= images.length) {
+      console.error('Invalid index:', index);
       toast({
         title: "Error",
-        description: "Image not found",
+        description: "Invalid image selection",
         variant: "destructive",
       });
       return;
     }
     
-    console.log('Found image to remove with sortOrder:', imageToRemove.sortOrder);
+    const imageToRemove = images[index];
+    console.log('Image to remove:', {
+      index,
+      sortOrder: imageToRemove.sortOrder,
+      url: imageToRemove.url.substring(0, 50) + '...',
+      altText: imageToRemove.altText
+    });
     
     // Check if this is the main image (sortOrder 1)
     const isMainImage = imageToRemove.sortOrder === 1;
     console.log('Is main image:', isMainImage);
     
     if (isMainImage) {
-      // For main image, we need special handling
-      console.log('Cannot delete main design image - this comes from the design itself');
+      console.log('Cannot delete main design image');
       toast({
         title: "Cannot Delete",
         description: "The main image cannot be deleted as it's the core design. You can only delete additional images.",
@@ -93,19 +97,19 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       return;
     }
     
-    // Remove the image by filtering out the exact URL match
-    const filteredImages = images.filter(img => img.url !== imageUrl);
-    console.log('Images after filtering:', filteredImages.length);
+    // Remove the image by index
+    const filteredImages = images.filter((_, i) => i !== index);
+    console.log('Images after filtering by index:', filteredImages.length);
     
     // Reorder the remaining images, preserving the main image at position 1
-    const reorderedImages = filteredImages.map((img, index) => {
+    const reorderedImages = filteredImages.map((img, newIndex) => {
       if (img.sortOrder === 1) {
         // Keep main image at sortOrder 1
         return img;
       } else {
         // Reorder additional images starting from 2
         const mainImageExists = filteredImages.some(i => i.sortOrder === 1);
-        const newSortOrder = mainImageExists ? index + 1 : index + 1;
+        const newSortOrder = mainImageExists ? newIndex + 1 : newIndex + 1;
         return {
           ...img,
           sortOrder: newSortOrder
@@ -117,7 +121,7 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       sortOrder: img.sortOrder, 
       url: img.url.substring(0, 30) + '...' 
     })));
-    console.log('=== IMAGE REMOVAL DEBUG END ===');
+    console.log('=== IMAGE REMOVAL BY INDEX DEBUG END ===');
     
     onImagesUpdate(reorderedImages);
     
@@ -127,14 +131,15 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     });
   };
 
-  const updateImageAltText = (imageUrl: string, altText: string) => {
-    console.log('Updating alt text for:', imageUrl.substring(0, 30) + '...', 'to:', altText);
+  const updateImageAltText = (index: number, altText: string) => {
+    console.log('Updating alt text for index:', index, 'to:', altText);
     
-    const imageToUpdate = images.find(img => img.url === imageUrl);
-    if (!imageToUpdate) {
-      console.error('Image not found for alt text update');
+    if (index < 0 || index >= images.length) {
+      console.error('Invalid index for alt text update:', index);
       return;
     }
+    
+    const imageToUpdate = images[index];
     
     // Check if this is the main image
     if (imageToUpdate.sortOrder === 1) {
@@ -147,8 +152,8 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       return;
     }
     
-    const updatedImages = images.map(img => 
-      img.url === imageUrl ? { ...img, altText } : img
+    const updatedImages = images.map((img, i) => 
+      i === index ? { ...img, altText } : img
     );
     onImagesUpdate(updatedImages);
   };

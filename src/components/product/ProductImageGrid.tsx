@@ -14,8 +14,8 @@ interface ProductImage {
 interface ProductImageGridProps {
   images: ProductImage[];
   readOnly?: boolean;
-  onRemoveImage?: (imageUrl: string) => void;
-  onUpdateAltText?: (imageUrl: string, altText: string) => void;
+  onRemoveImage?: (index: number) => void;
+  onUpdateAltText?: (index: number, altText: string) => void;
 }
 
 const ProductImageGrid: React.FC<ProductImageGridProps> = ({
@@ -28,7 +28,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((image, index) => (
-          <div key={`readonly-${image.url}-${index}`} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <div key={`readonly-${index}`} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={image.url}
               alt={image.altText}
@@ -40,28 +40,31 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
     );
   }
 
-  const handleRemoveImage = (imageUrl: string, sortOrder: number) => {
-    console.log('=== BUTTON CLICK DEBUG ===');
-    console.log('Button clicked for image with sortOrder:', sortOrder);
-    console.log('Image URL:', imageUrl.substring(0, 50) + '...');
-    console.log('Calling onRemoveImage with URL:', imageUrl.substring(0, 50) + '...');
-    console.log('=== END BUTTON DEBUG ===');
+  const handleRemoveImage = (index: number) => {
+    console.log('=== REMOVE IMAGE DEBUG ===');
+    console.log('Removing image at index:', index);
+    console.log('Image details:', {
+      sortOrder: images[index]?.sortOrder,
+      url: images[index]?.url?.substring(0, 50) + '...',
+      altText: images[index]?.altText
+    });
+    console.log('=== END REMOVE DEBUG ===');
     
-    onRemoveImage?.(imageUrl);
+    onRemoveImage?.(index);
   };
 
-  const handleAltTextChange = (imageUrl: string, altText: string, sortOrder: number) => {
-    console.log('Alt text change for sortOrder:', sortOrder, 'new text:', altText);
-    onUpdateAltText?.(imageUrl, altText);
+  const handleAltTextChange = (index: number, altText: string) => {
+    console.log('Alt text change for index:', index, 'new text:', altText);
+    onUpdateAltText?.(index, altText);
   };
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-      {images.map((image) => {
+      {images.map((image, index) => {
         const isMainImage = image.sortOrder === 1;
         
         return (
-          <div key={`image-${image.sortOrder}-${image.url.substring(0, 20)}`} className="relative group">
+          <div key={`image-${index}`} className="relative group">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src={image.url}
@@ -75,7 +78,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
                 <RYButton
                   variant="secondary"
                   size="sm"
-                  onClick={() => handleRemoveImage(image.url, image.sortOrder)}
+                  onClick={() => handleRemoveImage(index)}
                   className="p-1 h-6 w-6"
                 >
                   <X className="w-3 h-3" />
@@ -86,7 +89,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
             <Input
               placeholder="Alt text"
               value={image.altText}
-              onChange={(e) => handleAltTextChange(image.url, e.target.value, image.sortOrder)}
+              onChange={(e) => handleAltTextChange(index, e.target.value)}
               className="mt-1 text-xs"
               readOnly={isMainImage}
               disabled={isMainImage}
