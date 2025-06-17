@@ -9,6 +9,7 @@ import Creators from "./pages/Creators";
 import HowItWorks from "./pages/HowItWorks";
 import About from "./pages/About";
 import Store from "./pages/Store";
+import ProductDetail from "./pages/ProductDetail";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorUpload from "./pages/CreatorUpload";
 import CreatorSubmitted from "./pages/CreatorSubmitted";
@@ -32,6 +33,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/store" element={<Store />} />
+          <Route path="/store/:slug" element={<ProductDetail />} />
           <Route path="/creators" element={<Creators />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about" element={<About />} />

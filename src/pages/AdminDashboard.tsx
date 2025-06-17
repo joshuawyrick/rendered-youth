@@ -9,6 +9,7 @@ import AdminAccessControl from '@/components/admin/AdminAccessControl';
 import AdminDashboardHeader from '@/components/admin/AdminDashboardHeader';
 import CollectionManager from '@/components/admin/CollectionManager';
 import DesignCollectionAssigner from '@/components/admin/DesignCollectionAssigner';
+import ProductManager from '@/components/admin/ProductManager';
 
 interface Design {
   id: string;
@@ -22,7 +23,7 @@ interface Design {
 const AdminDashboard = () => {
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'collections' | 'assign'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'collections' | 'assign'>('overview');
   const designSectionRef = useRef<HTMLDivElement>(null);
 
   const handleDesignClick = (design: Design) => {
@@ -83,6 +84,16 @@ const AdminDashboard = () => {
                   Overview
                 </button>
                 <button
+                  onClick={() => setActiveTab('products')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'products'
+                      ? 'border-ry-yellow text-ry-black'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Products
+                </button>
+                <button
                   onClick={() => setActiveTab('collections')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === 'collections'
@@ -121,6 +132,10 @@ const AdminDashboard = () => {
                   <DesignStatusCards onDesignClick={handleDesignClick} />
                 </div>
               </>
+            )}
+
+            {activeTab === 'products' && (
+              <ProductManager />
             )}
 
             {activeTab === 'collections' && (
