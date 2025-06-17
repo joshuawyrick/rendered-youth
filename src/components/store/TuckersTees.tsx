@@ -1,10 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { RYCard } from '@/components/ui/ry-card';
-import { RYButton } from '@/components/ui/ry-button';
-import { Star, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProductCard } from '@/components/ui/product-card';
+import TuckersTeesHeader from './TuckersTeesHeader';
+import TuckersTeesContent from './TuckersTeesContent';
 
 interface TuckersProduct {
   id: string;
@@ -147,103 +145,12 @@ const TuckersTees: React.FC = () => {
 
   return (
     <div className="mb-16">
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Star className="w-6 h-6 text-ry-yellow fill-current" />
-          <h2 className="text-3xl font-bold text-ry-black">Tucker's Tees</h2>
-          <Star className="w-6 h-6 text-ry-yellow fill-current" />
-        </div>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Special collection from our co-founder Tucker - the original inspiration behind Rendered Youth
-        </p>
-      </div>
-
-      <RYCard className="bg-gradient-to-br from-ry-yellow/10 to-ry-yellow/5 border-ry-yellow/20 p-8">
-        <div className="grid md:grid-cols-2 gap-8 items-start">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Heart className="w-5 h-5 text-red-500 fill-current" />
-              <span className="text-sm font-medium text-ry-yellow bg-ry-yellow/10 px-3 py-1 rounded-full">
-                Co-Founder Collection
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold text-ry-black mb-4">
-              Where It All Started
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Tucker's creative vision was the spark that started Rendered Youth. Originally conceived as "Tucker's Tees," 
-              this platform has grown to celebrate the artistic talents of all young creators. Explore Tucker's original 
-              designs that started this amazing journey.
-            </p>
-            <RYButton 
-              onClick={handleViewAllClick}
-              className="bg-ry-yellow hover:bg-ry-yellow/90"
-            >
-              View All Tucker's Designs
-            </RYButton>
-          </div>
-          
-          <div className="relative">
-            {loading ? (
-              <div className="bg-white rounded-lg p-6 shadow-lg">
-                <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg mb-4">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ry-yellow mx-auto mb-2"></div>
-                    <p className="text-gray-500 text-sm">Loading designs...</p>
-                  </div>
-                </div>
-              </div>
-            ) : tuckersProducts.length > 0 ? (
-              <div className="space-y-4">
-                {/* Use ProductCard for the first product to make it clickable */}
-                {tuckersProducts.slice(0, 1).map((product) => (
-                  <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-                
-                {tuckersProducts.length > 1 && (
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">
-                      +{tuckersProducts.length - 1} more design{tuckersProducts.length > 2 ? 's' : ''}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg p-6 shadow-lg">
-                <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg mb-4">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">🎨</div>
-                    <p className="text-gray-500 text-sm">No designs yet</p>
-                    <p className="text-xs text-gray-400 mt-1">Assign designs to see them here</p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-semibold text-ry-black">Tucker's Collection</h4>
-                  <p className="text-sm text-gray-600">Coming Soon</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 w-8 h-8 bg-ry-yellow rounded-full opacity-20"></div>
-            <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-ry-yellow rounded-full opacity-30"></div>
-          </div>
-        </div>
-
-        {/* Featured Products Grid - Show remaining products */}
-        {tuckersProducts.length > 1 && (
-          <div className="mt-8 pt-8 border-t border-ry-yellow/20">
-            <h4 className="text-lg font-semibold text-ry-black mb-4 text-center">More from Tucker's Collection</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tuckersProducts.slice(1).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        )}
-      </RYCard>
+      <TuckersTeesHeader />
+      <TuckersTeesContent 
+        products={tuckersProducts}
+        loading={loading}
+        onViewAllClick={handleViewAllClick}
+      />
     </div>
   );
 };
