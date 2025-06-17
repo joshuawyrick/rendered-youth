@@ -41,7 +41,7 @@ const HeroSection = () => {
               variant="outline" 
               size="lg" 
               onClick={handleBecomeCreator}
-              className="bg-ry-black text-ry-white hover:bg-gray-800"
+              className="bg-ry-black text-ry-yellow hover:bg-gray-800"
             >
               Become a Creator
             </RYButton>
