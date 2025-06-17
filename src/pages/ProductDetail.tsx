@@ -5,6 +5,7 @@ import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { useToast } from '@/components/ui/use-toast';
 import { useProductDetail } from '@/hooks/useProductDetail';
+import { fetchProductImages, type ProductImage } from '@/services/productImageService';
 import ProductImageGallery from '@/components/product/ProductImageGallery';
 import ProductInfo from '@/components/product/ProductInfo';
 import ProductOptions from '@/components/product/ProductOptions';
@@ -19,6 +20,7 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [currentPrice, setCurrentPrice] = useState(0);
   const [variantAdjustment, setVariantAdjustment] = useState(0);
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [discount, setDiscount] = useState<{ code: string; amount: number; type: 'percentage' | 'fixed' } | undefined>();
   const { toast } = useToast();
   
@@ -39,6 +41,13 @@ const ProductDetail = () => {
       setCurrentPrice(product.base_price || product.price);
       setSelectedSize('One Size');
       setSelectedColor('Default');
+    }
+  }, [product]);
+
+  // Fetch product images when product loads
+  useEffect(() => {
+    if (product) {
+      fetchProductImages(product.id).then(setProductImages);
     }
   }, [product]);
 
@@ -119,7 +128,7 @@ const ProductDetail = () => {
             {/* Left Column - Images */}
             <div className="lg:col-span-1">
               <ProductImageGallery 
-                imageUrl={product.designs.file_url}
+                images={productImages}
                 title={product.title}
               />
             </div>

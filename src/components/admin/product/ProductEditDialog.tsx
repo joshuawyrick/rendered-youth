@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, X, Plus } from 'lucide-react';
+import ProductImageManager from '@/components/product/ProductImageManager';
 import type { Product } from './types';
 
 interface ProductEditDialogProps {
@@ -119,26 +119,6 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
     setVariants(newVariants);
-  };
-
-  const addImage = () => {
-    const newImage: ProductImage = {
-      url: '',
-      altText: '',
-      sortOrder: images.length + 1
-    };
-    setImages([...images, newImage]);
-  };
-
-  const updateImage = (index: number, field: keyof ProductImage, value: any) => {
-    const newImages = [...images];
-    newImages[index] = { ...newImages[index], [field]: value };
-    setImages(newImages);
-  };
-
-  const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
   };
 
   const handleSave = async () => {
@@ -252,40 +232,12 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
 
           {/* Product Images */}
           <RYCard className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Product Images</h3>
-              <RYButton variant="secondary" onClick={addImage} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Image
-              </RYButton>
-            </div>
-            <div className="space-y-3">
-              {images.map((image, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 border rounded">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Image URL"
-                      value={image.url}
-                      onChange={(e) => updateImage(index, 'url', e.target.value)}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Alt text"
-                      value={image.altText}
-                      onChange={(e) => updateImage(index, 'altText', e.target.value)}
-                    />
-                  </div>
-                  <RYButton
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => removeImage(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </RYButton>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-lg font-semibold mb-4">Product Images</h3>
+            <ProductImageManager
+              productId={product.id}
+              images={images}
+              onImagesUpdate={setImages}
+            />
           </RYCard>
 
           {/* Product Variants */}
