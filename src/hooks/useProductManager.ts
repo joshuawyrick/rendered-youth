@@ -26,7 +26,7 @@ export const useProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles!user_id(
+          profiles!designs_user_id_fkey(
             first_name,
             last_name
           )
@@ -51,7 +51,7 @@ export const useProductManager = () => {
             title,
             file_url,
             user_id,
-            profiles!user_id(
+            profiles!designs_user_id_fkey(
               first_name,
               last_name
             )
