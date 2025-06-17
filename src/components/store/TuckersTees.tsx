@@ -195,20 +195,10 @@ const TuckersTees: React.FC = () => {
               </div>
             ) : tuckersProducts.length > 0 ? (
               <div className="space-y-4">
+                {/* Use ProductCard for the first product to make it clickable */}
                 {tuckersProducts.slice(0, 1).map((product) => (
-                  <div key={product.id} className="bg-white rounded-lg p-4 shadow-lg">
-                    <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                      <img
-                        src={product.design?.file_url || '/placeholder.svg'}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <h4 className="font-semibold text-ry-black">{product.title}</h4>
-                      <p className="text-sm text-gray-600">By {product.creatorName}</p>
-                      <p className="text-lg font-bold text-ry-black mt-2">${product.price.toFixed(2)}</p>
-                    </div>
+                  <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <ProductCard product={product} />
                   </div>
                 ))}
                 
