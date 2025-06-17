@@ -61,14 +61,27 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const removeImage = (imageUrl: string) => {
-    // Find and remove the image by URL instead of index
-    const updatedImages = images.filter(img => img.url !== imageUrl);
+    console.log('Before removal - images:', images.map(img => ({ url: img.url.substring(0, 50), sortOrder: img.sortOrder })));
+    console.log('Removing image with URL:', imageUrl.substring(0, 50));
+    
+    // Find and remove the image by URL
+    const updatedImages = images.filter(img => {
+      const shouldKeep = img.url !== imageUrl;
+      if (!shouldKeep) {
+        console.log('Found image to remove:', { url: img.url.substring(0, 50), sortOrder: img.sortOrder });
+      }
+      return shouldKeep;
+    });
+    
+    console.log('After filtering - remaining images:', updatedImages.length);
     
     // Reorder the remaining images
     const reorderedImages = updatedImages.map((img, i) => ({
       ...img,
       sortOrder: i + 1
     }));
+    
+    console.log('After reordering:', reorderedImages.map(img => ({ url: img.url.substring(0, 50), sortOrder: img.sortOrder })));
     
     onImagesUpdate(reorderedImages);
     
