@@ -50,7 +50,7 @@ const ProductManager = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch published designs without products
+      // Fetch published designs without products - using proper join syntax
       const { data: designsData, error: designsError } = await supabase
         .from('designs')
         .select(`
@@ -59,7 +59,7 @@ const ProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles!inner (
+          profiles:user_id (
             first_name,
             last_name
           )
@@ -69,7 +69,7 @@ const ProductManager = () => {
 
       if (designsError) throw designsError;
 
-      // Fetch existing products
+      // Fetch existing products - using proper join syntax
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -83,7 +83,7 @@ const ProductManager = () => {
           designs!inner (
             title,
             file_url,
-            profiles!inner (
+            profiles:user_id (
               first_name,
               last_name
             )
@@ -242,7 +242,7 @@ const ProductManager = () => {
                   <div className="space-y-2">
                     <h4 className="font-medium text-ry-black">{design.title}</h4>
                     <p className="text-sm text-gray-600">
-                      by {design.profiles.first_name} {design.profiles.last_name}
+                      by {design.profiles?.first_name} {design.profiles?.last_name}
                     </p>
                     
                     <RYButton
@@ -297,7 +297,7 @@ const ProductManager = () => {
                       <div>
                         <h4 className="font-medium">{product.title}</h4>
                         <p className="text-sm text-gray-600">
-                          by {product.designs.profiles.first_name} {product.designs.profiles.last_name}
+                          by {product.designs.profiles?.first_name} {product.designs.profiles?.last_name}
                         </p>
                       </div>
 
