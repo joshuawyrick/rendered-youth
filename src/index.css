@@ -96,9 +96,36 @@
 
   body {
     @apply bg-ry-white text-ry-black antialiased font-sans;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
   }
   
   a {
     @apply text-ry-yellow hover:text-ry-white transition-colors duration-200;
+  }
+
+  /* Ensure buttons and interactive elements are properly sized for mobile */
+  button, a {
+    min-height: 44px;
+    @apply touch-manipulation;
+  }
+
+  /* Improve readability on mobile */
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px;
+    }
+  }
+}
+
+/* Custom utilities for mobile optimization */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .safe-area-inset {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
