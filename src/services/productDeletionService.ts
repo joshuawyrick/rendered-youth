@@ -46,6 +46,10 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
   console.log('=== DELETE ENTIRE PRODUCT DEBUG START ===');
   console.log('Deleting product:', productId);
 
+  if (!productId) {
+    throw new Error('Product ID is required for deletion');
+  }
+
   try {
     // First, get all the product data including images and design
     const { data: product, error: fetchError } = await supabase
@@ -65,7 +69,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
     if (fetchError) {
       console.error('Error fetching product for deletion:', fetchError);
-      throw fetchError;
+      throw new Error(`Failed to fetch product: ${fetchError.message}`);
     }
 
     if (!product) {
@@ -83,7 +87,6 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
     if (product.additional_images && Array.isArray(product.additional_images)) {
       console.log('Deleting additional images from storage...');
       for (const img of product.additional_images) {
-        // Type guard to handle different possible structures
         if (typeof img === 'string') {
           await deleteStorageFile(img);
         } else if (img && typeof img === 'object' && 'url' in img) {
@@ -101,7 +104,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       await deleteStorageFile(product.designs.file_url);
     }
 
-    // Delete product variants
+    // Delete product variants first
     console.log('Deleting product variants...');
     const { error: variantsError } = await supabase
       .from('product_variants')
@@ -110,10 +113,22 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
     if (variantsError) {
       console.error('Error deleting product variants:', variantsError);
-      throw variantsError;
+      // Don't throw here, continue with deletion
     }
 
-    // Delete the design record
+    // Delete the product record
+    console.log('Deleting product record...');
+    const { error: productError } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (productError) {
+      console.error('Error deleting product:', productError);
+      throw new Error(`Failed to delete product: ${productError.message}`);
+    }
+
+    // Finally, delete the design record if it exists
     if (product.designs?.id) {
       console.log('Deleting design record...');
       const { error: designError } = await supabase
@@ -123,20 +138,8 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
       if (designError) {
         console.error('Error deleting design:', designError);
-        throw designError;
+        // Don't throw here, the main product is already deleted
       }
-    }
-
-    // Finally, delete the product
-    console.log('Deleting product record...');
-    const { error: productError } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', productId);
-
-    if (productError) {
-      console.error('Error deleting product:', productError);
-      throw productError;
     }
 
     console.log('Successfully deleted entire product and all associated data');

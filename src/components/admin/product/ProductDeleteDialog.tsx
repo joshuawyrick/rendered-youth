@@ -19,6 +19,16 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
   onConfirm,
   loading
 }) => {
+  const handleConfirm = () => {
+    console.log('Delete dialog confirmed for:', productTitle);
+    onConfirm();
+  };
+
+  const handleCancel = () => {
+    console.log('Delete dialog cancelled');
+    onOpenChange(false);
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -41,13 +51,15 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading} onClick={handleCancel}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction asChild>
             <RYButton 
-              variant="primary" 
-              onClick={onConfirm}
+              variant="outline" 
+              onClick={handleConfirm}
               disabled={loading}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white border-red-600"
             >
               {loading ? 'Deleting...' : 'Delete Product'}
             </RYButton>

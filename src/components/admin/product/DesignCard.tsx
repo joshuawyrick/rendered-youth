@@ -32,9 +32,19 @@ const DesignCard: React.FC<DesignCardProps> = ({
   const { toast } = useToast();
 
   const handleDeleteProduct = async () => {
-    if (!existingProductId) return;
+    if (!existingProductId) {
+      console.error('No product ID provided for deletion');
+      toast({
+        title: "Error",
+        description: "No product ID found for deletion.",
+        variant: "destructive",
+      });
+      return;
+    }
     
+    console.log('Starting delete process for product:', existingProductId);
     setDeleting(true);
+    
     try {
       await deleteEntireProduct(existingProductId);
       toast({
@@ -53,6 +63,15 @@ const DesignCard: React.FC<DesignCardProps> = ({
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    console.log('Delete button clicked:', { 
+      hasExistingProduct, 
+      existingProductId, 
+      existingProductTitle 
+    });
+    setDeleteDialogOpen(true);
   };
 
   return (
@@ -82,8 +101,8 @@ const DesignCard: React.FC<DesignCardProps> = ({
               <RYButton
                 variant="outline"
                 size="sm"
-                onClick={() => setDeleteDialogOpen(true)}
-                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={handleDeleteClick}
+                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                 disabled={deleting}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -111,11 +130,11 @@ const DesignCard: React.FC<DesignCardProps> = ({
         </div>
       </RYCard>
 
-      {hasExistingProduct && existingProductTitle && (
+      {hasExistingProduct && (
         <ProductDeleteDialog
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
-          productTitle={existingProductTitle}
+          productTitle={existingProductTitle || design.title}
           onConfirm={handleDeleteProduct}
           loading={deleting}
         />
