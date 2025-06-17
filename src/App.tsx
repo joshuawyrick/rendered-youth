@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import DesignReview from "./pages/DesignReview";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import AdminSetup from "./pages/AdminSetup";
+import AgeVerification from "./pages/AgeVerification";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/age-verification" element={<AgeVerification />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/upload" element={<CreatorUpload />} />
           <Route path="/creator/submitted" element={<CreatorSubmitted />} />

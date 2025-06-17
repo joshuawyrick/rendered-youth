@@ -27,6 +27,39 @@ export type Database = {
         }
         Relationships: []
       }
+      age_verification: {
+        Row: {
+          created_at: string
+          date_of_birth: string
+          id: string
+          is_minor: boolean
+          parent_email: string | null
+          requires_parent_consent: boolean
+          session_token: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth: string
+          id?: string
+          is_minor: boolean
+          parent_email?: string | null
+          requires_parent_consent: boolean
+          session_token?: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string
+          id?: string
+          is_minor?: boolean
+          parent_email?: string | null
+          requires_parent_consent?: boolean
+          session_token?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       design_mockups: {
         Row: {
           created_at: string
@@ -202,6 +235,42 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          age_bracket: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          is_minor: boolean | null
+          last_name: string | null
+          parent_email: string | null
+          requires_parent_consent: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          age_bracket?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          is_minor?: boolean | null
+          last_name?: string | null
+          parent_email?: string | null
+          requires_parent_consent?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          age_bracket?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          is_minor?: boolean | null
+          last_name?: string | null
+          parent_email?: string | null
+          requires_parent_consent?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       revenue_distributions: {
         Row: {
           commission_amount: number
@@ -287,6 +356,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_consents: {
+        Row: {
+          child_user_id: string | null
+          consent_given_at: string
+          consent_ip_address: unknown | null
+          consent_method: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notice_version: string
+          parent_email: string
+        }
+        Insert: {
+          child_user_id?: string | null
+          consent_given_at?: string
+          consent_ip_address?: unknown | null
+          consent_method?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notice_version?: string
+          parent_email: string
+        }
+        Update: {
+          child_user_id?: string | null
+          consent_given_at?: string
+          consent_ip_address?: unknown | null
+          consent_method?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notice_version?: string
+          parent_email?: string
+        }
+        Relationships: []
       }
     }
     Views: {

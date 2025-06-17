@@ -14,6 +14,10 @@ const HeroSection = () => {
     }
   };
 
+  const handleBecomeCreator = () => {
+    window.location.href = '/age-verification';
+  };
+
   return (
     <section className="bg-ry-white py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,7 +37,7 @@ const HeroSection = () => {
             <RYButton variant="primary" size="lg">
               Shop Designs
             </RYButton>
-            <RYButton variant="secondary" size="lg">
+            <RYButton variant="secondary" size="lg" onClick={handleBecomeCreator}>
               Become a Creator
             </RYButton>
           </div>
