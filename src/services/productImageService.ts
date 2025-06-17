@@ -60,7 +60,7 @@ const isStorageUrl = (url: string): boolean => {
   return url.includes('supabase') && url.includes('storage');
 };
 
-const extractStoragePathFromUrl = (url: string): string | null => => {
+const extractStoragePathFromUrl = (url: string): string | null => {
   try {
     // Extract the path after /storage/v1/object/public/{bucket}/
     const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
