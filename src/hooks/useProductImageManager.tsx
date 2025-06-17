@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { useFileUpload } from '@/hooks/useFileUpload';
+import { useImageOperations } from './useImageOperations';
+import { useImageUploadState } from './useImageUploadState';
 
 interface ProductImage {
   id?: string;
@@ -16,29 +16,33 @@ interface UseProductImageManagerProps {
 }
 
 export const useProductImageManager = ({ images, onImagesUpdate }: UseProductImageManagerProps) => {
-  const [newImageUrl, setNewImageUrl] = useState('');
-  const [isAddingImage, setIsAddingImage] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState(false);
   const { toast } = useToast();
-  const { file, dragActive, handleDrag, handleDrop, handleFileInput, removeFile } = useFileUpload();
+  const {
+    newImageUrl,
+    setNewImageUrl,
+    isAddingImage,
+    setIsAddingImage,
+    uploadingFile,
+    setUploadingFile,
+    file,
+    dragActive,
+    handleDrag,
+    handleDrop,
+    handleFileInput,
+    removeFile,
+    resetState
+  } = useImageUploadState();
+
+  const {
+    addImageByUrl: performAddImageByUrl,
+    addImageFromFile,
+    removeImage,
+    updateImageAltText
+  } = useImageOperations({ images, onImagesUpdate });
 
   const addImageByUrl = () => {
-    if (!newImageUrl.trim()) return;
-
-    const newImage: ProductImage = {
-      url: newImageUrl,
-      altText: `Product image ${images.length + 1}`,
-      sortOrder: images.length + 1
-    };
-
-    onImagesUpdate([...images, newImage]);
-    setNewImageUrl('');
-    setIsAddingImage(false);
-    
-    toast({
-      title: "Image Added",
-      description: "New image has been added to the product",
-    });
+    performAddImageByUrl(newImageUrl);
+    resetState();
   };
 
   const handleFileUpload = async () => {
@@ -46,26 +50,8 @@ export const useProductImageManager = ({ images, onImagesUpdate }: UseProductIma
 
     setUploadingFile(true);
     try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        
-        const newImage: ProductImage = {
-          url: dataUrl,
-          altText: `${file.name}`,
-          sortOrder: images.length + 1
-        };
-
-        onImagesUpdate([...images, newImage]);
-        removeFile();
-        setIsAddingImage(false);
-        
-        toast({
-          title: "Image Uploaded",
-          description: "File has been added to the product",
-        });
-      };
-      reader.readAsDataURL(file);
+      await addImageFromFile(file);
+      resetState();
     } catch (error) {
       console.error('Error uploading file:', error);
       toast({
@@ -78,30 +64,8 @@ export const useProductImageManager = ({ images, onImagesUpdate }: UseProductIma
     }
   };
 
-  const removeImage = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    const reorderedImages = updatedImages.map((img, i) => ({
-      ...img,
-      sortOrder: i + 1
-    }));
-    onImagesUpdate(reorderedImages);
-    
-    toast({
-      title: "Image Removed",
-      description: "Image has been removed from the product",
-    });
-  };
-
-  const updateImageAltText = (index: number, altText: string) => {
-    const updatedImages = [...images];
-    updatedImages[index] = { ...updatedImages[index], altText };
-    onImagesUpdate(updatedImages);
-  };
-
   const cancelAdding = () => {
-    setIsAddingImage(false);
-    setNewImageUrl('');
-    removeFile();
+    resetState();
   };
 
   return {
