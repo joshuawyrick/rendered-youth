@@ -8,23 +8,37 @@ import { supabase } from '@/integrations/supabase/client';
 const TopNav = () => {
   const { user, signOut } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
     if (user) {
-      checkAdminStatus();
+      checkUserRoles();
+    } else {
+      setIsAdmin(false);
+      setIsCreator(false);
     }
   }, [user]);
 
-  const checkAdminStatus = async () => {
+  const checkUserRoles = async () => {
     if (!user) return;
 
-    const { data } = await supabase
+    // Check if user is admin
+    const { data: adminData } = await supabase
       .from('admin_users')
       .select('id')
       .eq('user_id', user.id)
       .single();
 
-    setIsAdmin(!!data);
+    setIsAdmin(!!adminData);
+
+    // Check if user is a creator (has uploaded designs)
+    const { data: designsData } = await supabase
+      .from('designs')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1);
+
+    setIsCreator(!!designsData && designsData.length > 0);
   };
 
   return (
@@ -75,10 +89,12 @@ const TopNav = () => {
               {/* Dashboard Links for authenticated users */}
               {user && (
                 <>
-                  <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
-                    <User className="h-4 w-4 mr-1" />
-                    Creator Dashboard
-                  </a>
+                  {isCreator && (
+                    <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      Creator Dashboard
+                    </a>
+                  )}
                   {isAdmin && (
                     <a href="/admin" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
                       <Settings className="h-4 w-4 mr-1" />
