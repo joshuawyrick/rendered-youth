@@ -19,9 +19,17 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
   products,
   onProductDeleted
 }) => {
+  console.log('ProductCreationTab render:', {
+    availableDesignsCount: availableDesigns.length,
+    productsCount: products.length,
+    products: products.map(p => ({ id: p.id, title: p.title, design_id: p.design_id }))
+  });
+
   // Helper function to check if a design already has a product
   const getProductForDesign = (designId: string) => {
-    return products.find(product => product.design_id === designId);
+    const product = products.find(product => product.design_id === designId);
+    console.log('getProductForDesign:', { designId, foundProduct: !!product, productId: product?.id });
+    return product;
   };
 
   return (
@@ -41,6 +49,14 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {availableDesigns.map((design) => {
             const existingProduct = getProductForDesign(design.id);
+            console.log('Rendering DesignCard for:', {
+              designId: design.id,
+              designTitle: design.title,
+              hasExistingProduct: !!existingProduct,
+              existingProductId: existingProduct?.id,
+              existingProductTitle: existingProduct?.title
+            });
+            
             return (
               <DesignCard
                 key={design.id}

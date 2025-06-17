@@ -31,6 +31,14 @@ const DesignCard: React.FC<DesignCardProps> = ({
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
+  console.log('DesignCard render:', { 
+    designId: design.id, 
+    designTitle: design.title,
+    hasExistingProduct, 
+    existingProductId, 
+    existingProductTitle 
+  });
+
   const handleDeleteProduct = async () => {
     if (!existingProductId) {
       console.error('No product ID provided for deletion');
@@ -83,10 +91,16 @@ const DesignCard: React.FC<DesignCardProps> = ({
               src={design.file_url}
               alt={design.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                console.log('Image failed to load:', design.file_url);
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
+              }}
             />
-          ) : (
-            <div className="text-gray-400">No image</div>
-          )}
+          ) : null}
+          <div className="text-gray-400" style={{ display: design.file_url ? 'none' : 'flex' }}>
+            No image
+          </div>
         </div>
         
         <div className="space-y-2">
@@ -97,12 +111,12 @@ const DesignCard: React.FC<DesignCardProps> = ({
           
           {hasExistingProduct ? (
             <div className="space-y-2">
-              <p className="text-xs text-green-600 font-medium">Product exists</p>
+              <p className="text-xs text-green-600 font-medium">✓ Product exists</p>
               <RYButton
                 variant="outline"
                 size="sm"
                 onClick={handleDeleteClick}
-                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
                 disabled={deleting}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
