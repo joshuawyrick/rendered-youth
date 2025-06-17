@@ -6,7 +6,7 @@ import { AgeFilterChips } from '@/components/ui/age-filter-chips';
 import { ProductCard } from '@/components/ui/product-card';
 import { StateSelect } from '@/components/ui/state-select';
 import { Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { fetchProductsForStore } from '@/services/productService';
 
 interface Collection {
   id: string;
@@ -32,6 +32,13 @@ interface Product {
     last_name: string;
     age_bracket: string;
   };
+  variants?: Array<{
+    id: string;
+    size: string;
+    color: string;
+    price_adjustment: number;
+    is_available: boolean;
+  }>;
 }
 
 const Store = () => {
@@ -44,70 +51,44 @@ const Store = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCollections();
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const fetchCollections = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('collections')
-        .select('id, name, slug')
-        .eq('is_active', true)
-        .order('sort_order');
-
-      if (error) throw error;
-      setCollections(data || []);
-    } catch (error) {
-      console.error('Error fetching collections:', error);
-    }
-  };
-
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          id,
-          title,
-          price,
-          design_id,
-          designs!inner (
-            id,
-            file_url,
-            collection_id,
-            user_id,
-            profiles!inner (
-              first_name,
-              last_name,
-              age_bracket
-            )
-          )
-        `)
-        .eq('status', 'active')
-        .eq('designs.status', 'published');
+      const data = await fetchProductsForStore();
 
-      if (error) throw error;
+      // Get unique collections from products
+      const uniqueCollections = data
+        .filter(product => product.collections)
+        .map(product => product.collections)
+        .filter((collection, index, self) => 
+          collection && self.findIndex(c => c?.id === collection?.id) === index
+        );
+      
+      setCollections(uniqueCollections as Collection[]);
 
-      const formattedProducts: Product[] = (data || []).map((product: any) => ({
+      // Format products for display
+      const formattedProducts: Product[] = data.map((product: any) => ({
         id: product.id,
         title: product.title,
         slug: product.title.toLowerCase().replace(/\s+/g, '-'),
-        price: Number(product.price),
+        price: Number(product.base_price || product.price),
         creatorName: `${product.designs.profiles.first_name || ''} ${product.designs.profiles.last_name || ''}`.trim(),
         creatorAge: product.designs.profiles.age_bracket || 'Unknown',
         creatorState: 'Unknown', // We'll need to add state to profiles table later
         imageUrl: product.designs.file_url,
-        collectionId: product.designs.collection_id,
+        collectionId: product.collection_id,
         design: {
           file_url: product.designs.file_url
-        }
+        },
+        variants: product.product_variants || []
       }));
 
       setProducts(formattedProducts);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching store data:', error);
     } finally {
       setLoading(false);
     }

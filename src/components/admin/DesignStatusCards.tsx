@@ -1,17 +1,19 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Badge } from '@/components/ui/badge';
+import ProductPublishDialog from './product/ProductPublishDialog';
 import { 
   Clock, 
   Eye, 
   Star, 
   CheckCircle,
   MoreHorizontal,
-  Calendar
+  Calendar,
+  Package
 } from 'lucide-react';
 
 interface DesignStatusCardsProps {
@@ -21,6 +23,8 @@ interface DesignStatusCardsProps {
 const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
   ({ onDesignClick }, ref) => {
     const { toast } = useToast();
+    const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+    const [selectedDesign, setSelectedDesign] = useState(null);
     
     const { data: designs = [], isLoading, refetch } = useQuery({
       queryKey: ['admin-designs-by-status'],
@@ -33,6 +37,7 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
             status,
             created_at,
             file_url,
+            user_id,
             design_mockups(id),
             design_selections(id)
           `)
@@ -47,50 +52,15 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
       },
     });
 
-    const publishToStore = async (design: any) => {
-      try {
-        // First, update the design status to 'published'
-        const { error: designError } = await supabase
-          .from('designs')
-          .update({ status: 'published' })
-          .eq('id', design.id);
+    const handlePublishClick = (design: any) => {
+      setSelectedDesign(design);
+      setPublishDialogOpen(true);
+    };
 
-        if (designError) {
-          console.error('Error updating design status:', designError);
-          throw designError;
-        }
-
-        // Then, create the actual product
-        const { error: productError } = await supabase
-          .from('products')
-          .insert({
-            title: design.title,
-            design_id: design.id,
-            price: 25.00,
-            creator_commission_rate: 0.15,
-            status: 'active'
-          });
-
-        if (productError) {
-          console.error('Error creating product:', productError);
-          throw productError;
-        }
-
-        toast({
-          title: "Success",
-          description: `"${design.title}" has been published to the store and is now available for purchase!`,
-        });
-
-        // Refresh the data to show updated status
-        refetch();
-      } catch (error) {
-        console.error('Error publishing design:', error);
-        toast({
-          title: "Error",
-          description: "Failed to publish design to store",
-          variant: "destructive",
-        });
-      }
+    const handlePublishComplete = () => {
+      refetch();
+      setPublishDialogOpen(false);
+      setSelectedDesign(null);
     };
 
     const getStatusInfo = (status: string, mockupsCount: number, selectionsCount: number) => {
@@ -151,87 +121,96 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
     }
 
     return (
-      <div ref={ref} className="space-y-6">
-        {Object.entries(groupedDesigns).map(([status, statusDesigns]) => {
-          const statusInfo = getStatusInfo(status, 0, 0);
-          
-          return (
-            <div key={status} id={`status-${status}`}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-2 rounded-lg ${statusInfo.color}`}>
-                  {statusInfo.icon}
+      <>
+        <div ref={ref} className="space-y-6">
+          {Object.entries(groupedDesigns).map(([status, statusDesigns]) => {
+            const statusInfo = getStatusInfo(status, 0, 0);
+            
+            return (
+              <div key={status} id={`status-${status}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${statusInfo.color}`}>
+                    {statusInfo.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-ry-black">
+                      {statusInfo.label} ({statusDesigns.length})
+                    </h3>
+                    <p className="text-sm text-gray-600">{statusInfo.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-ry-black">
-                    {statusInfo.label} ({statusDesigns.length})
-                  </h3>
-                  <p className="text-sm text-gray-600">{statusInfo.description}</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {statusDesigns.map((design) => (
-                  <RYCard key={design.id} className="p-4 hover:shadow-lg transition-shadow">
-                    <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                      <img
-                        src={design.file_url}
-                        alt={design.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-ry-black truncate">{design.title}</h4>
-                        <Badge variant="secondary" className={statusInfo.color}>
-                          {statusInfo.label}
-                        </Badge>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {statusDesigns.map((design) => (
+                    <RYCard key={design.id} className="p-4 hover:shadow-lg transition-shadow">
+                      <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                        <img
+                          src={design.file_url}
+                          alt={design.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(design.created_at).toLocaleDateString()}
-                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-ry-black truncate">{design.title}</h4>
+                          <Badge variant="secondary" className={statusInfo.color}>
+                            {statusInfo.label}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(design.created_at).toLocaleDateString()}
+                        </p>
 
-                      <div className="flex gap-2">
-                        {status === 'pending_review' && (
+                        <div className="flex gap-2">
+                          {status === 'pending_review' && (
+                            <RYButton
+                              variant="primary"
+                              size="sm"
+                              onClick={() => onDesignClick(design)}
+                              className="flex-1"
+                            >
+                              <MoreHorizontal className="h-4 w-4 mr-1" />
+                              Create Mockups
+                            </RYButton>
+                          )}
+                          {status === 'selected' && (
+                            <RYButton
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handlePublishClick(design)}
+                              className="flex-1"
+                            >
+                              <Package className="h-4 w-4 mr-1" />
+                              Publish Product
+                            </RYButton>
+                          )}
                           <RYButton
-                            variant="primary"
+                            variant="secondary"
                             size="sm"
-                            onClick={() => onDesignClick(design)}
-                            className="flex-1"
+                            onClick={() => window.open(design.file_url, '_blank')}
                           >
-                            <MoreHorizontal className="h-4 w-4 mr-1" />
-                            Create Mockups
+                            <Eye className="h-4 w-4" />
                           </RYButton>
-                        )}
-                        {status === 'selected' && (
-                          <RYButton
-                            variant="primary"
-                            size="sm"
-                            onClick={() => publishToStore(design)}
-                            className="flex-1"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Publish to Store
-                          </RYButton>
-                        )}
-                        <RYButton
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => window.open(design.file_url, '_blank')}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </RYButton>
+                        </div>
                       </div>
-                    </div>
-                  </RYCard>
-                ))}
+                    </RYCard>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+
+        <ProductPublishDialog
+          design={selectedDesign}
+          open={publishDialogOpen}
+          onOpenChange={setPublishDialogOpen}
+          onComplete={handlePublishComplete}
+        />
+      </>
     );
   }
 );

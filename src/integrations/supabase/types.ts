@@ -376,8 +376,12 @@ export type Database = {
       }
       products: {
         Row: {
+          assigned_user_id: string | null
+          base_price: number | null
+          collection_id: string | null
           created_at: string
           creator_commission_rate: number
+          description: string | null
           design_id: string
           id: string
           price: number
@@ -386,8 +390,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_user_id?: string | null
+          base_price?: number | null
+          collection_id?: string | null
           created_at?: string
           creator_commission_rate?: number
+          description?: string | null
           design_id: string
           id?: string
           price?: number
@@ -396,8 +404,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_user_id?: string | null
+          base_price?: number | null
+          collection_id?: string | null
           created_at?: string
           creator_commission_rate?: number
+          description?: string | null
           design_id?: string
           id?: string
           price?: number
@@ -406,6 +418,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_design_id_fkey"
             columns: ["design_id"]

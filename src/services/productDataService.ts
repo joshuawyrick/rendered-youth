@@ -6,10 +6,24 @@ import { createDefaultProfile } from './profileUtils';
 export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
   console.log('Fetching products with designs...');
   
-  // Get products with their designs
+  // Get products with their designs and collections
   const { data: productsData, error: productsError } = await supabase
     .from('products')
-    .select('id, title, price, status, creator_commission_rate, created_at, design_id')
+    .select(`
+      id, 
+      title, 
+      description,
+      price, 
+      base_price,
+      status, 
+      creator_commission_rate, 
+      created_at, 
+      design_id,
+      collection_id,
+      assigned_user_id,
+      collections(name, slug),
+      profiles!assigned_user_id(first_name, last_name)
+    `)
     .order('created_at', { ascending: false });
 
   if (productsError) {
@@ -69,11 +83,17 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
         return {
           id: product.id,
           title: product.title,
+          description: product.description,
           price: product.price,
+          base_price: product.base_price,
           status: product.status,
           creator_commission_rate: product.creator_commission_rate,
           created_at: product.created_at,
           design_id: product.design_id,
+          collection_id: product.collection_id,
+          assigned_user_id: product.assigned_user_id,
+          collection_name: product.collections?.name,
+          assigned_user_name: product.profiles ? `${product.profiles.first_name} ${product.profiles.last_name}` : null,
           designs: {
             title: design.title,
             file_url: design.file_url,
@@ -85,11 +105,17 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       return {
         id: product.id,
         title: product.title,
+        description: product.description,
         price: product.price,
+        base_price: product.base_price,
         status: product.status,
         creator_commission_rate: product.creator_commission_rate,
         created_at: product.created_at,
         design_id: product.design_id,
+        collection_id: product.collection_id,
+        assigned_user_id: product.assigned_user_id,
+        collection_name: product.collections?.name,
+        assigned_user_name: product.profiles ? `${product.profiles.first_name} ${product.profiles.last_name}` : null,
         designs: {
           title: design.title,
           file_url: design.file_url,
@@ -104,4 +130,52 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
 
   console.log('Final products with designs:', result);
   return result;
+};
+
+export const fetchProductsForStore = async () => {
+  console.log('Fetching products for store...');
+  
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      id,
+      title,
+      description,
+      base_price,
+      price,
+      collection_id,
+      design_id,
+      designs!inner (
+        id,
+        file_url,
+        collection_id,
+        user_id,
+        profiles!inner (
+          first_name,
+          last_name,
+          age_bracket
+        )
+      ),
+      collections (
+        name,
+        slug
+      ),
+      product_variants (
+        id,
+        size,
+        color,
+        price_adjustment,
+        is_available
+      )
+    `)
+    .eq('status', 'active')
+    .eq('designs.status', 'published');
+
+  if (error) {
+    console.error('Error fetching store products:', error);
+    throw error;
+  }
+
+  console.log('Store products fetched:', data);
+  return data || [];
 };
