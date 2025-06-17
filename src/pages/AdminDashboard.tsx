@@ -10,6 +10,7 @@ import AdminDashboardHeader from '@/components/admin/AdminDashboardHeader';
 import CollectionManager from '@/components/admin/CollectionManager';
 import DesignCollectionAssigner from '@/components/admin/DesignCollectionAssigner';
 import ProductManager from '@/components/admin/ProductManager';
+import TuckersTeesManager from '@/components/admin/TuckersTeesManager';
 
 interface Design {
   id: string;
@@ -23,7 +24,7 @@ interface Design {
 const AdminDashboard = () => {
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'collections' | 'assign'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'collections' | 'assign' | 'tuckers'>('overview');
   const designSectionRef = useRef<HTMLDivElement>(null);
 
   const handleDesignClick = (design: Design) => {
@@ -113,6 +114,16 @@ const AdminDashboard = () => {
                 >
                   Assign to Collections
                 </button>
+                <button
+                  onClick={() => setActiveTab('tuckers')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'tuckers'
+                      ? 'border-ry-yellow text-ry-black'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Tucker's Tees
+                </button>
               </nav>
             </div>
 
@@ -144,6 +155,10 @@ const AdminDashboard = () => {
 
             {activeTab === 'assign' && (
               <DesignCollectionAssigner />
+            )}
+
+            {activeTab === 'tuckers' && (
+              <TuckersTeesManager />
             )}
           </main>
         </div>
