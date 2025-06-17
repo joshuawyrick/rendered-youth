@@ -14,8 +14,8 @@ interface ProductImage {
 interface ProductImageGridProps {
   images: ProductImage[];
   readOnly?: boolean;
-  onRemoveImage?: (index: number) => void;
-  onUpdateAltText?: (index: number, altText: string) => void;
+  onRemoveImage?: (imageUrl: string) => void;
+  onUpdateAltText?: (imageUrl: string, altText: string) => void;
 }
 
 const ProductImageGrid: React.FC<ProductImageGridProps> = ({
@@ -43,7 +43,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
       {images.map((image, index) => (
-        <div key={index} className="relative group">
+        <div key={image.url} className="relative group">
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={image.url}
@@ -55,7 +55,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
             <RYButton
               variant="secondary"
               size="sm"
-              onClick={() => onRemoveImage?.(index)}
+              onClick={() => onRemoveImage?.(image.url)}
               className="p-1 h-6 w-6"
             >
               <X className="w-3 h-3" />
@@ -64,7 +64,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
           <Input
             placeholder="Alt text"
             value={image.altText}
-            onChange={(e) => onUpdateAltText?.(index, e.target.value)}
+            onChange={(e) => onUpdateAltText?.(image.url, e.target.value)}
             className="mt-1 text-xs"
           />
           {image.sortOrder === 1 && (

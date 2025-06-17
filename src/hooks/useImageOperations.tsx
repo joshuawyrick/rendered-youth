@@ -60,12 +60,16 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     });
   };
 
-  const removeImage = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
+  const removeImage = (imageUrl: string) => {
+    // Find and remove the image by URL instead of index
+    const updatedImages = images.filter(img => img.url !== imageUrl);
+    
+    // Reorder the remaining images
     const reorderedImages = updatedImages.map((img, i) => ({
       ...img,
       sortOrder: i + 1
     }));
+    
     onImagesUpdate(reorderedImages);
     
     toast({
@@ -74,9 +78,10 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     });
   };
 
-  const updateImageAltText = (index: number, altText: string) => {
-    const updatedImages = [...images];
-    updatedImages[index] = { ...updatedImages[index], altText };
+  const updateImageAltText = (imageUrl: string, altText: string) => {
+    const updatedImages = images.map(img => 
+      img.url === imageUrl ? { ...img, altText } : img
+    );
     onImagesUpdate(updatedImages);
   };
 
