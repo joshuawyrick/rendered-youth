@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
+import { RYButton } from '@/components/ui/ry-button';
+import { useNavigate } from 'react-router-dom';
 import type { ProductDetail } from './types';
 
 interface ProductDetailsProps {
@@ -8,6 +10,12 @@ interface ProductDetailsProps {
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+  const navigate = useNavigate();
+
+  const handleViewCreatorProfile = () => {
+    navigate(`/creator/${product.designs.user_id}`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Product Info */}
@@ -27,12 +35,25 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         <h3 className="text-lg font-semibold text-ry-black mb-2">
           Supporting Young Artists 🎨
         </h3>
-        <p className="text-gray-700">
+        <p className="text-gray-700 mb-4">
           By purchasing this design, you're directly supporting{' '}
-          {product.designs.profiles?.first_name} and helping young artists 
-          turn their creativity into income. 70% of your purchase goes 
+          <button
+            onClick={handleViewCreatorProfile}
+            className="font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
+          >
+            {product.designs.profiles?.first_name}
+          </button>{' '}
+          and helping young artists turn their creativity into income. 70% of your purchase goes 
           directly to the creator!
         </p>
+        <RYButton
+          variant="secondary"
+          size="sm"
+          onClick={handleViewCreatorProfile}
+          className="w-full sm:w-auto"
+        >
+          View {product.designs.profiles?.first_name}'s Profile
+        </RYButton>
       </RYCard>
     </div>
   );

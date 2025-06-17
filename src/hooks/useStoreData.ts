@@ -16,6 +16,7 @@ interface Product {
   creatorName: string;
   creatorAge: string;
   creatorState: string;
+  creatorUserId: string; // Added creator user ID for linking
   imageUrl?: string;
   collectionId?: string;
   design?: {
@@ -68,6 +69,7 @@ export const useStoreData = () => {
         creatorName: `${product.designs?.profiles?.first_name || ''} ${product.designs?.profiles?.last_name || ''}`.trim(),
         creatorAge: product.designs?.profiles?.age_bracket || 'Unknown',
         creatorState: 'Unknown', // We'll need to add state to profiles table later
+        creatorUserId: product.designs?.user_id || '', // Added creator user ID
         imageUrl: product.designs?.file_url,
         collectionId: product.collection_id,
         design: {

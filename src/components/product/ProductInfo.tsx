@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { ProductDetail } from './types';
 
 interface ProductInfoProps {
@@ -8,6 +9,13 @@ interface ProductInfoProps {
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
+  const navigate = useNavigate();
+
+  const handleCreatorClick = () => {
+    // Navigate to creator page using the creator's user_id
+    navigate(`/creator/${product.designs.user_id}`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Title and Creator */}
@@ -15,14 +23,20 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         <h1 className="text-3xl md:text-4xl font-bold text-ry-black mb-2">
           {product.title}
         </h1>
-        <p className="text-lg text-gray-600">
-          Created by {product.designs.profiles?.first_name} {product.designs.profiles?.last_name}
+        <div className="flex items-center gap-2">
+          <span className="text-lg text-gray-600">Created by</span>
+          <button
+            onClick={handleCreatorClick}
+            className="text-lg font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
+          >
+            {product.designs.profiles?.first_name} {product.designs.profiles?.last_name}
+          </button>
           {product.designs.profiles?.age_bracket && (
             <span className="ml-2 px-2 py-1 bg-ry-yellow text-ry-black text-sm rounded-full">
               Age {product.designs.profiles.age_bracket}
             </span>
           )}
-        </p>
+        </div>
       </div>
 
       {/* Price */}
