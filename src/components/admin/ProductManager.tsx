@@ -58,7 +58,7 @@ const ProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles!designs_user_id_fkey(
+          profiles!user_id(
             first_name,
             last_name
           )
@@ -83,7 +83,7 @@ const ProductManager = () => {
             title,
             file_url,
             user_id,
-            profiles!designs_user_id_fkey(
+            profiles!user_id(
               first_name,
               last_name
             )
