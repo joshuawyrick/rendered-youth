@@ -1,11 +1,31 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
-import { Search } from 'lucide-react';
+import { Search, Settings, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const TopNav = () => {
   const { user, signOut } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    setIsAdmin(!!data);
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-16">
@@ -51,6 +71,22 @@ const TopNav = () => {
               <a href="/about" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
                 About
               </a>
+              
+              {/* Dashboard Links for authenticated users */}
+              {user && (
+                <>
+                  <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    Creator Dashboard
+                  </a>
+                  {isAdmin && (
+                    <a href="/admin" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
+                      <Settings className="h-4 w-4 mr-1" />
+                      Admin Dashboard
+                    </a>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
