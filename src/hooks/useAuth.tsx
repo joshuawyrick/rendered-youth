@@ -62,8 +62,8 @@ export const useAuth = () => {
     } catch (error) {
       console.error('Unexpected sign out error:', error);
     } finally {
-      // Always redirect regardless of errors
-      window.location.href = '/auth';
+      // Always redirect to home page regardless of errors
+      window.location.href = '/';
     }
   };
 

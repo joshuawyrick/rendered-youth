@@ -14,7 +14,7 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in and redirect to home page
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         window.location.href = '/';
@@ -48,6 +48,7 @@ const Auth = () => {
           description: "You've been signed in successfully.",
         });
         
+        // Redirect to home page after successful login
         window.location.href = '/';
       } else {
         // Sign up
