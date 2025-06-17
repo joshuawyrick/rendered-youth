@@ -102,7 +102,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
         return {
           id: product.id,
           title: product.title,
-          description: product.description || '',
+          description: product.description,
           price: product.price,
           base_price: product.base_price,
           status: product.status,
@@ -118,13 +118,13 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
             file_url: design.file_url,
             profiles: createDefaultProfile()
           }
-        };
+        } as Product;
       }
       
       return {
         id: product.id,
         title: product.title,
-        description: product.description || '',
+        description: product.description,
         price: product.price,
         base_price: product.base_price,
         status: product.status,
@@ -143,7 +143,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
             last_name: profile.last_name || 'Creator'
           }
         }
-      };
+      } as Product;
     })
     .filter((product): product is Product => product !== null);
 
