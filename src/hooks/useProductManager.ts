@@ -16,7 +16,7 @@ export const useProductManager = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch published designs without products
+      // Fetch published designs without products with explicit join
       const { data: designsData, error: designsError } = await supabase
         .from('designs')
         .select(`
@@ -25,17 +25,20 @@ export const useProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles (
+          profiles!inner (
             first_name,
             last_name
           )
         `)
         .eq('status', 'published')
-        .not('id', 'in', `(SELECT design_id FROM products)`);
+        .not('id', 'in', `(SELECT design_id FROM products WHERE design_id IS NOT NULL)`);
 
-      if (designsError) throw designsError;
+      if (designsError) {
+        console.error('Designs query error:', designsError);
+        throw designsError;
+      }
 
-      // Fetch existing products
+      // Fetch existing products with explicit join
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -46,11 +49,11 @@ export const useProductManager = () => {
           creator_commission_rate,
           created_at,
           design_id,
-          designs (
+          designs!inner (
             title,
             file_url,
             user_id,
-            profiles (
+            profiles!inner (
               first_name,
               last_name
             )
@@ -58,10 +61,25 @@ export const useProductManager = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (productsError) throw productsError;
+      if (productsError) {
+        console.error('Products query error:', productsError);
+        throw productsError;
+      }
 
-      setAvailableDesigns(designsData || []);
-      setProducts(productsData || []);
+      // Validate and filter data to ensure it matches our types
+      const validDesigns = (designsData || []).filter((design: any) => 
+        design && design.profiles && typeof design.profiles === 'object' &&
+        'first_name' in design.profiles && 'last_name' in design.profiles
+      ) as Design[];
+
+      const validProducts = (productsData || []).filter((product: any) =>
+        product && product.designs && typeof product.designs === 'object' &&
+        product.designs.profiles && typeof product.designs.profiles === 'object' &&
+        'first_name' in product.designs.profiles && 'last_name' in product.designs.profiles
+      ) as Product[];
+
+      setAvailableDesigns(validDesigns);
+      setProducts(validProducts);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({

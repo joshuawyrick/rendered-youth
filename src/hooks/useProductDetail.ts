@@ -28,11 +28,11 @@ export const useProductDetail = (slug: string | undefined) => {
           price,
           status,
           design_id,
-          designs (
+          designs!inner (
             file_url,
             title,
             user_id,
-            profiles (
+            profiles!inner (
               first_name,
               last_name,
               age_bracket
@@ -41,11 +41,24 @@ export const useProductDetail = (slug: string | undefined) => {
         `)
         .ilike('title', `%${searchTitle}%`)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching product:', error);
+        throw error;
+      }
       
-      setProduct(data);
+      // Validate that we have the expected nested data structure
+      if (data && data.designs && typeof data.designs === 'object' && 
+          data.designs.profiles && typeof data.designs.profiles === 'object' &&
+          'first_name' in data.designs.profiles) {
+        setProduct(data as ProductDetail);
+      } else if (data) {
+        console.error('Invalid data structure received:', data);
+        throw new Error('Product data is incomplete');
+      } else {
+        throw new Error('Product not found');
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
       toast({
