@@ -1,9 +1,19 @@
 
+export interface ProductVariant {
+  id: string;
+  size: string;
+  color: string;
+  price_adjustment: number;
+  is_available: boolean;
+}
+
 export interface ProductDetail {
   id: string;
   title: string;
   price: number;
+  base_price: number;
   status: string;
+  description: string;
   design_id: string;
   designs: {
     file_url: string;
@@ -15,4 +25,5 @@ export interface ProductDetail {
       age_bracket: string;
     };
   };
+  product_variants: ProductVariant[];
 }

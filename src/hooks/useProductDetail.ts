@@ -17,27 +17,74 @@ export const useProductDetail = (slug: string | undefined) => {
 
   const fetchProduct = async () => {
     try {
-      // Convert slug back to title for search
-      const searchTitle = slug?.replace(/-/g, ' ') || '';
-      
-      // First, get the product with design
-      const { data: productData, error: productError } = await supabase
+      // First, try to find the product by slug (which should be the product ID)
+      // If that fails, try to find by title matching
+      let productData;
+      let productError;
+
+      // Try to fetch by ID first (assuming slug might be product ID)
+      const { data: productById, error: errorById } = await supabase
         .from('products')
         .select(`
           id,
           title,
           price,
+          base_price,
           status,
+          description,
           design_id,
           designs (
             file_url,
             title,
             user_id
+          ),
+          product_variants (
+            id,
+            size,
+            color,
+            price_adjustment,
+            is_available
           )
         `)
-        .ilike('title', `%${searchTitle}%`)
+        .eq('id', slug)
         .eq('status', 'active')
         .maybeSingle();
+
+      if (productById) {
+        productData = productById;
+      } else {
+        // Fallback: try to find by title match
+        const searchTitle = slug?.replace(/-/g, ' ') || '';
+        const { data: productByTitle, error: errorByTitle } = await supabase
+          .from('products')
+          .select(`
+            id,
+            title,
+            price,
+            base_price,
+            status,
+            description,
+            design_id,
+            designs (
+              file_url,
+              title,
+              user_id
+            ),
+            product_variants (
+              id,
+              size,
+              color,
+              price_adjustment,
+              is_available
+            )
+          `)
+          .ilike('title', `%${searchTitle}%`)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        productData = productByTitle;
+        productError = errorByTitle;
+      }
 
       if (productError) {
         console.error('Error fetching product:', productError);
@@ -48,7 +95,7 @@ export const useProductDetail = (slug: string | undefined) => {
         throw new Error('Product not found');
       }
 
-      // Then get the profile data separately
+      // Get the profile data separately
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('first_name, last_name, age_bracket')
@@ -57,7 +104,7 @@ export const useProductDetail = (slug: string | undefined) => {
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        throw profileError;
+        // Don't throw error, just use default values
       }
 
       // Combine the data
@@ -65,18 +112,21 @@ export const useProductDetail = (slug: string | undefined) => {
         id: productData.id,
         title: productData.title,
         price: productData.price,
+        base_price: productData.base_price || productData.price,
         status: productData.status,
+        description: productData.description || '',
         design_id: productData.design_id,
         designs: {
           file_url: productData.designs.file_url,
           title: productData.designs.title,
           user_id: productData.designs.user_id,
           profiles: {
-            first_name: profileData.first_name,
-            last_name: profileData.last_name,
-            age_bracket: profileData.age_bracket
+            first_name: profileData?.first_name || 'Unknown',
+            last_name: profileData?.last_name || 'Creator',
+            age_bracket: profileData?.age_bracket || 'Unknown'
           }
-        }
+        },
+        product_variants: productData.product_variants || []
       };
 
       setProduct(combinedProduct);

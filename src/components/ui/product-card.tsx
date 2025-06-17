@@ -1,86 +1,78 @@
 
 import React from 'react';
-import { RYCard } from '@/components/ui/ry-card';
-import { RYButton } from '@/components/ui/ry-button';
-import { cn } from "@/lib/utils";
+import { useNavigate } from 'react-router-dom';
+import { RYCard } from './ry-card';
 
-interface ProductCardProps {
-  product: {
-    id: string;
-    title: string;
-    slug: string;
-    price: number;
-    creatorName: string;
-    creatorAge?: string;
-    creatorState?: string;
-    imageUrl?: string;
+interface Product {
+  id: string;
+  title: string;
+  slug: string;
+  price: number;
+  creatorName: string;
+  creatorAge: string;
+  creatorState: string;
+  imageUrl?: string;
+  collectionId?: string;
+  design?: {
+    file_url: string;
   };
-  className?: string;
+  variants?: Array<{
+    id: string;
+    size: string;
+    color: string;
+    price_adjustment: number;
+    is_available: boolean;
+  }>;
 }
 
-const ProductCard = ({ product, className }: ProductCardProps) => {
+interface ProductCardProps {
+  product: Product;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    // Use product ID as the slug for reliable routing
+    navigate(`/store/${product.id}`);
+  };
+
   return (
-    <RYCard className={cn(
-      "p-0 overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer",
-      className
-    )}>
+    <RYCard 
+      className="group cursor-pointer overflow-hidden p-0 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+      onClick={handleClick}
+    >
       {/* Product Image */}
-      <div className="aspect-square bg-gray-100 flex items-center justify-center border-b border-gray-200">
-        {product.imageUrl ? (
-          <img 
-            src={product.imageUrl} 
-            alt={product.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-center">
-            <div className="text-4xl mb-2">👕</div>
-            <p className="text-sm text-gray-500">{product.title}</p>
-          </div>
-        )}
+      <div className="aspect-square bg-gray-100 overflow-hidden">
+        <img
+          src={product.design?.file_url || product.imageUrl || '/placeholder.svg'}
+          alt={product.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
       </div>
-      
+
+      {/* Product Info */}
       <div className="p-4">
-        {/* Title */}
-        <h3 className="font-semibold text-ry-black mb-1">
+        <h3 className="font-semibold text-ry-black mb-1 line-clamp-2">
           {product.title}
         </h3>
         
-        {/* Creator Info */}
         <p className="text-sm text-gray-600 mb-2">
-          by {product.creatorName}
+          by {product.creatorName} • Age {product.creatorAge}
         </p>
-
-        {/* Creator Tags */}
-        <div className="flex gap-2 mb-3">
-          {product.creatorAge && (
-            <span className="px-2 py-1 bg-ry-yellow text-ry-black text-xs rounded-lg font-medium">
-              Ages {product.creatorAge}
-            </span>
-          )}
-          {product.creatorState && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg font-medium">
-              {product.creatorState}
-            </span>
-          )}
-        </div>
-
-        {/* Price and Action */}
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-ry-black text-lg">
-            ${product.price}
+        
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-lg text-ry-black">
+            ${Number(product.price).toFixed(2)}
           </span>
-          <RYButton 
-            variant="primary" 
-            size="sm"
-            onClick={() => window.location.href = `/store/${product.slug}`}
-          >
-            View
-          </RYButton>
+          
+          {product.variants && product.variants.length > 0 && (
+            <span className="text-xs text-gray-500">
+              {product.variants.filter(v => v.is_available).length} variants
+            </span>
+          )}
         </div>
       </div>
     </RYCard>
   );
 };
-
-export { ProductCard };

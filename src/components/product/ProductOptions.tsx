@@ -1,63 +1,108 @@
 
 import React from 'react';
+import type { ProductVariant } from './types';
 
 interface ProductOptionsProps {
+  variants: ProductVariant[];
   selectedSize: string;
   selectedColor: string;
   onSizeChange: (size: string) => void;
   onColorChange: (color: string) => void;
+  onPriceChange: (basePrice: number, adjustment: number) => void;
 }
 
 const ProductOptions: React.FC<ProductOptionsProps> = ({
+  variants,
   selectedSize,
   selectedColor,
   onSizeChange,
-  onColorChange
+  onColorChange,
+  onPriceChange
 }) => {
-  const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-  const colors = ['Black', 'White', 'Navy', 'Gray'];
+  // Get unique sizes and colors from variants
+  const availableSizes = [...new Set(variants.filter(v => v.is_available).map(v => v.size))];
+  const availableColors = [...new Set(variants.filter(v => v.is_available).map(v => v.color))];
+
+  // Find the current variant to get price adjustment
+  const currentVariant = variants.find(v => 
+    v.size === selectedSize && 
+    v.color === selectedColor && 
+    v.is_available
+  );
+
+  // Handle size change and update price
+  const handleSizeChange = (size: string) => {
+    onSizeChange(size);
+    const variant = variants.find(v => v.size === size && v.color === selectedColor && v.is_available);
+    if (variant) {
+      onPriceChange(0, variant.price_adjustment); // Base price will be handled in parent
+    }
+  };
+
+  // Handle color change and update price
+  const handleColorChange = (color: string) => {
+    onColorChange(color);
+    const variant = variants.find(v => v.size === selectedSize && v.color === color && v.is_available);
+    if (variant) {
+      onPriceChange(0, variant.price_adjustment);
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Size Selection */}
-      <div>
-        <h3 className="text-lg font-semibold text-ry-black mb-3">Size</h3>
-        <div className="flex gap-2">
-          {sizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => onSizeChange(size)}
-              className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
-                selectedSize === size
-                  ? 'border-ry-yellow bg-ry-yellow text-ry-black'
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
-              }`}
-            >
-              {size}
-            </button>
-          ))}
+      {availableSizes.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-ry-black mb-3">Size</h3>
+          <div className="flex gap-2 flex-wrap">
+            {availableSizes.map((size) => (
+              <button
+                key={size}
+                onClick={() => handleSizeChange(size)}
+                className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
+                  selectedSize === size
+                    ? 'border-ry-yellow bg-ry-yellow text-ry-black'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Color Selection */}
-      <div>
-        <h3 className="text-lg font-semibold text-ry-black mb-3">Color</h3>
-        <div className="flex gap-2">
-          {colors.map((color) => (
-            <button
-              key={color}
-              onClick={() => onColorChange(color)}
-              className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
-                selectedColor === color
-                  ? 'border-ry-yellow bg-ry-yellow text-ry-black'
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
-              }`}
-            >
-              {color}
-            </button>
-          ))}
+      {availableColors.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-ry-black mb-3">Color</h3>
+          <div className="flex gap-2 flex-wrap">
+            {availableColors.map((color) => (
+              <button
+                key={color}
+                onClick={() => handleColorChange(color)}
+                className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
+                  selectedColor === color
+                    ? 'border-ry-yellow bg-ry-yellow text-ry-black'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                {color}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Variant Info */}
+      {currentVariant && currentVariant.price_adjustment !== 0 && (
+        <div className="text-sm text-gray-600">
+          {currentVariant.price_adjustment > 0 
+            ? `+$${currentVariant.price_adjustment.toFixed(2)} for this variant`
+            : `$${Math.abs(currentVariant.price_adjustment).toFixed(2)} discount for this variant`
+          }
+        </div>
+      )}
     </div>
   );
 };
