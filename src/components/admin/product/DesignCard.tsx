@@ -59,11 +59,15 @@ const DesignCard: React.FC<DesignCardProps> = ({
     <>
       <RYCard className="p-4">
         <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-          <img
-            src={design.file_url}
-            alt={design.title}
-            className="w-full h-full object-cover"
-          />
+          {design.file_url ? (
+            <img
+              src={design.file_url}
+              alt={design.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-gray-400">No image</div>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -80,9 +84,10 @@ const DesignCard: React.FC<DesignCardProps> = ({
                 size="sm"
                 onClick={() => setDeleteDialogOpen(true)}
                 className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                disabled={deleting}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
-                Delete Product
+                {deleting ? 'Deleting...' : 'Delete Product'}
               </RYButton>
             </div>
           ) : (

@@ -19,36 +19,73 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
   useEffect(() => {
     if (user) {
       checkAdminStatus();
+    } else {
+      setIsAdmin(false);
+      setLoading(false);
     }
   }, [user]);
 
   const checkAdminStatus = async () => {
     if (!user) return;
 
-    const { data } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
 
-    setIsAdmin(!!data);
-    setLoading(false);
-    
-    if (!data) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have admin privileges",
-        variant: "destructive",
-      });
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', error);
+      }
+
+      setIsAdmin(!!data);
+      setLoading(false);
+      
+      if (!data) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error in checkAdminStatus:', error);
+      setIsAdmin(false);
+      setLoading(false);
     }
   };
 
-  if (!user || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
         <div className="pt-16 flex items-center justify-center min-h-screen">
           <div className="text-2xl text-ry-black">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16 flex items-center justify-center min-h-screen">
+          <RYCard className="p-8 text-center">
+            <h1 className="text-2xl font-bold text-ry-black mb-4">
+              Please Sign In
+            </h1>
+            <p className="text-gray-600 mb-4">
+              You need to be signed in to access the admin dashboard.
+            </p>
+            <a 
+              href="/auth" 
+              className="inline-block bg-ry-yellow text-ry-black px-6 py-2 rounded-lg hover:bg-yellow-400 transition-colors"
+            >
+              Sign In
+            </a>
+          </RYCard>
         </div>
       </div>
     );
