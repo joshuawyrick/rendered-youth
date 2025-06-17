@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import AgeGate from './AgeGate';
 import ParentEmailCollection from './ParentEmailCollection';
+import TeenSignupForm from './TeenSignupForm';
+import AdultSignupForm from './AdultSignupForm';
 
 type OnboardingStep = 'age-gate' | 'parent-email' | 'pending-parent' | 'teen-signup' | 'adult-signup';
 
@@ -65,44 +67,10 @@ const OnboardingRouter = () => {
         );
       
       case 'teen-signup':
-        return (
-          <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
-            <div className="text-center max-w-md">
-              <h1 className="text-3xl font-bold text-ry-black mb-4">
-                Teen Creator Signup
-              </h1>
-              <p className="text-gray-600 mb-6">
-                Age: {onboardingData.age} (Teen flow would go here)
-              </p>
-              <button 
-                onClick={() => window.location.href = '/auth'}
-                className="bg-ry-yellow text-ry-black px-6 py-3 rounded-lg font-semibold"
-              >
-                Continue to Sign Up
-              </button>
-            </div>
-          </div>
-        );
+        return <TeenSignupForm age={onboardingData.age!} />;
       
       case 'adult-signup':
-        return (
-          <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
-            <div className="text-center max-w-md">
-              <h1 className="text-3xl font-bold text-ry-black mb-4">
-                Adult Creator Signup
-              </h1>
-              <p className="text-gray-600 mb-6">
-                Age: {onboardingData.age} (Adult flow would go here)
-              </p>
-              <button 
-                onClick={() => window.location.href = '/auth'}
-                className="bg-ry-yellow text-ry-black px-6 py-3 rounded-lg font-semibold"
-              >
-                Continue to Sign Up
-              </button>
-            </div>
-          </div>
-        );
+        return <AdultSignupForm age={onboardingData.age!} />;
       
       default:
         return <AgeGate onAgeVerified={handleAgeVerified} />;
