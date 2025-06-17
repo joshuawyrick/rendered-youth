@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { RYCard } from '@/components/ui/ry-card';
-import { RYButton } from '@/components/ui/ry-button';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Edit, Eye, Trash2, Package } from 'lucide-react';
+import { Package } from 'lucide-react';
+import ProductCreationTab from './product/ProductCreationTab';
+import ProductManagementTab from './product/ProductManagementTab';
 
 interface Design {
   id: string;
@@ -50,7 +50,7 @@ const ProductManager = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch published designs without products - using proper join syntax
+      // Fetch published designs without products
       const { data: designsData, error: designsError } = await supabase
         .from('designs')
         .select(`
@@ -59,7 +59,7 @@ const ProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles:user_id (
+          profiles!designs_user_id_fkey (
             first_name,
             last_name
           )
@@ -69,7 +69,7 @@ const ProductManager = () => {
 
       if (designsError) throw designsError;
 
-      // Fetch existing products - using proper join syntax
+      // Fetch existing products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -83,7 +83,7 @@ const ProductManager = () => {
           designs!inner (
             title,
             file_url,
-            profiles:user_id (
+            profiles!designs_user_id_fkey (
               first_name,
               last_name
             )
@@ -213,137 +213,20 @@ const ProductManager = () => {
         </nav>
       </div>
 
-      {/* Create Products Tab */}
+      {/* Tab Content */}
       {activeTab === 'create' && (
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Convert published designs into sellable products
-          </p>
-          
-          {availableDesigns.length === 0 ? (
-            <RYCard className="p-8 text-center">
-              <p className="text-gray-500">No designs available for product creation</p>
-              <p className="text-sm text-gray-400 mt-1">
-                All published designs have already been converted to products
-              </p>
-            </RYCard>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {availableDesigns.map((design) => (
-                <RYCard key={design.id} className="p-4">
-                  <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={design.file_url}
-                      alt={design.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-ry-black">{design.title}</h4>
-                    <p className="text-sm text-gray-600">
-                      by {design.profiles?.first_name} {design.profiles?.last_name}
-                    </p>
-                    
-                    <RYButton
-                      variant="primary"
-                      size="sm"
-                      onClick={() => createProduct(design)}
-                      disabled={creating === design.id}
-                      className="w-full"
-                    >
-                      {creating === design.id ? (
-                        'Creating...'
-                      ) : (
-                        <>
-                          <Plus className="h-4 w-4 mr-1" />
-                          Create Product ($25.00)
-                        </>
-                      )}
-                    </RYButton>
-                  </div>
-                </RYCard>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductCreationTab
+          availableDesigns={availableDesigns}
+          creating={creating}
+          onCreateProduct={createProduct}
+        />
       )}
 
-      {/* Manage Products Tab */}
       {activeTab === 'manage' && (
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Manage existing products and their settings
-          </p>
-          
-          {products.length === 0 ? (
-            <RYCard className="p-8 text-center">
-              <p className="text-gray-500">No products created yet</p>
-            </RYCard>
-          ) : (
-            <div className="space-y-4">
-              {products.map((product) => (
-                <RYCard key={product.id} className="p-4">
-                  <div className="flex gap-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <img 
-                        src={product.designs.file_url} 
-                        alt={product.title}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                      <div>
-                        <h4 className="font-medium">{product.title}</h4>
-                        <p className="text-sm text-gray-600">
-                          by {product.designs.profiles?.first_name} {product.designs.profiles?.last_name}
-                        </p>
-                      </div>
-
-                      <div className="text-center">
-                        <p className="font-semibold">${Number(product.price).toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">Price</p>
-                      </div>
-
-                      <div className="text-center">
-                        <p className="font-semibold">{(product.creator_commission_rate * 100).toFixed(0)}%</p>
-                        <p className="text-xs text-gray-500">Commission</p>
-                      </div>
-
-                      <div className="text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.status}
-                        </span>
-                      </div>
-
-                      <div className="flex gap-2 justify-end">
-                        <RYButton
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(`/store/${product.title.toLowerCase().replace(/\s+/g, '-')}`, '_blank')}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </RYButton>
-                        <RYButton
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleProductStatus(product)}
-                        >
-                          {product.status === 'active' ? 'Deactivate' : 'Activate'}
-                        </RYButton>
-                      </div>
-                    </div>
-                  </div>
-                </RYCard>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductManagementTab
+          products={products}
+          onToggleProductStatus={toggleProductStatus}
+        />
       )}
     </div>
   );
