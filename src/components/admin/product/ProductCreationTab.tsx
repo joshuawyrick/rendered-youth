@@ -2,23 +2,32 @@
 import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import DesignCard from './DesignCard';
-import type { Design } from './types';
+import type { Design, Product } from './types';
 
 interface ProductCreationTabProps {
   availableDesigns: Design[];
   creating: string | null;
   onCreateProduct: (design: Design) => void;
+  products: Product[];
+  onProductDeleted: () => void;
 }
 
 const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
   availableDesigns,
   creating,
-  onCreateProduct
+  onCreateProduct,
+  products,
+  onProductDeleted
 }) => {
+  // Helper function to check if a design already has a product
+  const getProductForDesign = (designId: string) => {
+    return products.find(product => product.design_id === designId);
+  };
+
   return (
     <div className="space-y-4">
       <p className="text-gray-600">
-        Convert published designs into sellable products
+        Convert published designs into sellable products or manage existing products
       </p>
       
       {availableDesigns.length === 0 ? (
@@ -30,14 +39,21 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
         </RYCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {availableDesigns.map((design) => (
-            <DesignCard
-              key={design.id}
-              design={design}
-              creating={creating}
-              onCreateProduct={onCreateProduct}
-            />
-          ))}
+          {availableDesigns.map((design) => {
+            const existingProduct = getProductForDesign(design.id);
+            return (
+              <DesignCard
+                key={design.id}
+                design={design}
+                creating={creating}
+                onCreateProduct={onCreateProduct}
+                onProductDeleted={onProductDeleted}
+                hasExistingProduct={!!existingProduct}
+                existingProductId={existingProduct?.id}
+                existingProductTitle={existingProduct?.title}
+              />
+            );
+          })}
         </div>
       )}
     </div>

@@ -64,6 +64,8 @@ const ProductManager = () => {
           availableDesigns={availableDesigns}
           creating={creating}
           onCreateProduct={createProduct}
+          products={products}
+          onProductDeleted={fetchData}
         />
       )}
 
