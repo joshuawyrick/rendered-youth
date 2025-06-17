@@ -19,8 +19,8 @@ export const useProductData = () => {
       setAvailableDesigns([]);
       setProducts([]);
       
-      // Add a small delay to ensure state is cleared
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Add a longer delay to ensure state is cleared and database changes are reflected
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const [designs, productsData] = await Promise.all([
         fetchDesignsWithProfiles(),
@@ -29,7 +29,7 @@ export const useProductData = () => {
 
       console.log('useProductData: Fresh fetched designs count:', designs.length);
       console.log('useProductData: Fresh fetched products count:', productsData.length);
-      console.log('useProductData: Fresh design IDs:', designs.map(d => ({ id: d.id, title: d.title })));
+      console.log('useProductData: Fresh design IDs:', designs.map(d => ({ id: d.id, title: d.title, status: d.status })));
       console.log('useProductData: Fresh product design IDs:', productsData.map(p => ({ id: p.id, title: p.title, design_id: p.design_id })));
 
       setAvailableDesigns(designs);

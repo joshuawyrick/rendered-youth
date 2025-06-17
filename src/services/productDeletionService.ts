@@ -65,7 +65,8 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
         designs (
           id,
           file_url,
-          title
+          title,
+          status
         )
       `)
       .eq('id', productId)
@@ -86,7 +87,8 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       id: product.id,
       title: product.title,
       designId: product.design_id,
-      designTitle: product.designs?.title
+      designTitle: product.designs?.title,
+      designStatus: product.designs?.status
     });
 
     // Step 2: Delete additional images from storage
@@ -152,21 +154,24 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
     }
     console.log('✅ Product record deleted');
 
-    // Step 6: Delete the design record
+    // Step 6: Mark the design as "consumed" instead of deleting it
     if (product.design_id) {
-      console.log('Step 6: Deleting design record...');
+      console.log('Step 6: Marking design as consumed...');
       
       const { error: designError } = await supabase
         .from('designs')
-        .delete()
+        .update({ 
+          status: 'consumed',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', product.design_id);
 
       if (designError) {
-        console.error('❌ Error deleting design:', designError);
-        throw new Error(`Failed to delete design: ${designError.message}`);
+        console.error('❌ Error marking design as consumed:', designError);
+        throw new Error(`Failed to mark design as consumed: ${designError.message}`);
       }
       
-      console.log('✅ Design record deleted');
+      console.log('✅ Design marked as consumed');
     }
 
     console.log('🎉 DELETION COMPLETED SUCCESSFULLY');

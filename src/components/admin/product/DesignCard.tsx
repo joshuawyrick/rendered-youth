@@ -34,6 +34,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
   console.log('DesignCard render:', { 
     designId: design.id, 
     designTitle: design.title,
+    designStatus: design.status,
     hasExistingProduct, 
     existingProductId, 
     existingProductTitle 
@@ -65,12 +66,12 @@ const DesignCard: React.FC<DesignCardProps> = ({
       // Close dialog immediately
       setDeleteDialogOpen(false);
       
-      // Trigger data refresh
+      // Trigger aggressive data refresh with longer delay
       if (onProductDeleted) {
         console.log('🔄 Triggering data refresh...');
         setTimeout(() => {
           onProductDeleted();
-        }, 100);
+        }, 500); // Increased delay to ensure database changes propagate
       }
       
     } catch (error) {
