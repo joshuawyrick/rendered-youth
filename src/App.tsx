@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import AdminSetup from "./pages/AdminSetup";
 import AgeVerification from "./pages/AgeVerification";
+import ParentVerification from "./pages/ParentVerification";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/age-verification" element={<AgeVerification />} />
+          <Route path="/parent-verify" element={<ParentVerification />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/upload" element={<CreatorUpload />} />
           <Route path="/creator/submitted" element={<CreatorSubmitted />} />

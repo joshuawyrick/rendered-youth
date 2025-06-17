@@ -194,6 +194,47 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_verification_tokens: {
+        Row: {
+          age_verification_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          parent_email: string
+          token_hash: string
+          verification_ip_address: unknown | null
+          verified_at: string | null
+        }
+        Insert: {
+          age_verification_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          parent_email: string
+          token_hash: string
+          verification_ip_address?: unknown | null
+          verified_at?: string | null
+        }
+        Update: {
+          age_verification_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          parent_email?: string
+          token_hash?: string
+          verification_ip_address?: unknown | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_verification_tokens_age_verification_id_fkey"
+            columns: ["age_verification_id"]
+            isOneToOne: false
+            referencedRelation: "age_verification"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string

@@ -80,27 +80,33 @@ export const useAgeVerification = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase
-        .from('age_verification')
-        .update({ parent_email: parentEmail })
-        .eq('session_token', sessionToken);
+      // Call the edge function to send verification email
+      const { data, error } = await supabase.functions.invoke('send-parent-verification', {
+        body: {
+          sessionToken,
+          parentEmail,
+        },
+      });
 
       if (error) {
         console.error('Parent email submission error:', error);
         toast({
           title: "Submission Error",
-          description: "Unable to submit parent email. Please try again.",
+          description: "Unable to send verification email. Please try again.",
           variant: "destructive",
         });
         return false;
       }
 
-      toast({
-        title: "Email Submitted",
-        description: "We've sent verification instructions to the parent email.",
-      });
-      
-      return true;
+      if (data?.success) {
+        toast({
+          title: "Verification Email Sent",
+          description: "We've sent verification instructions to the parent email.",
+        });
+        return true;
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
     } catch (error) {
       console.error('Parent email submission failed:', error);
       toast({
