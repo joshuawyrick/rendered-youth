@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import StoreHeader from '@/components/store/StoreHeader';
+import TuckersTees from '@/components/store/TuckersTees';
 import StoreFilters from '@/components/store/StoreFilters';
 import ProductGrid from '@/components/store/ProductGrid';
 import { useStoreData } from '@/hooks/useStoreData';
@@ -47,6 +48,9 @@ const Store = () => {
       <div className="pt-16">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <StoreHeader />
+          
+          {/* Tucker's Tees Special Section */}
+          <TuckersTees />
           
           <StoreFilters
             selectedAge={selectedAge}
