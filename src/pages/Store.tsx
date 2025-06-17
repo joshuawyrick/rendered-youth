@@ -1,18 +1,46 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { AgeFilterChips } from '@/components/ui/age-filter-chips';
 import { ProductCard } from '@/components/ui/product-card';
 import { StateSelect } from '@/components/ui/state-select';
 import { Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 const Store = () => {
   const [selectedAge, setSelectedAge] = useState<string | undefined>();
   const [selectedState, setSelectedState] = useState<string | undefined>();
+  const [selectedCollection, setSelectedCollection] = useState<string | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
+  const [collections, setCollections] = useState<Collection[]>([]);
 
-  // Mock data for demonstration
+  useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  const fetchCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('id, name, slug')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+    }
+  };
+
+  // Mock data for demonstration - in real app this would come from your products table
   const mockProducts = [
     {
       id: '1',
@@ -22,7 +50,8 @@ const Store = () => {
       creatorName: 'Emma Rodriguez',
       creatorAge: '8-10',
       creatorState: 'CA',
-      imageUrl: undefined
+      imageUrl: undefined,
+      collectionId: collections.find(c => c.slug === 'fantasy')?.id
     },
     {
       id: '2',
@@ -32,7 +61,8 @@ const Store = () => {
       creatorName: 'Lucas Thompson',
       creatorAge: '11-13',
       creatorState: 'NY',
-      imageUrl: undefined
+      imageUrl: undefined,
+      collectionId: collections.find(c => c.slug === 'kids-art')?.id
     },
     {
       id: '3',
@@ -42,7 +72,8 @@ const Store = () => {
       creatorName: 'Sofia Chen',
       creatorAge: '4-7',
       creatorState: 'TX',
-      imageUrl: undefined
+      imageUrl: undefined,
+      collectionId: collections.find(c => c.slug === 'seasonal')?.id
     },
     {
       id: '4',
@@ -52,17 +83,19 @@ const Store = () => {
       creatorName: 'Max Johnson',
       creatorAge: '14-17',
       creatorState: 'FL',
-      imageUrl: undefined
+      imageUrl: undefined,
+      collectionId: collections.find(c => c.slug === 'animals')?.id
     }
   ];
 
   const filteredProducts = mockProducts.filter(product => {
     const matchesAge = !selectedAge || product.creatorAge === selectedAge;
     const matchesState = !selectedState || product.creatorState === selectedState;
+    const matchesCollection = !selectedCollection || product.collectionId === selectedCollection;
     const matchesSearch = !searchTerm || 
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.creatorName.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesAge && matchesState && matchesSearch;
+    return matchesAge && matchesState && matchesCollection && matchesSearch;
   });
 
   return (
@@ -84,6 +117,23 @@ const Store = () => {
           {/* Filters */}
           <div className="mb-12">
             <div className="flex flex-col lg:flex-row gap-6 items-start justify-between">
+              {/* Collection Filter */}
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-ry-black mb-3">Filter by Collection</h3>
+                <select
+                  value={selectedCollection || ''}
+                  onChange={(e) => setSelectedCollection(e.target.value || undefined)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+                >
+                  <option value="">All Collections</option>
+                  {collections.map((collection) => (
+                    <option key={collection.id} value={collection.id}>
+                      {collection.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Age Filter */}
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-ry-black mb-3">Filter by Creator Age</h3>

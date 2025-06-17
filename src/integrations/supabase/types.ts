@@ -60,6 +60,39 @@ export type Database = {
         }
         Relationships: []
       }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       design_mockups: {
         Row: {
           created_at: string
@@ -130,6 +163,7 @@ export type Database = {
       }
       designs: {
         Row: {
+          collection_id: string | null
           created_at: string
           file_name: string
           file_size: number
@@ -137,11 +171,13 @@ export type Database = {
           id: string
           inspiration: string | null
           status: string | null
+          subcollection_id: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          collection_id?: string | null
           created_at?: string
           file_name: string
           file_size: number
@@ -149,11 +185,13 @@ export type Database = {
           id?: string
           inspiration?: string | null
           status?: string | null
+          subcollection_id?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          collection_id?: string | null
           created_at?: string
           file_name?: string
           file_size?: number
@@ -161,11 +199,27 @@ export type Database = {
           id?: string
           inspiration?: string | null
           status?: string | null
+          subcollection_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "designs_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designs_subcollection_id_fkey"
+            columns: ["subcollection_id"]
+            isOneToOne: false
+            referencedRelation: "subcollections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_settings: {
         Row: {
@@ -231,6 +285,91 @@ export type Database = {
             columns: ["age_verification_id"]
             isOneToOne: false
             referencedRelation: "age_verification"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      printful_products: {
+        Row: {
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          printful_product_id: string
+          product_id: string
+          sync_error_message: string | null
+          sync_status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          printful_product_id: string
+          product_id: string
+          sync_error_message?: string | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          printful_product_id?: string
+          product_id?: string
+          sync_error_message?: string | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "printful_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_available: boolean
+          price_adjustment: number | null
+          printful_variant_id: string | null
+          product_id: string
+          size: string
+          variant_type: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price_adjustment?: number | null
+          printful_variant_id?: string | null
+          product_id: string
+          size: string
+          variant_type: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price_adjustment?: number | null
+          printful_variant_id?: string | null
+          product_id?: string
+          size?: string
+          variant_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -394,6 +533,50 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subcollections: {
+        Row: {
+          collection_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcollections_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
             referencedColumns: ["id"]
           },
         ]
