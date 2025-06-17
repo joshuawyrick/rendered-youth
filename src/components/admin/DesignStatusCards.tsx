@@ -49,19 +49,36 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
 
     const publishToStore = async (design: any) => {
       try {
-        const { error } = await supabase
+        // First, update the design status to 'published'
+        const { error: designError } = await supabase
           .from('designs')
           .update({ status: 'published' })
           .eq('id', design.id);
 
-        if (error) {
-          console.error('Error publishing design:', error);
-          throw error;
+        if (designError) {
+          console.error('Error updating design status:', designError);
+          throw designError;
+        }
+
+        // Then, create the actual product
+        const { error: productError } = await supabase
+          .from('products')
+          .insert({
+            title: design.title,
+            design_id: design.id,
+            price: 25.00,
+            creator_commission_rate: 0.15,
+            status: 'active'
+          });
+
+        if (productError) {
+          console.error('Error creating product:', productError);
+          throw productError;
         }
 
         toast({
           title: "Success",
-          description: `"${design.title}" has been published to the store!`,
+          description: `"${design.title}" has been published to the store and is now available for purchase!`,
         });
 
         // Refresh the data to show updated status
