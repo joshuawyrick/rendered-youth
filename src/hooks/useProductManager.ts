@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -26,7 +25,7 @@ export const useProductManager = () => {
           file_url,
           status,
           user_id,
-          profiles!inner (
+          profiles (
             first_name,
             last_name
           )
@@ -47,11 +46,11 @@ export const useProductManager = () => {
           creator_commission_rate,
           created_at,
           design_id,
-          designs!inner (
+          designs (
             title,
             file_url,
             user_id,
-            profiles!inner (
+            profiles (
               first_name,
               last_name
             )

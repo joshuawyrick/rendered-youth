@@ -28,11 +28,11 @@ export const useProductDetail = (slug: string | undefined) => {
           price,
           status,
           design_id,
-          designs!inner (
+          designs (
             file_url,
             title,
             user_id,
-            profiles!inner (
+            profiles (
               first_name,
               last_name,
               age_bracket
