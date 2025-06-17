@@ -11,16 +11,22 @@ export const useProductData = () => {
   const { toast } = useToast();
 
   const fetchData = async () => {
+    console.log('useProductData: Starting data fetch...');
+    setLoading(true);
+    
     try {
       const [designs, productsData] = await Promise.all([
         fetchDesignsWithProfiles(),
         fetchProductsWithDesigns()
       ]);
 
+      console.log('useProductData: Fetched designs:', designs);
+      console.log('useProductData: Fetched products:', productsData);
+
       setAvailableDesigns(designs);
       setProducts(productsData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('useProductData: Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load data",

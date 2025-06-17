@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Design, Product } from '@/components/admin/product/types';
 
 export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
-  // Get designs without products
+  console.log('Fetching designs with profiles...');
+  
+  // Get designs that are published
   const { data: designsData, error: designsError } = await supabase
     .from('designs')
     .select('id, title, file_url, status, user_id')
@@ -13,6 +15,8 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
     console.error('Designs query error:', designsError);
     throw designsError;
   }
+
+  console.log('Found published designs:', designsData);
 
   // Get existing products to filter out designs that already have products
   const { data: existingProducts, error: existingProductsError } = await supabase
@@ -24,11 +28,21 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
     throw existingProductsError;
   }
 
+  console.log('Existing products:', existingProducts);
+
   const existingDesignIds = new Set(existingProducts?.map(p => p.design_id) || []);
   const availableDesignsData = (designsData || []).filter(design => !existingDesignIds.has(design.id));
 
+  console.log('Available designs after filtering:', availableDesignsData);
+
   // Get profiles for available designs
   const designUserIds = availableDesignsData.map(design => design.user_id);
+  
+  if (designUserIds.length === 0) {
+    console.log('No available designs found');
+    return [];
+  }
+
   const { data: designProfilesData, error: designProfilesError } = await supabase
     .from('profiles')
     .select('id, first_name, last_name')
@@ -39,11 +53,16 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
     throw designProfilesError;
   }
 
+  console.log('Design profiles:', designProfilesData);
+
   // Combine designs with profiles
-  return availableDesignsData
+  const result = availableDesignsData
     .map(design => {
       const profile = designProfilesData?.find(p => p.id === design.user_id);
-      if (!profile) return null;
+      if (!profile) {
+        console.warn(`No profile found for user ${design.user_id}`);
+        return null;
+      }
       
       return {
         id: design.id,
@@ -58,9 +77,14 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
       };
     })
     .filter((design): design is Design => design !== null);
+
+  console.log('Final available designs:', result);
+  return result;
 };
 
 export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
+  console.log('Fetching products with designs...');
+  
   // Get products with their designs
   const { data: productsData, error: productsError } = await supabase
     .from('products')
@@ -72,8 +96,15 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
     throw productsError;
   }
 
+  console.log('Found products:', productsData);
+
+  if (!productsData || productsData.length === 0) {
+    console.log('No products found');
+    return [];
+  }
+
   // Get designs for products
-  const productDesignIds = (productsData || []).map(product => product.design_id);
+  const productDesignIds = productsData.map(product => product.design_id);
   const { data: productDesignsData, error: productDesignsError } = await supabase
     .from('designs')
     .select('id, title, file_url, user_id')
@@ -83,6 +114,8 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
     console.error('Product designs query error:', productDesignsError);
     throw productDesignsError;
   }
+
+  console.log('Product designs:', productDesignsData);
 
   // Get profiles for product designs
   const productUserIds = (productDesignsData || []).map(design => design.user_id);
@@ -96,14 +129,22 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
     throw productProfilesError;
   }
 
+  console.log('Product profiles:', productProfilesData);
+
   // Combine products with design and profile data
-  return (productsData || [])
+  const result = productsData
     .map(product => {
       const design = productDesignsData?.find(d => d.id === product.design_id);
-      if (!design) return null;
+      if (!design) {
+        console.warn(`No design found for product ${product.id}`);
+        return null;
+      }
       
       const profile = productProfilesData?.find(p => p.id === design.user_id);
-      if (!profile) return null;
+      if (!profile) {
+        console.warn(`No profile found for user ${design.user_id}`);
+        return null;
+      }
       
       return {
         id: product.id,
@@ -124,9 +165,14 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       };
     })
     .filter((product): product is Product => product !== null);
+
+  console.log('Final products with designs:', result);
+  return result;
 };
 
 export const createProductFromDesign = async (design: Design) => {
+  console.log('Creating product from design:', design);
+  
   const { error } = await supabase
     .from('products')
     .insert({
@@ -137,14 +183,26 @@ export const createProductFromDesign = async (design: Design) => {
       status: 'active'
     });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
+  
+  console.log('Product created successfully');
 };
 
 export const updateProductStatus = async (productId: string, status: string) => {
+  console.log('Updating product status:', productId, status);
+  
   const { error } = await supabase
     .from('products')
     .update({ status })
     .eq('id', productId);
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error updating product status:', error);
+    throw error;
+  }
+  
+  console.log('Product status updated successfully');
 };
