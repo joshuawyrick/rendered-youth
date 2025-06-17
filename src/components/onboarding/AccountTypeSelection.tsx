@@ -18,8 +18,8 @@ const AccountTypeSelection = ({ onAccountTypeSelected }: AccountTypeSelectionPro
   };
 
   return (
-    <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
-      <RYCard className="w-full max-w-2xl p-8">
+    <div className="p-8">
+      <RYCard className="w-full max-w-2xl mx-auto p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-ry-black mb-2">
             Welcome to Rendered Youth

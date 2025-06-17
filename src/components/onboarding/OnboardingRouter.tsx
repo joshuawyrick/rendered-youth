@@ -70,20 +70,18 @@ const OnboardingRouter = () => {
       
       case 'pending-parent':
         return (
-          <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
-            <div className="text-center max-w-md">
-              <div className="text-6xl mb-4">📧</div>
-              <h1 className="text-3xl font-bold text-ry-black mb-4">
-                Email Sent!
-              </h1>
-              <p className="text-gray-600 mb-6">
-                We've sent instructions to your parent's email. 
-                They'll need to complete the verification process before you can continue.
-              </p>
-              <p className="text-sm text-gray-500">
-                You can close this page and return when your parent has finished the setup.
-              </p>
-            </div>
+          <div className="p-8 text-center max-w-md mx-auto">
+            <div className="text-6xl mb-4">📧</div>
+            <h1 className="text-3xl font-bold text-ry-black mb-4">
+              Email Sent!
+            </h1>
+            <p className="text-gray-600 mb-6">
+              We've sent instructions to your parent's email. 
+              They'll need to complete the verification process before you can continue.
+            </p>
+            <p className="text-sm text-gray-500">
+              You can close this page and return when your parent has finished the setup.
+            </p>
           </div>
         );
       
