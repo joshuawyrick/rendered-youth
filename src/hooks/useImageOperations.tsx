@@ -61,19 +61,34 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const removeImage = (imageUrl: string) => {
-    console.log('Before removal - images:', images.map(img => ({ url: img.url.substring(0, 50), sortOrder: img.sortOrder })));
-    console.log('Removing image with URL:', imageUrl.substring(0, 50));
-    
-    // Find and remove the image by URL
-    const updatedImages = images.filter(img => {
-      const shouldKeep = img.url !== imageUrl;
-      if (!shouldKeep) {
-        console.log('Found image to remove:', { url: img.url.substring(0, 50), sortOrder: img.sortOrder });
-      }
-      return shouldKeep;
+    console.log('=== IMAGE REMOVAL DEBUG ===');
+    console.log('Attempting to remove image with URL:', imageUrl.substring(0, 50) + '...');
+    console.log('Current images before removal:');
+    images.forEach((img, idx) => {
+      console.log(`  [${idx}] Sort: ${img.sortOrder}, URL: ${img.url.substring(0, 50)}...`);
     });
     
-    console.log('After filtering - remaining images:', updatedImages.length);
+    // Find the image to remove
+    const imageToRemove = images.find(img => img.url === imageUrl);
+    if (!imageToRemove) {
+      console.error('Image not found in array!');
+      toast({
+        title: "Error",
+        description: "Image not found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log('Found image to remove:', {
+      sortOrder: imageToRemove.sortOrder,
+      url: imageToRemove.url.substring(0, 50) + '...'
+    });
+    
+    // Remove the image by URL (exact match)
+    const updatedImages = images.filter(img => img.url !== imageUrl);
+    
+    console.log('Images after filtering:', updatedImages.length);
     
     // Reorder the remaining images
     const reorderedImages = updatedImages.map((img, i) => ({
@@ -81,7 +96,11 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       sortOrder: i + 1
     }));
     
-    console.log('After reordering:', reorderedImages.map(img => ({ url: img.url.substring(0, 50), sortOrder: img.sortOrder })));
+    console.log('Final reordered images:');
+    reorderedImages.forEach((img, idx) => {
+      console.log(`  [${idx}] Sort: ${img.sortOrder}, URL: ${img.url.substring(0, 50)}...`);
+    });
+    console.log('=== END DEBUG ===');
     
     onImagesUpdate(reorderedImages);
     

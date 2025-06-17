@@ -28,7 +28,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((image, index) => (
-          <div key={`${image.url}-${index}`} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <div key={`readonly-${image.url}-${index}`} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={image.url}
               alt={image.altText}
@@ -40,15 +40,22 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
     );
   }
 
-  const handleRemoveImage = (imageUrl: string, index: number) => {
-    console.log('Removing image:', { imageUrl, index, sortOrder: images[index]?.sortOrder });
+  const handleRemoveImage = (imageUrl: string, sortOrder: number) => {
+    console.log('=== BUTTON CLICK DEBUG ===');
+    console.log('Button clicked for image:', {
+      url: imageUrl.substring(0, 50) + '...',
+      sortOrder: sortOrder
+    });
+    console.log('Calling onRemoveImage with URL:', imageUrl.substring(0, 50) + '...');
+    console.log('=== END BUTTON DEBUG ===');
+    
     onRemoveImage?.(imageUrl);
   };
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-      {images.map((image, index) => (
-        <div key={`${image.url}-${index}-${image.sortOrder}`} className="relative group">
+      {images.map((image) => (
+        <div key={`editable-${image.url}-${image.sortOrder}`} className="relative group">
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={image.url}
@@ -60,7 +67,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
             <RYButton
               variant="secondary"
               size="sm"
-              onClick={() => handleRemoveImage(image.url, index)}
+              onClick={() => handleRemoveImage(image.url, image.sortOrder)}
               className="p-1 h-6 w-6"
             >
               <X className="w-3 h-3" />
