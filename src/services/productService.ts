@@ -55,13 +55,25 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
 
   console.log('Design profiles:', designProfilesData);
 
-  // Combine designs with profiles
+  // Combine designs with profiles - create default profile if missing
   const result = availableDesignsData
     .map(design => {
       const profile = designProfilesData?.find(p => p.id === design.user_id);
+      
+      // If no profile found, create a default one but still include the design
       if (!profile) {
-        console.warn(`No profile found for user ${design.user_id}`);
-        return null;
+        console.warn(`No profile found for user ${design.user_id}, using default profile`);
+        return {
+          id: design.id,
+          title: design.title,
+          file_url: design.file_url,
+          status: design.status,
+          user_id: design.user_id,
+          profiles: {
+            first_name: 'Unknown',
+            last_name: 'Creator'
+          }
+        };
       }
       
       return {
@@ -71,12 +83,11 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
         status: design.status,
         user_id: design.user_id,
         profiles: {
-          first_name: profile.first_name || '',
-          last_name: profile.last_name || ''
+          first_name: profile.first_name || 'Unknown',
+          last_name: profile.last_name || 'Creator'
         }
       };
-    })
-    .filter((design): design is Design => design !== null);
+    });
 
   console.log('Final available designs:', result);
   return result;
@@ -141,9 +152,27 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       }
       
       const profile = productProfilesData?.find(p => p.id === design.user_id);
+      
+      // If no profile found, create a default one but still include the product
       if (!profile) {
-        console.warn(`No profile found for user ${design.user_id}`);
-        return null;
+        console.warn(`No profile found for user ${design.user_id}, using default profile`);
+        return {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          status: product.status,
+          creator_commission_rate: product.creator_commission_rate,
+          created_at: product.created_at,
+          design_id: product.design_id,
+          designs: {
+            title: design.title,
+            file_url: design.file_url,
+            profiles: {
+              first_name: 'Unknown',
+              last_name: 'Creator'
+            }
+          }
+        };
       }
       
       return {
@@ -158,8 +187,8 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
           title: design.title,
           file_url: design.file_url,
           profiles: {
-            first_name: profile.first_name || '',
-            last_name: profile.last_name || ''
+            first_name: profile.first_name || 'Unknown',
+            last_name: profile.last_name || 'Creator'
           }
         }
       };
