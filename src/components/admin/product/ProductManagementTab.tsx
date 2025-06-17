@@ -2,24 +2,7 @@
 import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import ProductCard from './ProductCard';
-
-interface Product {
-  id: string;
-  title: string;
-  price: number;
-  status: string;
-  creator_commission_rate: number;
-  created_at: string;
-  design_id: string;
-  designs: {
-    title: string;
-    file_url: string;
-    profiles: {
-      first_name: string;
-      last_name: string;
-    };
-  };
-}
+import type { Product } from './types';
 
 interface ProductManagementTabProps {
   products: Product[];

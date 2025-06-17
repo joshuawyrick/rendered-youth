@@ -3,18 +3,7 @@ import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Plus } from 'lucide-react';
-
-interface Design {
-  id: string;
-  title: string;
-  file_url: string;
-  status: string;
-  user_id: string;
-  profiles: {
-    first_name: string;
-    last_name: string;
-  };
-}
+import type { Design } from './types';
 
 interface DesignCardProps {
   design: Design;
