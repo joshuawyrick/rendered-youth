@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { Search, Settings, User, Menu, X } from 'lucide-react';
@@ -14,6 +13,7 @@ const TopNav = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -22,29 +22,53 @@ const TopNav = () => {
     } else {
       setIsAdmin(false);
       setIsCreator(false);
+      setProfileLoading(false);
     }
   }, [user]);
 
   const checkUserRoles = async () => {
     if (!user) return;
+    
+    setProfileLoading(true);
+    console.log('Checking user roles for user:', user.id);
 
-    // Check if user is admin
-    const { data: adminData } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
+    try {
+      // Check if user is admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
 
-    setIsAdmin(!!adminData);
+      if (adminError && adminError.code !== 'PGRST116') {
+        console.error('Error checking admin status:', adminError);
+      }
 
-    // Check if user is a creator by checking their profile account_type
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('account_type')
-      .eq('id', user.id)
-      .single();
+      setIsAdmin(!!adminData);
+      console.log('Admin status:', !!adminData);
 
-    setIsCreator(profileData?.account_type === 'creator');
+      // Check if user is a creator by checking their profile account_type
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('account_type')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+        setIsCreator(false);
+      } else {
+        const creatorStatus = profileData?.account_type === 'creator';
+        setIsCreator(creatorStatus);
+        console.log('Creator status:', creatorStatus, 'Account type:', profileData?.account_type);
+      }
+    } catch (error) {
+      console.error('Error in checkUserRoles:', error);
+      setIsAdmin(false);
+      setIsCreator(false);
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -112,7 +136,7 @@ const TopNav = () => {
                 </a>
                 
                 {/* Dashboard Links for authenticated users */}
-                {user && (
+                {user && !profileLoading && (
                   <>
                     {isCreator && (
                       <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors flex items-center">
@@ -137,7 +161,7 @@ const TopNav = () => {
               
               {user ? (
                 <>
-                  {isCreator && (
+                  {!profileLoading && isCreator && (
                     <RYButton 
                       variant="secondary" 
                       size="sm"
@@ -264,7 +288,7 @@ const TopNav = () => {
                 </a>
                 
                 {/* Mobile Dashboard Links for authenticated users */}
-                {user && (
+                {user && !profileLoading && (
                   <>
                     {isCreator && (
                       <a 
@@ -293,7 +317,7 @@ const TopNav = () => {
                 <div className="px-3 py-4 space-y-3">
                   {user ? (
                     <>
-                      {isCreator && (
+                      {!profileLoading && isCreator && (
                         <RYButton 
                           variant="secondary" 
                           size="sm"
