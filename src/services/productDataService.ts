@@ -105,7 +105,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       return {
         id: product.id,
         title: product.title,
-        description: product.description,
+        description: product.description || '',
         price: product.price,
         base_price: product.base_price,
         status: product.status,
@@ -148,13 +148,7 @@ export const fetchProductsForStore = async () => {
       designs!inner (
         id,
         file_url,
-        collection_id,
-        user_id,
-        profiles!inner (
-          first_name,
-          last_name,
-          age_bracket
-        )
+        user_id
       ),
       collections (
         name,
@@ -176,6 +170,35 @@ export const fetchProductsForStore = async () => {
     throw error;
   }
 
-  console.log('Store products fetched:', data);
-  return data || [];
+  // Get user profiles separately to avoid the relationship error
+  const designUserIds = (data || []).map(product => product.designs?.user_id).filter(Boolean);
+  
+  let profilesData = [];
+  if (designUserIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name, age_bracket')
+      .in('id', designUserIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+    } else {
+      profilesData = profiles || [];
+    }
+  }
+
+  // Combine the data
+  const enrichedData = (data || []).map(product => {
+    const profile = profilesData.find(p => p.id === product.designs?.user_id);
+    return {
+      ...product,
+      designs: {
+        ...product.designs,
+        profiles: profile || { first_name: 'Unknown', last_name: 'Creator', age_bracket: 'Unknown' }
+      }
+    };
+  });
+
+  console.log('Store products fetched:', enrichedData);
+  return enrichedData;
 };
