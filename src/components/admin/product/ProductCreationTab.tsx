@@ -32,6 +32,11 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
     return product;
   };
 
+  const handleProductDeleted = () => {
+    console.log('Product deleted - refreshing data...');
+    onProductDeleted();
+  };
+
   return (
     <div className="space-y-4">
       <p className="text-gray-600">
@@ -63,7 +68,7 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
                 design={design}
                 creating={creating}
                 onCreateProduct={onCreateProduct}
-                onProductDeleted={onProductDeleted}
+                onProductDeleted={handleProductDeleted}
                 hasExistingProduct={!!existingProduct}
                 existingProductId={existingProduct?.id}
                 existingProductTitle={existingProduct?.title}

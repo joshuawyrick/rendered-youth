@@ -55,12 +55,20 @@ const DesignCard: React.FC<DesignCardProps> = ({
     
     try {
       await deleteEntireProduct(existingProductId);
+      console.log('Product deleted successfully, calling onProductDeleted...');
+      
       toast({
         title: "Product Deleted",
         description: "Product and all associated data have been permanently deleted.",
       });
-      onProductDeleted?.();
+      
+      // Close dialog first
       setDeleteDialogOpen(false);
+      
+      // Then trigger the refresh
+      if (onProductDeleted) {
+        onProductDeleted();
+      }
     } catch (error) {
       console.error('Error deleting product:', error);
       toast({

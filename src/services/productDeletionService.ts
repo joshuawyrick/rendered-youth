@@ -43,7 +43,7 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 };
 
 export const deleteEntireProduct = async (productId: string): Promise<void> => {
-  console.log('=== DELETE ENTIRE PRODUCT DEBUG START ===');
+  console.log('=== DELETE ENTIRE PRODUCT START ===');
   console.log('Deleting product:', productId);
 
   if (!productId) {
@@ -104,7 +104,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       await deleteStorageFile(product.designs.file_url);
     }
 
-    // Delete product variants first
+    // Delete product variants first (due to foreign key constraints)
     console.log('Deleting product variants...');
     const { error: variantsError } = await supabase
       .from('product_variants')
@@ -113,6 +113,18 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
     if (variantsError) {
       console.error('Error deleting product variants:', variantsError);
+      // Don't throw here, continue with deletion
+    }
+
+    // Delete printful products if they exist
+    console.log('Deleting printful products...');
+    const { error: printfulError } = await supabase
+      .from('printful_products')
+      .delete()
+      .eq('product_id', productId);
+
+    if (printfulError) {
+      console.error('Error deleting printful products:', printfulError);
       // Don't throw here, continue with deletion
     }
 
@@ -143,7 +155,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
     }
 
     console.log('Successfully deleted entire product and all associated data');
-    console.log('=== DELETE ENTIRE PRODUCT DEBUG END ===');
+    console.log('=== DELETE ENTIRE PRODUCT END ===');
   } catch (error) {
     console.error('Error in deleteEntireProduct:', error);
     throw error;
