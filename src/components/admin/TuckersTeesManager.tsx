@@ -42,8 +42,8 @@ const TuckersTeesManager = () => {
       // First, ensure Tucker's Tees collection exists
       await ensureTuckersCollection();
       
-      // Fetch all published designs not yet assigned to Tucker's collection
-      const { data: allDesigns, error: designsError } = await supabase
+      // Fetch all published designs with their profiles
+      const { data: designsData, error: designsError } = await supabase
         .from('designs')
         .select(`
           id, 
@@ -52,12 +52,38 @@ const TuckersTeesManager = () => {
           file_url, 
           collection_id, 
           created_at,
-          profiles!inner (first_name, last_name)
+          user_id
         `)
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
       if (designsError) throw designsError;
+
+      console.log('Fetched designs:', designsData);
+
+      // Get all unique user IDs from the designs
+      const userIds = designsData?.map(d => d.user_id).filter(Boolean) || [];
+      
+      // Fetch profiles for these users
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Profiles query error:', profilesError);
+      }
+
+      console.log('Fetched profiles:', profilesData);
+
+      // Combine designs with their profiles
+      const designsWithProfiles = designsData?.map(design => ({
+        ...design,
+        profiles: profilesData?.find(p => p.id === design.user_id) || {
+          first_name: 'Unknown',
+          last_name: 'Creator'
+        }
+      })) || [];
 
       // Get Tucker's collection
       const { data: collection, error: collectionError } = await supabase
@@ -74,13 +100,13 @@ const TuckersTeesManager = () => {
         setTuckersCollection(collection);
         
         // Separate Tucker's designs from other designs
-        const tuckersDesigns = allDesigns?.filter(d => d.collection_id === collection.id) || [];
-        const otherDesigns = allDesigns?.filter(d => d.collection_id !== collection.id) || [];
+        const tuckersDesigns = designsWithProfiles.filter(d => d.collection_id === collection.id);
+        const otherDesigns = designsWithProfiles.filter(d => d.collection_id !== collection.id);
         
         setTuckersDesigns(tuckersDesigns);
         setDesigns(otherDesigns);
       } else {
-        setDesigns(allDesigns || []);
+        setDesigns(designsWithProfiles);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
