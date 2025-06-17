@@ -30,7 +30,7 @@ export const fetchProductImages = async (productId: string): Promise<ProductImag
 
     const images: ProductImage[] = [];
     
-    // Add the main design image first
+    // Add the main design image first (only if it exists)
     if (product?.designs?.file_url) {
       images.push({
         url: product.designs.file_url,
@@ -60,7 +60,7 @@ const isStorageUrl = (url: string): boolean => {
   return url.includes('supabase') && url.includes('storage');
 };
 
-const extractStoragePathFromUrl = (url: string): string | null => {
+const extractStoragePathFromUrl = (url: string): string | null => => {
   try {
     // Extract the path after /storage/v1/object/public/{bucket}/
     const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
@@ -100,7 +100,21 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 
 export const saveProductImages = async (productId: string, images: ProductImage[], previousImages: ProductImage[] = []): Promise<void> => {
   try {
-    // Filter out the main design image (sortOrder 1) and save the rest as additional_images
+    // Get current product data to check if we need to update the main design
+    const { data: currentProduct, error: fetchError } = await supabase
+      .from('products')
+      .select('designs(file_url)')
+      .eq('id', productId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Check if the main design image was removed (was at sortOrder 1 in previous but not in current)
+    const currentMainDesignUrl = currentProduct?.designs?.file_url;
+    const hasMainDesignInCurrent = images.some(img => img.sortOrder === 1 && img.url === currentMainDesignUrl);
+    
+    // Separate main design image (sortOrder 1) from additional images
+    const mainDesignImage = images.find(img => img.sortOrder === 1);
     const additionalImages = images
       .filter(img => img.sortOrder > 1)
       .map(img => ({
@@ -111,15 +125,22 @@ export const saveProductImages = async (productId: string, images: ProductImage[
 
     // Find images that were removed (existed in previousImages but not in current images)
     const currentUrls = new Set(images.map(img => img.url));
-    const removedImages = previousImages.filter(prevImg => 
-      prevImg.sortOrder > 1 && !currentUrls.has(prevImg.url)
-    );
+    const removedImages = previousImages.filter(prevImg => !currentUrls.has(prevImg.url));
 
     // Delete removed images from storage
     for (const removedImage of removedImages) {
       await deleteStorageFile(removedImage.url);
     }
 
+    // If main design was removed or changed, handle the design update
+    if (currentMainDesignUrl && (!hasMainDesignInCurrent || (mainDesignImage && mainDesignImage.url !== currentMainDesignUrl))) {
+      // Delete the old main design file if it was removed
+      if (!hasMainDesignInCurrent) {
+        await deleteStorageFile(currentMainDesignUrl);
+      }
+    }
+
+    // Update the product with new additional images
     const { error } = await supabase
       .from('products')
       .update({
@@ -132,7 +153,8 @@ export const saveProductImages = async (productId: string, images: ProductImage[
     console.log('Successfully saved product images:', { 
       productId, 
       imageCount: additionalImages.length,
-      removedCount: removedImages.length 
+      removedCount: removedImages.length,
+      mainDesignRemoved: currentMainDesignUrl && !hasMainDesignInCurrent
     });
   } catch (error) {
     console.error('Error saving product images:', error);

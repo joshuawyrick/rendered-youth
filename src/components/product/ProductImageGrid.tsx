@@ -67,6 +67,11 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
             onChange={(e) => onUpdateAltText?.(index, e.target.value)}
             className="mt-1 text-xs"
           />
+          {image.sortOrder === 1 && (
+            <div className="absolute bottom-8 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+              Main
+            </div>
+          )}
         </div>
       ))}
     </div>
