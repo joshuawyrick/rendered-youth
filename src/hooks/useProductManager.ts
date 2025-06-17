@@ -16,7 +16,7 @@ export const useProductManager = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch published designs without products with explicit join
+      // First, get designs without products
       const { data: designsData, error: designsError } = await supabase
         .from('designs')
         .select(`
@@ -24,11 +24,7 @@ export const useProductManager = () => {
           title,
           file_url,
           status,
-          user_id,
-          profiles!inner (
-            first_name,
-            last_name
-          )
+          user_id
         `)
         .eq('status', 'published')
         .not('id', 'in', `(SELECT design_id FROM products WHERE design_id IS NOT NULL)`);
@@ -38,7 +34,33 @@ export const useProductManager = () => {
         throw designsError;
       }
 
-      // Fetch existing products with explicit join
+      // Get profiles for designs
+      const designUserIds = (designsData || []).map(design => design.user_id);
+      const { data: designProfilesData, error: designProfilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', designUserIds);
+
+      if (designProfilesError) {
+        console.error('Design profiles query error:', designProfilesError);
+        throw designProfilesError;
+      }
+
+      // Combine designs with profiles
+      const validDesigns: Design[] = (designsData || [])
+        .map(design => {
+          const profile = designProfilesData?.find(p => p.id === design.user_id);
+          return profile ? {
+            ...design,
+            profiles: {
+              first_name: profile.first_name,
+              last_name: profile.last_name
+            }
+          } : null;
+        })
+        .filter((design): design is Design => design !== null);
+
+      // Get products with designs
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -49,14 +71,10 @@ export const useProductManager = () => {
           creator_commission_rate,
           created_at,
           design_id,
-          designs!inner (
+          designs (
             title,
             file_url,
-            user_id,
-            profiles!inner (
-              first_name,
-              last_name
-            )
+            user_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -66,17 +84,38 @@ export const useProductManager = () => {
         throw productsError;
       }
 
-      // Validate and filter data to ensure it matches our types
-      const validDesigns = (designsData || []).filter((design: any) => 
-        design && design.profiles && typeof design.profiles === 'object' &&
-        'first_name' in design.profiles && 'last_name' in design.profiles
-      ) as Design[];
+      // Get profiles for products
+      const productUserIds = (productsData || [])
+        .filter(product => product.designs)
+        .map(product => product.designs!.user_id);
+      
+      const { data: productProfilesData, error: productProfilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', productUserIds);
 
-      const validProducts = (productsData || []).filter((product: any) =>
-        product && product.designs && typeof product.designs === 'object' &&
-        product.designs.profiles && typeof product.designs.profiles === 'object' &&
-        'first_name' in product.designs.profiles && 'last_name' in product.designs.profiles
-      ) as Product[];
+      if (productProfilesError) {
+        console.error('Product profiles query error:', productProfilesError);
+        throw productProfilesError;
+      }
+
+      // Combine products with profiles
+      const validProducts: Product[] = (productsData || [])
+        .map(product => {
+          if (!product.designs) return null;
+          const profile = productProfilesData?.find(p => p.id === product.designs!.user_id);
+          return profile ? {
+            ...product,
+            designs: {
+              ...product.designs,
+              profiles: {
+                first_name: profile.first_name,
+                last_name: profile.last_name
+              }
+            }
+          } : null;
+        })
+        .filter((product): product is Product => product !== null);
 
       setAvailableDesigns(validDesigns);
       setProducts(validProducts);

@@ -20,7 +20,8 @@ export const useProductDetail = (slug: string | undefined) => {
       // Convert slug back to title for search
       const searchTitle = slug?.replace(/-/g, ' ') || '';
       
-      const { data, error } = await supabase
+      // First, get the product with design
+      const { data: productData, error: productError } = await supabase
         .from('products')
         .select(`
           id,
@@ -28,37 +29,57 @@ export const useProductDetail = (slug: string | undefined) => {
           price,
           status,
           design_id,
-          designs!inner (
+          designs (
             file_url,
             title,
-            user_id,
-            profiles!inner (
-              first_name,
-              last_name,
-              age_bracket
-            )
+            user_id
           )
         `)
         .ilike('title', `%${searchTitle}%`)
         .eq('status', 'active')
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching product:', error);
-        throw error;
+      if (productError) {
+        console.error('Error fetching product:', productError);
+        throw productError;
       }
-      
-      // Validate that we have the expected nested data structure
-      if (data && data.designs && typeof data.designs === 'object' && 
-          data.designs.profiles && typeof data.designs.profiles === 'object' &&
-          'first_name' in data.designs.profiles) {
-        setProduct(data as ProductDetail);
-      } else if (data) {
-        console.error('Invalid data structure received:', data);
-        throw new Error('Product data is incomplete');
-      } else {
+
+      if (!productData || !productData.designs) {
         throw new Error('Product not found');
       }
+
+      // Then get the profile data separately
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, age_bracket')
+        .eq('id', productData.designs.user_id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
+
+      // Combine the data
+      const combinedProduct: ProductDetail = {
+        id: productData.id,
+        title: productData.title,
+        price: productData.price,
+        status: productData.status,
+        design_id: productData.design_id,
+        designs: {
+          file_url: productData.designs.file_url,
+          title: productData.designs.title,
+          user_id: productData.designs.user_id,
+          profiles: {
+            first_name: profileData.first_name,
+            last_name: profileData.last_name,
+            age_bracket: profileData.age_bracket
+          }
+        }
+      };
+
+      setProduct(combinedProduct);
     } catch (error) {
       console.error('Error fetching product:', error);
       toast({
