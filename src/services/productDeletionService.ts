@@ -58,6 +58,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
         id,
         title,
         additional_images,
+        design_id,
         designs (
           id,
           file_url,
@@ -79,6 +80,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
     console.log('Product to delete:', {
       id: product.id,
       title: product.title,
+      designId: product.design_id,
       mainDesignUrl: product.designs?.file_url?.substring(0, 50) + '...',
       additionalImagesCount: Array.isArray(product.additional_images) ? product.additional_images.length : 0
     });
@@ -140,21 +142,22 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       throw new Error(`Failed to delete product: ${productError.message}`);
     }
 
-    // Finally, delete the design record if it exists
-    if (product.designs?.id) {
-      console.log('Deleting design record...');
+    // CRITICAL: Delete the design record to ensure complete removal
+    if (product.design_id) {
+      console.log('Deleting design record completely...');
       const { error: designError } = await supabase
         .from('designs')
         .delete()
-        .eq('id', product.designs.id);
+        .eq('id', product.design_id);
 
       if (designError) {
         console.error('Error deleting design:', designError);
-        // Don't throw here, the main product is already deleted
+        throw new Error(`Failed to delete design: ${designError.message}`);
       }
+      console.log('Design deleted successfully');
     }
 
-    console.log('Successfully deleted entire product and all associated data');
+    console.log('Successfully deleted entire product and all associated data INCLUDING the design');
     console.log('=== DELETE ENTIRE PRODUCT END ===');
   } catch (error) {
     console.error('Error in deleteEntireProduct:', error);

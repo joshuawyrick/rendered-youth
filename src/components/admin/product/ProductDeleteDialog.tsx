@@ -20,7 +20,7 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
   loading
 }) => {
   const handleConfirm = () => {
-    console.log('Delete dialog confirmed for:', productTitle);
+    console.log('Delete dialog confirmed for PERMANENT deletion:', productTitle);
     onConfirm();
   };
 
@@ -35,19 +35,22 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-red-500" />
-            Delete Product
+            Delete Forever
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete "{productTitle}"?
+            Are you sure you want to <strong>permanently delete</strong> "{productTitle}"?
             <br />
             <br />
-            <strong>This action cannot be undone.</strong> This will permanently delete:
+            <strong className="text-red-600">This action cannot be undone.</strong> This will permanently delete:
             <ul className="list-disc list-inside mt-2 space-y-1">
+              <li><strong>The original design</strong></li>
               <li>The product and all its variants</li>
               <li>All additional images</li>
               <li>The main design image from storage</li>
               <li>All associated data</li>
             </ul>
+            <br />
+            <strong>The design will NOT reappear in the create products section.</strong>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -61,7 +64,7 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
               disabled={loading}
               className="bg-red-600 hover:bg-red-700 text-white border-red-600"
             >
-              {loading ? 'Deleting...' : 'Delete Product'}
+              {loading ? 'Deleting Forever...' : 'Delete Forever'}
             </RYButton>
           </AlertDialogAction>
         </AlertDialogFooter>

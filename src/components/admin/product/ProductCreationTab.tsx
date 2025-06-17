@@ -22,6 +22,7 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
   console.log('ProductCreationTab render:', {
     availableDesignsCount: availableDesigns.length,
     productsCount: products.length,
+    availableDesigns: availableDesigns.map(d => ({ id: d.id, title: d.title })),
     products: products.map(p => ({ id: p.id, title: p.title, design_id: p.design_id }))
   });
 
@@ -32,9 +33,10 @@ const ProductCreationTab: React.FC<ProductCreationTabProps> = ({
     return product;
   };
 
-  const handleProductDeleted = () => {
-    console.log('Product deleted - refreshing data...');
-    onProductDeleted();
+  const handleProductDeleted = async () => {
+    console.log('Product deleted - triggering complete data refresh...');
+    // Force a complete refresh of all data
+    await onProductDeleted();
   };
 
   return (

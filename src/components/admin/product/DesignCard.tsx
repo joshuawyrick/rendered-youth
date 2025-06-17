@@ -50,30 +50,31 @@ const DesignCard: React.FC<DesignCardProps> = ({
       return;
     }
     
-    console.log('Starting delete process for product:', existingProductId);
+    console.log('Starting COMPLETE delete process for product:', existingProductId);
     setDeleting(true);
     
     try {
       await deleteEntireProduct(existingProductId);
-      console.log('Product deleted successfully, calling onProductDeleted...');
+      console.log('Product AND design deleted successfully, calling onProductDeleted...');
       
       toast({
         title: "Product Deleted",
-        description: "Product and all associated data have been permanently deleted.",
+        description: "Product, design, and all associated data have been permanently deleted.",
       });
       
       // Close dialog first
       setDeleteDialogOpen(false);
       
-      // Then trigger the refresh
+      // Then trigger the complete refresh
       if (onProductDeleted) {
+        console.log('Triggering data refresh after complete deletion...');
         onProductDeleted();
       }
     } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error('Error deleting product completely:', error);
       toast({
         title: "Error",
-        description: "Failed to delete product. Please try again.",
+        description: "Failed to delete product completely. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -128,7 +129,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
                 disabled={deleting}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
-                {deleting ? 'Deleting...' : 'Delete Product'}
+                {deleting ? 'Deleting Forever...' : 'Delete Forever'}
               </RYButton>
             </div>
           ) : (
