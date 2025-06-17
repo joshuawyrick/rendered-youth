@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RYButton } from '@/components/ui/ry-button';
@@ -37,6 +36,7 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
   const [basePrice, setBasePrice] = useState(25.00);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [images, setImages] = useState<ProductImage[]>([]);
+  const [originalImages, setOriginalImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -56,15 +56,18 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
     try {
       const productImages = await fetchProductImages(product.id);
       setImages(productImages);
+      setOriginalImages([...productImages]); // Store a copy of original images
     } catch (error) {
       console.error('Error loading product images:', error);
       // Fallback to design image if available
       if (product.designs?.file_url) {
-        setImages([{
+        const fallbackImages = [{
           url: product.designs.file_url,
           altText: product.title,
           sortOrder: 1
-        }]);
+        }];
+        setImages(fallbackImages);
+        setOriginalImages([...fallbackImages]);
       }
     }
   };
@@ -117,8 +120,8 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
 
       if (productError) throw productError;
 
-      // Save product images
-      await saveProductImages(product.id, images);
+      // Save product images with cleanup of removed images
+      await saveProductImages(product.id, images, originalImages);
 
       // Delete existing variants
       const { error: deleteError } = await supabase

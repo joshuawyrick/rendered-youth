@@ -56,7 +56,49 @@ export const fetchProductImages = async (productId: string): Promise<ProductImag
   }
 };
 
-export const saveProductImages = async (productId: string, images: ProductImage[]): Promise<void> => {
+const isStorageUrl = (url: string): boolean => {
+  return url.includes('supabase') && url.includes('storage');
+};
+
+const extractStoragePathFromUrl = (url: string): string | null => {
+  try {
+    // Extract the path after /storage/v1/object/public/{bucket}/
+    const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+    return match ? match[1] : null;
+  } catch (error) {
+    console.error('Error extracting storage path:', error);
+    return null;
+  }
+};
+
+const deleteStorageFile = async (url: string): Promise<void> => {
+  if (!isStorageUrl(url)) {
+    console.log('Skipping deletion of non-storage URL:', url);
+    return;
+  }
+
+  const filePath = extractStoragePathFromUrl(url);
+  if (!filePath) {
+    console.error('Could not extract file path from URL:', url);
+    return;
+  }
+
+  try {
+    const { error } = await supabase.storage
+      .from('design-uploads')
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting file from storage:', error);
+    } else {
+      console.log('Successfully deleted file from storage:', filePath);
+    }
+  } catch (error) {
+    console.error('Error during file deletion:', error);
+  }
+};
+
+export const saveProductImages = async (productId: string, images: ProductImage[], previousImages: ProductImage[] = []): Promise<void> => {
   try {
     // Filter out the main design image (sortOrder 1) and save the rest as additional_images
     const additionalImages = images
@@ -67,6 +109,17 @@ export const saveProductImages = async (productId: string, images: ProductImage[
         sortOrder: img.sortOrder
       }));
 
+    // Find images that were removed (existed in previousImages but not in current images)
+    const currentUrls = new Set(images.map(img => img.url));
+    const removedImages = previousImages.filter(prevImg => 
+      prevImg.sortOrder > 1 && !currentUrls.has(prevImg.url)
+    );
+
+    // Delete removed images from storage
+    for (const removedImage of removedImages) {
+      await deleteStorageFile(removedImage.url);
+    }
+
     const { error } = await supabase
       .from('products')
       .update({
@@ -76,7 +129,11 @@ export const saveProductImages = async (productId: string, images: ProductImage[
 
     if (error) throw error;
 
-    console.log('Successfully saved product images:', { productId, imageCount: additionalImages.length });
+    console.log('Successfully saved product images:', { 
+      productId, 
+      imageCount: additionalImages.length,
+      removedCount: removedImages.length 
+    });
   } catch (error) {
     console.error('Error saving product images:', error);
     throw error;
