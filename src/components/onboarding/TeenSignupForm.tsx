@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface TeenSignupFormProps {
   age: number;
@@ -18,16 +20,57 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // This would integrate with Supabase auth
-    console.log('Teen signup:', { ...formData, age });
-    
-    // For now, redirect to auth page
-    navigate('/auth');
+    try {
+      // Sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            age: age,
+            parent_email: formData.parentEmail,
+            account_type: 'teen'
+          }
+        }
+      });
+
+      if (authError) {
+        toast({
+          title: "Signup Error",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (authData.user) {
+        toast({
+          title: "Account Created!",
+          description: "Please check your email to verify your account.",
+        });
+        
+        // Redirect to a confirmation page or dashboard
+        navigate('/creator/dashboard');
+      }
+    } catch (error) {
+      console.error('Teen signup error:', error);
+      toast({
+        title: "Unexpected Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
