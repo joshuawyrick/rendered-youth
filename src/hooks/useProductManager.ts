@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -19,23 +20,29 @@ export const useProductManager = () => {
       // First, get designs without products
       const { data: designsData, error: designsError } = await supabase
         .from('designs')
-        .select(`
-          id,
-          title,
-          file_url,
-          status,
-          user_id
-        `)
-        .eq('status', 'published')
-        .not('id', 'in', `(SELECT design_id FROM products WHERE design_id IS NOT NULL)`);
+        .select('id, title, file_url, status, user_id')
+        .eq('status', 'published');
 
       if (designsError) {
         console.error('Designs query error:', designsError);
         throw designsError;
       }
 
-      // Get profiles for designs
-      const designUserIds = (designsData || []).map(design => design.user_id);
+      // Get existing products to filter out designs that already have products
+      const { data: existingProducts, error: existingProductsError } = await supabase
+        .from('products')
+        .select('design_id');
+
+      if (existingProductsError) {
+        console.error('Existing products query error:', existingProductsError);
+        throw existingProductsError;
+      }
+
+      const existingDesignIds = new Set(existingProducts?.map(p => p.design_id) || []);
+      const availableDesignsData = (designsData || []).filter(design => !existingDesignIds.has(design.id));
+
+      // Get profiles for available designs
+      const designUserIds = availableDesignsData.map(design => design.user_id);
       const { data: designProfilesData, error: designProfilesError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
@@ -47,36 +54,29 @@ export const useProductManager = () => {
       }
 
       // Combine designs with profiles
-      const validDesigns: Design[] = (designsData || [])
+      const validDesigns: Design[] = availableDesignsData
         .map(design => {
           const profile = designProfilesData?.find(p => p.id === design.user_id);
-          return profile ? {
-            ...design,
+          if (!profile) return null;
+          
+          return {
+            id: design.id,
+            title: design.title,
+            file_url: design.file_url,
+            status: design.status,
+            user_id: design.user_id,
             profiles: {
-              first_name: profile.first_name,
-              last_name: profile.last_name
+              first_name: profile.first_name || '',
+              last_name: profile.last_name || ''
             }
-          } : null;
+          };
         })
         .filter((design): design is Design => design !== null);
 
-      // Get products with designs
+      // Get products with their designs
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select(`
-          id,
-          title,
-          price,
-          status,
-          creator_commission_rate,
-          created_at,
-          design_id,
-          designs (
-            title,
-            file_url,
-            user_id
-          )
-        `)
+        .select('id, title, price, status, creator_commission_rate, created_at, design_id')
         .order('created_at', { ascending: false });
 
       if (productsError) {
@@ -84,11 +84,20 @@ export const useProductManager = () => {
         throw productsError;
       }
 
-      // Get profiles for products
-      const productUserIds = (productsData || [])
-        .filter(product => product.designs)
-        .map(product => product.designs!.user_id);
-      
+      // Get designs for products
+      const productDesignIds = (productsData || []).map(product => product.design_id);
+      const { data: productDesignsData, error: productDesignsError } = await supabase
+        .from('designs')
+        .select('id, title, file_url, user_id')
+        .in('id', productDesignIds);
+
+      if (productDesignsError) {
+        console.error('Product designs query error:', productDesignsError);
+        throw productDesignsError;
+      }
+
+      // Get profiles for product designs
+      const productUserIds = (productDesignsData || []).map(design => design.user_id);
       const { data: productProfilesData, error: productProfilesError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
@@ -99,21 +108,32 @@ export const useProductManager = () => {
         throw productProfilesError;
       }
 
-      // Combine products with profiles
+      // Combine products with design and profile data
       const validProducts: Product[] = (productsData || [])
         .map(product => {
-          if (!product.designs) return null;
-          const profile = productProfilesData?.find(p => p.id === product.designs!.user_id);
-          return profile ? {
-            ...product,
+          const design = productDesignsData?.find(d => d.id === product.design_id);
+          if (!design) return null;
+          
+          const profile = productProfilesData?.find(p => p.id === design.user_id);
+          if (!profile) return null;
+          
+          return {
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            status: product.status,
+            creator_commission_rate: product.creator_commission_rate,
+            created_at: product.created_at,
+            design_id: product.design_id,
             designs: {
-              ...product.designs,
+              title: design.title,
+              file_url: design.file_url,
               profiles: {
-                first_name: profile.first_name,
-                last_name: profile.last_name
+                first_name: profile.first_name || '',
+                last_name: profile.last_name || ''
               }
             }
-          } : null;
+          };
         })
         .filter((product): product is Product => product !== null);
 
