@@ -23,9 +23,9 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-ry-black mb-8">
-            Kid Art,
-            <span className="block text-ry-yellow">Grown-Up</span>
-            <span className="block">Tees</span>
+            Kids Draw It
+            <span className="block text-ry-yellow">We Render It</span>
+            <span className="block">You Wear It</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
