@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ProductImageManager from '@/components/product/ProductImageManager';
+import { fetchProductImages, saveProductImages, type ProductImage } from '@/services/productImageService';
 import type { Product } from './types';
 
 interface ProductEditDialogProps {
@@ -24,13 +25,6 @@ interface ProductVariant {
   color: string;
   priceAdjustment: number;
   isAvailable: boolean;
-}
-
-interface ProductImage {
-  id?: string;
-  url: string;
-  altText: string;
-  sortOrder: number;
 }
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -56,17 +50,26 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
       setDescription(product.description || '');
       setBasePrice(Number(product.base_price || product.price));
       fetchProductVariants();
-      initializeImages();
+      loadProductImages();
     }
   }, [product, open]);
 
-  const initializeImages = () => {
-    if (product?.designs?.file_url) {
-      setImages([{
-        url: product.designs.file_url,
-        altText: product.title,
-        sortOrder: 1
-      }]);
+  const loadProductImages = async () => {
+    if (!product) return;
+    
+    try {
+      const productImages = await fetchProductImages(product.id);
+      setImages(productImages);
+    } catch (error) {
+      console.error('Error loading product images:', error);
+      // Fallback to design image if available
+      if (product.designs?.file_url) {
+        setImages([{
+          url: product.designs.file_url,
+          altText: product.title,
+          sortOrder: 1
+        }]);
+      }
     }
   };
 
@@ -138,6 +141,9 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
         .eq('id', product.id);
 
       if (productError) throw productError;
+
+      // Save product images
+      await saveProductImages(product.id, images);
 
       // Delete existing variants
       const { error: deleteError } = await supabase

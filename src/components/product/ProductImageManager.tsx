@@ -28,6 +28,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
 }) => {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [isAddingImage, setIsAddingImage] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const { toast } = useToast();
   const { file, dragActive, handleDrag, handleDrop, handleFileInput, removeFile } = useFileUpload();
 
@@ -50,9 +51,52 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
     });
   };
 
+  const handleFileUpload = async () => {
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      // Convert file to data URL for immediate use
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        
+        const newImage: ProductImage = {
+          url: dataUrl,
+          altText: `${file.name}`,
+          sortOrder: images.length + 1
+        };
+
+        onImagesUpdate([...images, newImage]);
+        removeFile();
+        setIsAddingImage(false);
+        
+        toast({
+          title: "Image Uploaded",
+          description: "File has been added to the product",
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload the image file",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   const removeImage = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index);
-    onImagesUpdate(updatedImages);
+    // Update sort orders
+    const reorderedImages = updatedImages.map((img, i) => ({
+      ...img,
+      sortOrder: i + 1
+    }));
+    onImagesUpdate(reorderedImages);
     
     toast({
       title: "Image Removed",
@@ -135,13 +179,14 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
               className="flex-1"
             />
             <RYButton onClick={addImageByUrl} disabled={!newImageUrl.trim()}>
-              Add
+              Add URL
             </RYButton>
             <RYButton
               variant="secondary"
               onClick={() => {
                 setIsAddingImage(false);
                 setNewImageUrl('');
+                removeFile();
               }}
             >
               Cancel
@@ -172,16 +217,27 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
               </label>
             </p>
             {file && (
-              <div className="mt-2 text-sm text-green-600">
-                File selected: {file.name}
-                <RYButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={removeFile}
-                  className="ml-2"
-                >
-                  Remove
-                </RYButton>
+              <div className="mt-2 space-y-2">
+                <div className="text-sm text-green-600">
+                  File selected: {file.name}
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <RYButton
+                    onClick={handleFileUpload}
+                    disabled={uploadingFile}
+                    size="sm"
+                  >
+                    {uploadingFile ? 'Adding...' : 'Add File'}
+                  </RYButton>
+                  <RYButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={removeFile}
+                    disabled={uploadingFile}
+                  >
+                    Remove
+                  </RYButton>
+                </div>
               </div>
             )}
           </div>

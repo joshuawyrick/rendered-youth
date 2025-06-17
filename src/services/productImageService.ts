@@ -8,15 +8,16 @@ export interface ProductImage {
   sortOrder: number;
 }
 
+// We'll store images in the products table as a JSON array for now
+// In the future, this could be moved to a dedicated product_images table
+
 export const fetchProductImages = async (productId: string): Promise<ProductImage[]> => {
   try {
-    // For now, we'll simulate product images since we don't have a product_images table yet
-    // In the future, this would fetch from a dedicated product_images table
-    
-    // Get the main design image from the product
+    // Get the main design image from the product and any additional images
     const { data: product, error } = await supabase
       .from('products')
       .select(`
+        additional_images,
         designs (
           file_url,
           title
@@ -29,6 +30,7 @@ export const fetchProductImages = async (productId: string): Promise<ProductImag
 
     const images: ProductImage[] = [];
     
+    // Add the main design image first
     if (product?.designs?.file_url) {
       images.push({
         url: product.designs.file_url,
@@ -37,15 +39,17 @@ export const fetchProductImages = async (productId: string): Promise<ProductImag
       });
     }
 
-    // Add placeholder additional images for demo
-    // In a real implementation, these would come from the database
-    const additionalImages = [
-      { url: product?.designs?.file_url, altText: 'Back view', sortOrder: 2 },
-      { url: product?.designs?.file_url, altText: 'Side view', sortOrder: 3 },
-      { url: product?.designs?.file_url, altText: 'Detail view', sortOrder: 4 }
-    ];
+    // Add any additional images stored in the product
+    if (product?.additional_images && Array.isArray(product.additional_images)) {
+      const additionalImages = product.additional_images.map((img: any, index: number) => ({
+        url: img.url || img,
+        altText: img.altText || `Product image ${index + 2}`,
+        sortOrder: index + 2
+      }));
+      images.push(...additionalImages);
+    }
 
-    return [...images, ...additionalImages];
+    return images.sort((a, b) => a.sortOrder - b.sortOrder);
   } catch (error) {
     console.error('Error fetching product images:', error);
     return [];
@@ -54,14 +58,25 @@ export const fetchProductImages = async (productId: string): Promise<ProductImag
 
 export const saveProductImages = async (productId: string, images: ProductImage[]): Promise<void> => {
   try {
-    // This would normally save to a product_images table
-    // For now, we'll just log the images that would be saved
-    console.log('Saving product images:', { productId, images });
-    
-    // In a future implementation, this would:
-    // 1. Delete existing product images
-    // 2. Insert new product images
-    // 3. Update sort orders
+    // Filter out the main design image (sortOrder 1) and save the rest as additional_images
+    const additionalImages = images
+      .filter(img => img.sortOrder > 1)
+      .map(img => ({
+        url: img.url,
+        altText: img.altText,
+        sortOrder: img.sortOrder
+      }));
+
+    const { error } = await supabase
+      .from('products')
+      .update({
+        additional_images: additionalImages
+      })
+      .eq('id', productId);
+
+    if (error) throw error;
+
+    console.log('Successfully saved product images:', { productId, imageCount: additionalImages.length });
   } catch (error) {
     console.error('Error saving product images:', error);
     throw error;
