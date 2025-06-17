@@ -14,15 +14,38 @@ interface Collection {
   slug: string;
 }
 
+interface Product {
+  id: string;
+  title: string;
+  slug: string;
+  price: number;
+  creatorName: string;
+  creatorAge: string;
+  creatorState: string;
+  imageUrl?: string;
+  collectionId?: string;
+  design?: {
+    file_url: string;
+  };
+  profiles?: {
+    first_name: string;
+    last_name: string;
+    age_bracket: string;
+  };
+}
+
 const Store = () => {
   const [selectedAge, setSelectedAge] = useState<string | undefined>();
   const [selectedState, setSelectedState] = useState<string | undefined>();
   const [selectedCollection, setSelectedCollection] = useState<string | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCollections();
+    fetchProducts();
   }, []);
 
   const fetchCollections = async () => {
@@ -40,55 +63,57 @@ const Store = () => {
     }
   };
 
-  // Mock data for demonstration - in real app this would come from your products table
-  const mockProducts = [
-    {
-      id: '1',
-      title: 'Rainbow Dragon',
-      slug: 'rainbow-dragon',
-      price: 24.99,
-      creatorName: 'Emma Rodriguez',
-      creatorAge: '8-10',
-      creatorState: 'CA',
-      imageUrl: undefined,
-      collectionId: collections.find(c => c.slug === 'fantasy')?.id
-    },
-    {
-      id: '2',
-      title: 'Space Adventure',
-      slug: 'space-adventure',
-      price: 24.99,
-      creatorName: 'Lucas Thompson',
-      creatorAge: '11-13',
-      creatorState: 'NY',
-      imageUrl: undefined,
-      collectionId: collections.find(c => c.slug === 'kids-art')?.id
-    },
-    {
-      id: '3',
-      title: 'Flower Power',
-      slug: 'flower-power',
-      price: 24.99,
-      creatorName: 'Sofia Chen',
-      creatorAge: '4-7',
-      creatorState: 'TX',
-      imageUrl: undefined,
-      collectionId: collections.find(c => c.slug === 'seasonal')?.id
-    },
-    {
-      id: '4',
-      title: 'Superhero Cat',
-      slug: 'superhero-cat',
-      price: 24.99,
-      creatorName: 'Max Johnson',
-      creatorAge: '14-17',
-      creatorState: 'FL',
-      imageUrl: undefined,
-      collectionId: collections.find(c => c.slug === 'animals')?.id
-    }
-  ];
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          title,
+          price,
+          design_id,
+          designs!inner (
+            id,
+            file_url,
+            collection_id,
+            user_id,
+            profiles!inner (
+              first_name,
+              last_name,
+              age_bracket
+            )
+          )
+        `)
+        .eq('status', 'active')
+        .eq('designs.status', 'published');
 
-  const filteredProducts = mockProducts.filter(product => {
+      if (error) throw error;
+
+      const formattedProducts: Product[] = (data || []).map((product: any) => ({
+        id: product.id,
+        title: product.title,
+        slug: product.title.toLowerCase().replace(/\s+/g, '-'),
+        price: Number(product.price),
+        creatorName: `${product.designs.profiles.first_name || ''} ${product.designs.profiles.last_name || ''}`.trim(),
+        creatorAge: product.designs.profiles.age_bracket || 'Unknown',
+        creatorState: 'Unknown', // We'll need to add state to profiles table later
+        imageUrl: product.designs.file_url,
+        collectionId: product.designs.collection_id,
+        design: {
+          file_url: product.designs.file_url
+        }
+      }));
+
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(product => {
     const matchesAge = !selectedAge || product.creatorAge === selectedAge;
     const matchesState = !selectedState || product.creatorState === selectedState;
     const matchesCollection = !selectedCollection || product.collectionId === selectedCollection;
@@ -97,6 +122,23 @@ const Store = () => {
       product.creatorName.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesAge && matchesState && matchesCollection && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16">
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ry-yellow mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading products...</p>
+            </div>
+          </main>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ry-white">
@@ -184,7 +226,7 @@ const Store = () => {
           </div>
 
           {/* Empty State */}
-          {filteredProducts.length === 0 && (
+          {filteredProducts.length === 0 && !loading && (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-xl font-semibold text-ry-black mb-2">No designs found</h3>
