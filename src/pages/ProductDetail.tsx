@@ -60,7 +60,7 @@ const ProductDetail = () => {
             file_url,
             title,
             user_id,
-            profiles!user_id (
+            profiles(
               first_name,
               last_name,
               age_bracket
