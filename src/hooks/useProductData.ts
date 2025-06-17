@@ -11,17 +11,23 @@ export const useProductData = () => {
   const { toast } = useToast();
 
   const fetchData = async () => {
-    console.log('useProductData: Starting data fetch...');
+    console.log('useProductData: Starting FRESH data fetch...');
     setLoading(true);
     
     try {
+      // Clear existing data first to ensure fresh fetch
+      setAvailableDesigns([]);
+      setProducts([]);
+      
       const [designs, productsData] = await Promise.all([
         fetchDesignsWithProfiles(),
         fetchProductsWithDesigns()
       ]);
 
-      console.log('useProductData: Fetched designs:', designs);
-      console.log('useProductData: Fetched products:', productsData);
+      console.log('useProductData: Fresh fetched designs count:', designs.length);
+      console.log('useProductData: Fresh fetched products count:', productsData.length);
+      console.log('useProductData: Fresh design IDs:', designs.map(d => d.id));
+      console.log('useProductData: Fresh product design IDs:', productsData.map(p => p.design_id));
 
       setAvailableDesigns(designs);
       setProducts(productsData);

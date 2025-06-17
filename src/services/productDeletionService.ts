@@ -130,7 +130,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       // Don't throw here, continue with deletion
     }
 
-    // Delete the product record
+    // Delete the product record FIRST
     console.log('Deleting product record...');
     const { error: productError } = await supabase
       .from('products')

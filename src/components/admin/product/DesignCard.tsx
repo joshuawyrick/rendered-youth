@@ -54,27 +54,31 @@ const DesignCard: React.FC<DesignCardProps> = ({
     setDeleting(true);
     
     try {
+      // Delete the entire product and design
       await deleteEntireProduct(existingProductId);
-      console.log('Product AND design deleted successfully, calling onProductDeleted...');
+      console.log('Product AND design deleted successfully');
       
       toast({
-        title: "Product Deleted",
+        title: "Deleted Forever",
         description: "Product, design, and all associated data have been permanently deleted.",
       });
       
-      // Close dialog first
+      // Close dialog immediately
       setDeleteDialogOpen(false);
       
-      // Then trigger the complete refresh
+      // Force complete data refresh - this is critical
       if (onProductDeleted) {
-        console.log('Triggering data refresh after complete deletion...');
-        onProductDeleted();
+        console.log('Triggering complete data refresh after permanent deletion...');
+        // Add a small delay to ensure database operations are complete
+        setTimeout(() => {
+          onProductDeleted();
+        }, 100);
       }
     } catch (error) {
-      console.error('Error deleting product completely:', error);
+      console.error('Error deleting product permanently:', error);
       toast({
         title: "Error",
-        description: "Failed to delete product completely. Please try again.",
+        description: "Failed to delete product permanently. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -83,7 +87,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
   };
 
   const handleDeleteClick = () => {
-    console.log('Delete button clicked:', { 
+    console.log('Delete Forever button clicked:', { 
       hasExistingProduct, 
       existingProductId, 
       existingProductTitle 
