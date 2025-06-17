@@ -76,16 +76,21 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       id: product.id,
       title: product.title,
       mainDesignUrl: product.designs?.file_url?.substring(0, 50) + '...',
-      additionalImagesCount: product.additional_images?.length || 0
+      additionalImagesCount: Array.isArray(product.additional_images) ? product.additional_images.length : 0
     });
 
     // Delete additional images from storage
     if (product.additional_images && Array.isArray(product.additional_images)) {
       console.log('Deleting additional images from storage...');
       for (const img of product.additional_images) {
-        const imageUrl = typeof img === 'string' ? img : img.url;
-        if (imageUrl) {
-          await deleteStorageFile(imageUrl);
+        // Type guard to handle different possible structures
+        if (typeof img === 'string') {
+          await deleteStorageFile(img);
+        } else if (img && typeof img === 'object' && 'url' in img) {
+          const imageUrl = (img as { url: string }).url;
+          if (imageUrl) {
+            await deleteStorageFile(imageUrl);
+          }
         }
       }
     }

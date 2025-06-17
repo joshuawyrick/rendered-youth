@@ -44,10 +44,10 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <RYButton 
-              variant="destructive" 
+              variant="primary" 
               onClick={onConfirm}
               disabled={loading}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               {loading ? 'Deleting...' : 'Delete Product'}
             </RYButton>

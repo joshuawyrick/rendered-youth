@@ -30,6 +30,13 @@ const ProductManagementTab: React.FC<ProductManagementTabProps> = ({
     onProductUpdated();
   };
 
+  const handleStatusToggle = (productId: string, newStatus: string) => {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      onToggleProductStatus({ ...product, status: newStatus });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -51,8 +58,9 @@ const ProductManagementTab: React.FC<ProductManagementTabProps> = ({
             <ProductCard
               key={product.id}
               product={product}
-              onToggleStatus={onToggleProductStatus}
+              onStatusToggle={handleStatusToggle}
               onEdit={handleEditProduct}
+              onProductDeleted={onProductUpdated}
             />
           ))}
         </div>
