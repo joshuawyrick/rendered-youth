@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import type { Design, Product } from '@/components/admin/product/types';
 
@@ -72,65 +73,9 @@ export const fetchDesignsWithProfiles = async (): Promise<Design[]> => {
 };
 
 export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
-  console.log('Fetching products with designs...');
-  
-  const { data: products, error } = await supabase
-    .from('products')
-    .select(`
-      id,
-      title,
-      description,
-      price,
-      base_price,
-      status,
-      creator_commission_rate,
-      created_at,
-      design_id,
-      collection_id,
-      assigned_user_id,
-      collections (
-        name
-      ),
-      profiles!assigned_user_id (
-        first_name,
-        last_name
-      ),
-      designs (
-        title,
-        file_url,
-        profiles (
-          first_name,
-          last_name
-        )
-      )
-    `)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
-
-  const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name');
-
-  if (profilesError) {
-    console.error('Error fetching product profiles:', profilesError);
-    throw profilesError;
-  }
-
-  console.log('Product profiles:', profiles);
-
-  const productsWithFormattedData = products?.map(product => ({
-    ...product,
-    collection_name: product.collections?.name || '',
-    assigned_user_name: product.profiles ? 
-      `${product.profiles.first_name} ${product.profiles.last_name}`.trim() : ''
-  })) || [];
-
-  console.log('Final products with designs:', productsWithFormattedData);
-  return productsWithFormattedData;
+  // Use the working implementation from productQueryService
+  const { fetchProductsWithDesigns: queryServiceFetch } = await import('./productQueryService');
+  return queryServiceFetch();
 };
 
 export const createProductFromDesign = async (design: Design) => {
