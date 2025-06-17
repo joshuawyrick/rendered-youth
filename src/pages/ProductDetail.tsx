@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,7 +60,7 @@ const ProductDetail = () => {
             file_url,
             title,
             user_id,
-            profiles!designs_user_id_fkey (
+            profiles!user_id (
               first_name,
               last_name,
               age_bracket
