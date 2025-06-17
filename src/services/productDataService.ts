@@ -21,8 +21,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       design_id,
       collection_id,
       assigned_user_id,
-      collections(name, slug),
-      profiles!assigned_user_id(first_name, last_name)
+      collections(name, slug)
     `)
     .order('created_at', { ascending: false });
 
@@ -66,6 +65,25 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
 
   console.log('Product profiles:', productProfilesData);
 
+  // Get assigned user profiles separately
+  const assignedUserIds = productsData
+    .map(product => product.assigned_user_id)
+    .filter(Boolean);
+  
+  let assignedProfilesData = [];
+  if (assignedUserIds.length > 0) {
+    const { data: assignedProfiles, error: assignedProfilesError } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name')
+      .in('id', assignedUserIds);
+
+    if (assignedProfilesError) {
+      console.error('Assigned profiles query error:', assignedProfilesError);
+    } else {
+      assignedProfilesData = assignedProfiles || [];
+    }
+  }
+
   // Combine products with design and profile data
   const result = productsData
     .map(product => {
@@ -76,6 +94,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
       }
       
       const profile = productProfilesData?.find(p => p.id === design.user_id);
+      const assignedProfile = assignedProfilesData.find(p => p.id === product.assigned_user_id);
       
       // If no profile found, create a default one but still include the product
       if (!profile) {
@@ -93,7 +112,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
           collection_id: product.collection_id,
           assigned_user_id: product.assigned_user_id,
           collection_name: product.collections?.name,
-          assigned_user_name: product.profiles ? `${product.profiles.first_name} ${product.profiles.last_name}` : null,
+          assigned_user_name: assignedProfile ? `${assignedProfile.first_name} ${assignedProfile.last_name}` : null,
           designs: {
             title: design.title,
             file_url: design.file_url,
@@ -115,7 +134,7 @@ export const fetchProductsWithDesigns = async (): Promise<Product[]> => {
         collection_id: product.collection_id,
         assigned_user_id: product.assigned_user_id,
         collection_name: product.collections?.name,
-        assigned_user_name: product.profiles ? `${product.profiles.first_name} ${product.profiles.last_name}` : null,
+        assigned_user_name: assignedProfile ? `${assignedProfile.first_name} ${assignedProfile.last_name}` : null,
         designs: {
           title: design.title,
           file_url: design.file_url,
