@@ -13,7 +13,8 @@ const ProductManager = () => {
     loading,
     creating,
     createProduct,
-    toggleProductStatus
+    toggleProductStatus,
+    fetchData
   } = useProductManager();
 
   if (loading) {
@@ -70,6 +71,7 @@ const ProductManager = () => {
         <ProductManagementTab
           products={products}
           onToggleProductStatus={toggleProductStatus}
+          onProductUpdated={fetchData}
         />
       )}
     </div>

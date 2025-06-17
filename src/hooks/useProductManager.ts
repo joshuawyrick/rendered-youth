@@ -23,6 +23,7 @@ export const useProductManager = () => {
     loading,
     creating,
     createProduct,
-    toggleProductStatus
+    toggleProductStatus,
+    fetchData
   };
 };
