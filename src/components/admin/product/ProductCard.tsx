@@ -32,20 +32,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const handleDeleteProduct = async () => {
+    console.log('🗑️ Starting delete process for product:', product.id);
     setDeleting(true);
+    
     try {
       await deleteEntireProduct(product.id);
+      
+      console.log('✅ Delete completed successfully');
       toast({
-        title: "Product Deleted",
+        title: "Deleted Successfully",
         description: "Product and all associated data have been permanently deleted.",
       });
-      onProductDeleted();
+      
       setDeleteDialogOpen(false);
+      onProductDeleted();
+      
     } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error('❌ Delete operation failed:', error);
+      
+      let errorMessage = "Failed to delete product. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to delete product. Please try again.",
+        title: "Deletion Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

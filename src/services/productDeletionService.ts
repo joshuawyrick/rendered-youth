@@ -44,14 +44,16 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 
 export const deleteEntireProduct = async (productId: string): Promise<void> => {
   console.log('=== DELETE ENTIRE PRODUCT START ===');
-  console.log('Deleting product:', productId);
+  console.log('Product ID to delete:', productId);
 
   if (!productId) {
-    throw new Error('Product ID is required for deletion');
+    const error = new Error('Product ID is required for deletion');
+    console.error('❌ ERROR:', error.message);
+    throw error;
   }
 
   try {
-    // First, get all the product data including images and design
+    // Step 1: Get all the product data including images and design
     console.log('Step 1: Fetching product data...');
     const { data: product, error: fetchError } = await supabase
       .from('products')
@@ -70,21 +72,21 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       .single();
 
     if (fetchError) {
-      console.error('Error fetching product for deletion:', fetchError);
+      console.error('❌ Error fetching product for deletion:', fetchError);
       throw new Error(`Failed to fetch product: ${fetchError.message}`);
     }
 
     if (!product) {
-      throw new Error('Product not found');
+      const error = new Error('Product not found');
+      console.error('❌ ERROR:', error.message);
+      throw error;
     }
 
-    console.log('Product fetched successfully:', {
+    console.log('✅ Product fetched successfully:', {
       id: product.id,
       title: product.title,
       designId: product.design_id,
-      designTitle: product.designs?.title,
-      mainDesignUrl: product.designs?.file_url?.substring(0, 50) + '...',
-      additionalImagesCount: Array.isArray(product.additional_images) ? product.additional_images.length : 0
+      designTitle: product.designs?.title
     });
 
     // Step 2: Delete additional images from storage
@@ -100,106 +102,84 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
           }
         }
       }
+      console.log('✅ Additional images processed');
     }
 
     // Step 3: Delete main design image from storage
     if (product.designs?.file_url) {
       console.log('Step 3: Deleting main design image from storage...');
       await deleteStorageFile(product.designs.file_url);
+      console.log('✅ Main design image processed');
     }
 
-    // Step 4: Delete product variants first (due to foreign key constraints)
-    console.log('Step 4: Deleting product variants...');
+    // Step 4: Delete related records in dependency order
+    console.log('Step 4: Deleting related records...');
+    
+    // Delete product variants
     const { error: variantsError } = await supabase
       .from('product_variants')
       .delete()
       .eq('product_id', productId);
 
     if (variantsError) {
-      console.error('Error deleting product variants:', variantsError);
-      // Don't throw here, continue with deletion
+      console.error('⚠️ Error deleting product variants (continuing):', variantsError);
     } else {
-      console.log('Product variants deleted successfully');
+      console.log('✅ Product variants deleted');
     }
 
-    // Step 5: Delete printful products if they exist
-    console.log('Step 5: Deleting printful products...');
+    // Delete printful products
     const { error: printfulError } = await supabase
       .from('printful_products')
       .delete()
       .eq('product_id', productId);
 
     if (printfulError) {
-      console.error('Error deleting printful products:', printfulError);
-      // Don't throw here, continue with deletion
+      console.error('⚠️ Error deleting printful products (continuing):', printfulError);
     } else {
-      console.log('Printful products deleted successfully');
+      console.log('✅ Printful products deleted');
     }
 
-    // Step 6: Delete the product record
-    console.log('Step 6: Deleting product record...');
+    // Step 5: Delete the product record
+    console.log('Step 5: Deleting product record...');
     const { error: productError } = await supabase
       .from('products')
       .delete()
       .eq('id', productId);
 
     if (productError) {
-      console.error('Error deleting product:', productError);
+      console.error('❌ Error deleting product:', productError);
       throw new Error(`Failed to delete product: ${productError.message}`);
     }
-    console.log('Product record deleted successfully');
+    console.log('✅ Product record deleted');
 
-    // Step 7: CRITICAL - Delete the design record completely
+    // Step 6: Delete the design record
     if (product.design_id) {
-      console.log('Step 7: Deleting design record completely...');
-      console.log('Design ID to delete:', product.design_id);
+      console.log('Step 6: Deleting design record...');
       
-      // First check if design exists
-      const { data: designCheck, error: designCheckError } = await supabase
+      const { error: designError } = await supabase
         .from('designs')
-        .select('id, title')
-        .eq('id', product.design_id)
-        .single();
+        .delete()
+        .eq('id', product.design_id);
 
-      if (designCheckError) {
-        console.error('Error checking design existence:', designCheckError);
-      } else if (designCheck) {
-        console.log('Design found, proceeding with deletion:', designCheck);
-        
-        const { error: designError } = await supabase
-          .from('designs')
-          .delete()
-          .eq('id', product.design_id);
-
-        if (designError) {
-          console.error('Error deleting design:', designError);
-          throw new Error(`Failed to delete design: ${designError.message}`);
-        }
-        
-        // Verify design was actually deleted
-        const { data: verifyDeleted, error: verifyError } = await supabase
-          .from('designs')
-          .select('id')
-          .eq('id', product.design_id)
-          .maybeSingle();
-
-        if (verifyError) {
-          console.error('Error verifying design deletion:', verifyError);
-        } else if (verifyDeleted) {
-          console.error('CRITICAL: Design was NOT deleted!', verifyDeleted);
-          throw new Error('Design deletion failed - record still exists');
-        } else {
-          console.log('✅ Design successfully deleted and verified');
-        }
-      } else {
-        console.log('Design not found, may have been already deleted');
+      if (designError) {
+        console.error('❌ Error deleting design:', designError);
+        throw new Error(`Failed to delete design: ${designError.message}`);
       }
+      
+      console.log('✅ Design record deleted');
     }
 
-    console.log('✅ Successfully deleted entire product and all associated data INCLUDING the design');
+    console.log('🎉 DELETION COMPLETED SUCCESSFULLY');
     console.log('=== DELETE ENTIRE PRODUCT END ===');
+
   } catch (error) {
-    console.error('❌ Error in deleteEntireProduct:', error);
-    throw error;
+    console.error('❌ CRITICAL ERROR in deleteEntireProduct:', error);
+    
+    // Re-throw with more context
+    if (error instanceof Error) {
+      throw new Error(`Product deletion failed: ${error.message}`);
+    } else {
+      throw new Error('Product deletion failed: Unknown error occurred');
+    }
   }
 };

@@ -41,7 +41,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
 
   const handleDeleteProduct = async () => {
     if (!existingProductId) {
-      console.error('No product ID provided for deletion');
+      console.error('❌ No product ID provided for deletion');
       toast({
         title: "Error",
         description: "No product ID found for deletion.",
@@ -50,36 +50,40 @@ const DesignCard: React.FC<DesignCardProps> = ({
       return;
     }
     
-    console.log('Starting COMPLETE PERMANENT delete process for product:', existingProductId);
+    console.log('🗑️ Starting delete process for product:', existingProductId);
     setDeleting(true);
     
     try {
-      // Delete the entire product and design
       await deleteEntireProduct(existingProductId);
-      console.log('✅ Product AND design deleted permanently');
       
+      console.log('✅ Delete completed successfully');
       toast({
-        title: "Deleted Forever",
-        description: "Product, design, and all associated data have been permanently deleted.",
+        title: "Deleted Successfully",
+        description: "Product and design have been permanently deleted.",
       });
       
       // Close dialog immediately
       setDeleteDialogOpen(false);
       
-      // Force complete data refresh with longer delay for database consistency
+      // Trigger data refresh
       if (onProductDeleted) {
-        console.log('Triggering complete data refresh after permanent deletion...');
-        // Longer delay to ensure database operations are fully committed
+        console.log('🔄 Triggering data refresh...');
         setTimeout(() => {
-          console.log('Executing data refresh now...');
           onProductDeleted();
-        }, 500);
+        }, 100);
       }
+      
     } catch (error) {
-      console.error('❌ Error deleting product permanently:', error);
+      console.error('❌ Delete operation failed:', error);
+      
+      let errorMessage = "Failed to delete product permanently. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to delete product permanently. Please try again.",
+        title: "Deletion Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -88,7 +92,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
   };
 
   const handleDeleteClick = () => {
-    console.log('Delete Forever button clicked:', { 
+    console.log('🗑️ Delete Forever button clicked:', { 
       hasExistingProduct, 
       existingProductId, 
       existingProductTitle 
