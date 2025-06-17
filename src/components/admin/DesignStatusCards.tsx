@@ -1,7 +1,7 @@
-
 import React, { forwardRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,9 @@ interface DesignStatusCardsProps {
 
 const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
   ({ onDesignClick }, ref) => {
-    const { data: designs = [], isLoading } = useQuery({
+    const { toast } = useToast();
+    
+    const { data: designs = [], isLoading, refetch } = useQuery({
       queryKey: ['admin-designs-by-status'],
       queryFn: async () => {
         const { data, error } = await supabase
@@ -44,6 +46,35 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
         return data || [];
       },
     });
+
+    const publishToStore = async (design: any) => {
+      try {
+        const { error } = await supabase
+          .from('designs')
+          .update({ status: 'published' })
+          .eq('id', design.id);
+
+        if (error) {
+          console.error('Error publishing design:', error);
+          throw error;
+        }
+
+        toast({
+          title: "Success",
+          description: `"${design.title}" has been published to the store!`,
+        });
+
+        // Refresh the data to show updated status
+        refetch();
+      } catch (error) {
+        console.error('Error publishing design:', error);
+        toast({
+          title: "Error",
+          description: "Failed to publish design to store",
+          variant: "destructive",
+        });
+      }
+    };
 
     const getStatusInfo = (status: string, mockupsCount: number, selectionsCount: number) => {
       switch (status) {
@@ -161,6 +192,7 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
                           <RYButton
                             variant="primary"
                             size="sm"
+                            onClick={() => publishToStore(design)}
                             className="flex-1"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
