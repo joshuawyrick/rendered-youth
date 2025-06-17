@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -61,12 +60,9 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const removeImage = (imageUrl: string) => {
-    console.log('=== IMAGE REMOVAL DEBUG ===');
+    console.log('=== IMAGE REMOVAL DEBUG START ===');
     console.log('Attempting to remove image with URL:', imageUrl.substring(0, 50) + '...');
-    console.log('Current images before removal:');
-    images.forEach((img, idx) => {
-      console.log(`  [${idx}] Sort: ${img.sortOrder}, URL: ${img.url.substring(0, 50)}...`);
-    });
+    console.log('Current images array length:', images.length);
     
     // Find the image to remove
     const imageToRemove = images.find(img => img.url === imageUrl);
@@ -80,37 +76,77 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       return;
     }
     
-    console.log('Found image to remove:', {
-      sortOrder: imageToRemove.sortOrder,
-      url: imageToRemove.url.substring(0, 50) + '...'
-    });
+    console.log('Found image to remove with sortOrder:', imageToRemove.sortOrder);
     
-    // Remove the image by URL (exact match)
-    const updatedImages = images.filter(img => img.url !== imageUrl);
+    // Check if this is the main image (sortOrder 1)
+    const isMainImage = imageToRemove.sortOrder === 1;
+    console.log('Is main image:', isMainImage);
     
-    console.log('Images after filtering:', updatedImages.length);
+    if (isMainImage) {
+      // For main image, we need special handling
+      console.log('Cannot delete main design image - this comes from the design itself');
+      toast({
+        title: "Cannot Delete",
+        description: "The main image cannot be deleted as it's the core design. You can only delete additional images.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Reorder the remaining images
-    const reorderedImages = updatedImages.map((img, i) => ({
-      ...img,
-      sortOrder: i + 1
-    }));
+    // Remove the image by filtering out the exact URL match
+    const filteredImages = images.filter(img => img.url !== imageUrl);
+    console.log('Images after filtering:', filteredImages.length);
     
-    console.log('Final reordered images:');
-    reorderedImages.forEach((img, idx) => {
-      console.log(`  [${idx}] Sort: ${img.sortOrder}, URL: ${img.url.substring(0, 50)}...`);
-    });
-    console.log('=== END DEBUG ===');
+    // Reorder the remaining images, preserving the main image at position 1
+    const reorderedImages = filteredImages.map((img, index) => {
+      if (img.sortOrder === 1) {
+        // Keep main image at sortOrder 1
+        return img;
+      } else {
+        // Reorder additional images starting from 2
+        const mainImageExists = filteredImages.some(i => i.sortOrder === 1);
+        const newSortOrder = mainImageExists ? index + 1 : index + 1;
+        return {
+          ...img,
+          sortOrder: newSortOrder
+        };
+      }
+    }).sort((a, b) => a.sortOrder - b.sortOrder);
+    
+    console.log('Final reordered images:', reorderedImages.map(img => ({ 
+      sortOrder: img.sortOrder, 
+      url: img.url.substring(0, 30) + '...' 
+    })));
+    console.log('=== IMAGE REMOVAL DEBUG END ===');
     
     onImagesUpdate(reorderedImages);
     
     toast({
       title: "Image Removed",
-      description: "Image has been removed from the product",
+      description: "Additional image has been removed from the product",
     });
   };
 
   const updateImageAltText = (imageUrl: string, altText: string) => {
+    console.log('Updating alt text for:', imageUrl.substring(0, 30) + '...', 'to:', altText);
+    
+    const imageToUpdate = images.find(img => img.url === imageUrl);
+    if (!imageToUpdate) {
+      console.error('Image not found for alt text update');
+      return;
+    }
+    
+    // Check if this is the main image
+    if (imageToUpdate.sortOrder === 1) {
+      console.log('Cannot update alt text for main design image');
+      toast({
+        title: "Cannot Edit",
+        description: "The main image's text cannot be edited as it's tied to the design.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const updatedImages = images.map(img => 
       img.url === imageUrl ? { ...img, altText } : img
     );
