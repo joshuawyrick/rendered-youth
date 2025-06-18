@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +42,7 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
             design_mockups(id),
             design_selections(id)
           `)
+          .neq('status', 'consumed') // Filter out consumed designs
           .order('created_at', { ascending: false });
 
         if (error) {
