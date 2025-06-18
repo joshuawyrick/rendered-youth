@@ -17,8 +17,7 @@ export const useDesignStatusData = () => {
           file_url,
           user_id,
           design_mockups(id),
-          design_selections(id),
-          profiles:user_id(first_name, last_name)
+          design_selections(id)
         `)
         .neq('status', 'consumed') // Filter out consumed designs
         .order('created_at', { ascending: false });
@@ -28,21 +27,37 @@ export const useDesignStatusData = () => {
         return [];
       }
 
+      // Fetch profile data separately for each unique user_id
+      const userIds = [...new Set((data || []).map(design => design.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+
+      // Create a map of user profiles for quick lookup
+      const profilesMap = new Map();
+      (profilesData || []).forEach(profile => {
+        profilesMap.set(profile.id, profile);
+      });
+
       // Transform the data to match our Design interface
-      const transformedData: Design[] = (data || []).map(item => ({
-        id: item.id,
-        title: item.title,
-        status: item.status,
-        created_at: item.created_at,
-        file_url: item.file_url,
-        user_id: item.user_id,
-        design_mockups: item.design_mockups || [],
-        design_selections: item.design_selections || [],
-        profiles: {
-          first_name: item.profiles?.first_name || null,
-          last_name: item.profiles?.last_name || null
-        }
-      }));
+      const transformedData: Design[] = (data || []).map(item => {
+        const profile = profilesMap.get(item.user_id);
+        return {
+          id: item.id,
+          title: item.title,
+          status: item.status,
+          created_at: item.created_at,
+          file_url: item.file_url,
+          user_id: item.user_id,
+          design_mockups: item.design_mockups || [],
+          design_selections: item.design_selections || [],
+          profiles: {
+            first_name: profile?.first_name || null,
+            last_name: profile?.last_name || null
+          }
+        };
+      });
 
       return transformedData;
     },
