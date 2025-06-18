@@ -11,7 +11,7 @@ export interface Design {
   profiles?: {
     first_name: string | null;
     last_name: string | null;
-  };
+  } | null;
 }
 
 export interface StatusInfo {
