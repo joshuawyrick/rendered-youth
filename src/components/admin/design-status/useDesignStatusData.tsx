@@ -17,7 +17,8 @@ export const useDesignStatusData = () => {
           file_url,
           user_id,
           design_mockups(id),
-          design_selections(id)
+          design_selections(id),
+          profiles(first_name, last_name)
         `)
         .neq('status', 'consumed') // Filter out consumed designs
         .order('created_at', { ascending: false });

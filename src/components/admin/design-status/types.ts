@@ -8,6 +8,10 @@ export interface Design {
   user_id: string;
   design_mockups: { id: string }[];
   design_selections: { id: string }[];
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+  };
 }
 
 export interface StatusInfo {
