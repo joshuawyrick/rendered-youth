@@ -7,6 +7,7 @@ import { getStatusInfo } from './design-status/statusConfig';
 import StatusSection from './design-status/StatusSection';
 import LoadingState from './design-status/LoadingState';
 import type { Design } from './design-status/types';
+import type { Design as ProductDesign } from './product/types';
 
 interface DesignStatusCardsProps {
   onDesignClick: (design: any) => void;
@@ -16,12 +17,24 @@ const DesignStatusCards = forwardRef<HTMLDivElement, DesignStatusCardsProps>(
   ({ onDesignClick }, ref) => {
     const { toast } = useToast();
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
-    const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
+    const [selectedDesign, setSelectedDesign] = useState<ProductDesign | null>(null);
     
     const { data: designs = [], isLoading, refetch } = useDesignStatusData();
 
     const handlePublishClick = (design: Design) => {
-      setSelectedDesign(design);
+      // Convert design-status Design to product Design format
+      const productDesign: ProductDesign = {
+        id: design.id,
+        title: design.title,
+        file_url: design.file_url,
+        status: design.status,
+        user_id: design.user_id,
+        profiles: {
+          first_name: design.profiles?.first_name || '',
+          last_name: design.profiles?.last_name || ''
+        }
+      };
+      setSelectedDesign(productDesign);
       setPublishDialogOpen(true);
     };
 
