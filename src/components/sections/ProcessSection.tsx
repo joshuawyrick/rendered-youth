@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 
@@ -8,7 +7,7 @@ const ProcessSection = () => {
       number: 1,
       icon: "✏️",
       title: "Draw & Upload",
-      description: "Kids grab their favorite black marker and create amazing artwork, then upload it to our platform."
+      description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform."
     },
     {
       number: 2,

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
@@ -10,8 +9,8 @@ const HowItWorks = () => {
       number: 1,
       icon: "✏️",
       title: "Draw & Upload",
-      description: "Kids grab their favorite black marker and create amazing artwork, then upload it to our platform.",
-      details: "Children can upload JPG, PNG, or SVG files up to 25MB. We accept all types of drawings made with black markers or digital equivalents."
+      description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform.",
+      details: "Children can upload JPG, PNG, or SVG files up to 25MB. We accept all types of drawings made with black sharpies or digital equivalents."
     },
     {
       number: 2,
