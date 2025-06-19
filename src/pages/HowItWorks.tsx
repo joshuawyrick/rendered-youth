@@ -1,3 +1,4 @@
+
 import React from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
@@ -22,8 +23,8 @@ const HowItWorks = () => {
     {
       number: 3,
       icon: "👕",
-      title: "Shop & Wear",
-      description: "Browse incredible designs from young artists and order high-quality T-shirts.",
+      title: "Live on Our Site",
+      description: "We put your rendered design live on our website for people to purchase as high-quality T-shirts.",
       details: "Published designs become available in our store with sizes from S to XXL. We use premium quality materials and printing techniques."
     },
     {

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 
@@ -18,8 +19,8 @@ const ProcessSection = () => {
     {
       number: 3,
       icon: "👕",
-      title: "Shop & Wear",
-      description: "Browse incredible designs from young artists and order high-quality T-shirts."
+      title: "Live on Our Site",
+      description: "We put your rendered design live on our website for people to purchase as high-quality T-shirts."
     },
     {
       number: 4,
