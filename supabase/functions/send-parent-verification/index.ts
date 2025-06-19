@@ -82,11 +82,11 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ parent_email: parentEmail })
       .eq('session_token', sessionToken);
 
-    // Send verification email
+    // Send verification email using the default Resend domain
     const verificationUrl = `${Deno.env.get("SUPABASE_URL")?.replace('supabase.co', 'lovable.app')}/parent-verify?token=${verificationToken}`;
     
     const emailResponse = await resend.emails.send({
-      from: "Rendered Youth <noreply@renderedyouth.com>",
+      from: "Rendered Youth <onboarding@resend.dev>",
       to: [parentEmail],
       subject: "Verify Your Child's Account - Rendered Youth",
       html: `
