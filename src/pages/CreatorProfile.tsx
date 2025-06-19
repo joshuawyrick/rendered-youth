@@ -1,22 +1,75 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { StateSelect } from '@/components/ui/state-select';
-import { Upload, User, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const CreatorProfile = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    displayName: 'Emma Rodriguez',
-    username: 'emma-r',
-    ageBracket: '8-10',
-    state: 'CA',
-    bio: 'I love drawing dragons and magical creatures!',
+    displayName: '',
+    username: '',
+    ageBracket: '',
+    state: '',
+    bio: '',
     instagram: '',
-    tiktok: ''
+    tiktok: '',
+    facebook: '',
+    profileImageUrl: ''
   });
+
+  // Load existing profile data
+  useEffect(() => {
+    if (user && !authLoading) {
+      loadProfileData();
+    }
+  }, [user, authLoading]);
+
+  const loadProfileData = async () => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (profile) {
+        setFormData({
+          displayName: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+          username: profile.username || '',
+          ageBracket: profile.age_bracket || '',
+          state: profile.state || '',
+          bio: profile.bio || '',
+          instagram: profile.instagram_handle || '',
+          tiktok: profile.tiktok_handle || '',
+          facebook: profile.facebook_handle || '',
+          profileImageUrl: profile.profile_image_url || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const ageBrackets = [
     { value: '4-7', label: 'Ages 4-7' },
@@ -25,12 +78,62 @@ const CreatorProfile = () => {
     { value: '14-17', label: 'Ages 14-17' }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Saving profile:', formData);
-    // Here would be the actual save logic
-    alert('Profile updated successfully!');
+    
+    if (!user) return;
+
+    try {
+      const nameParts = formData.displayName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          first_name: firstName,
+          last_name: lastName,
+          username: formData.username || null,
+          age_bracket: formData.ageBracket || null,
+          state: formData.state || null,
+          bio: formData.bio || null,
+          instagram_handle: formData.instagram || null,
+          tiktok_handle: formData.tiktok || null,
+          facebook_handle: formData.facebook || null,
+          profile_image_url: formData.profileImageUrl || null
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!",
+      });
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save profile",
+        variant: "destructive",
+      });
+    }
   };
+
+  const handleImageUpdate = (url: string) => {
+    setFormData(prev => ({ ...prev, profileImageUrl: url }));
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16 flex items-center justify-center min-h-screen">
+          <div className="text-2xl text-ry-black">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ry-white">
@@ -54,20 +157,10 @@ const CreatorProfile = () => {
               <label className="block text-lg font-semibold text-ry-black mb-4">
                 Profile Picture
               </label>
-              <div className="flex items-center space-x-6">
-                <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-ry-yellow">
-                  <User className="h-12 w-12 text-gray-400" />
-                </div>
-                <div>
-                  <RYButton type="button" variant="secondary" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Photo
-                  </RYButton>
-                  <p className="text-sm text-gray-600 mt-2">
-                    JPG or PNG, max 5MB
-                  </p>
-                </div>
-              </div>
+              <ProfileImageUpload 
+                currentImageUrl={formData.profileImageUrl}
+                onImageUpdate={handleImageUpdate}
+              />
             </RYCard>
 
             {/* Basic Info */}
@@ -90,14 +183,14 @@ const CreatorProfile = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-ry-black mb-2">
-                    Username *
+                    Username
                   </label>
                   <input
                     type="text"
                     value={formData.username}
                     onChange={(e) => setFormData({...formData, username: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
-                    required
+                    placeholder="Optional username for your public profile"
                   />
                 </div>
 
@@ -111,6 +204,7 @@ const CreatorProfile = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
                     required
                   >
+                    <option value="">Select age bracket</option>
                     {ageBrackets.map(bracket => (
                       <option key={bracket.value} value={bracket.value}>
                         {bracket.label}
@@ -183,6 +277,24 @@ const CreatorProfile = () => {
                       type="text"
                       value={formData.tiktok}
                       onChange={(e) => setFormData({...formData, tiktok: e.target.value})}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+                      placeholder="username"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-ry-black mb-2">
+                    Facebook
+                  </label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                      facebook.com/
+                    </span>
+                    <input
+                      type="text"
+                      value={formData.facebook}
+                      onChange={(e) => setFormData({...formData, facebook: e.target.value})}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
                       placeholder="username"
                     />
