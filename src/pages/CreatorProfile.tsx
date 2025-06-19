@@ -101,7 +101,8 @@ const CreatorProfile = () => {
           instagram_handle: formData.instagram || null,
           tiktok_handle: formData.tiktok || null,
           facebook_handle: formData.facebook || null,
-          profile_image_url: formData.profileImageUrl || null
+          profile_image_url: formData.profileImageUrl || null,
+          updated_at: new Date().toISOString()
         });
 
       if (error) throw error;

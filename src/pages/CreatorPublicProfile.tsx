@@ -54,12 +54,26 @@ const CreatorPublicProfile = () => {
       // Load creator profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, first_name, last_name, age_bracket, bio, profile_image_url, instagram_handle, tiktok_handle, facebook_handle')
         .eq('id', creatorId)
         .single();
 
       if (profileError) throw profileError;
-      setCreator(profile);
+      
+      // Transform the data to match our interface
+      const creatorData: CreatorData = {
+        id: profile.id,
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        age_bracket: profile.age_bracket || '',
+        bio: profile.bio || '',
+        profile_image_url: profile.profile_image_url,
+        instagram_handle: profile.instagram_handle,
+        tiktok_handle: profile.tiktok_handle,
+        facebook_handle: profile.facebook_handle
+      };
+      
+      setCreator(creatorData);
 
       // Load creator's designs and products
       const { data: designsData, error: designsError } = await supabase

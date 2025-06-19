@@ -42,7 +42,10 @@ export const useProfileImageUpload = () => {
       // Update user profile with new image URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ profile_image_url: publicUrl })
+        .update({ 
+          profile_image_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
