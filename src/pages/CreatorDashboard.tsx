@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
@@ -83,7 +82,7 @@ const CreatorDashboard = () => {
           <RYButton
             variant="primary"
             size="sm"
-            onClick={() => window.location.href = `/design-review?design=${design.id}`}
+            onClick={() => window.location.href = `/admin/review?design=${design.id}`}
           >
             <Star className="h-4 w-4 mr-2" />
             Review & Select
