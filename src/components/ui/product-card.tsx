@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RYCard } from './ry-card';
+import { RYButton } from './ry-button';
 
 interface Product {
   id: string;
@@ -27,13 +28,19 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  showViewButton?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, showViewButton = false }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // Use product ID as the slug for reliable routing
+    // Navigate to product detail page using product ID
+    navigate(`/store/${product.id}`);
+  };
+
+  const handleViewClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
     navigate(`/store/${product.id}`);
   };
 
@@ -72,6 +79,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </span>
           )}
         </div>
+
+        {/* View Button for Featured Section */}
+        {showViewButton && (
+          <div className="mt-3">
+            <RYButton
+              variant="secondary"
+              size="sm"
+              className="w-full bg-ry-yellow hover:bg-ry-yellow/80 text-ry-black font-semibold"
+              onClick={handleViewClick}
+            >
+              View
+            </RYButton>
+          </div>
+        )}
       </div>
     </RYCard>
   );
