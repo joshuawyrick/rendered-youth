@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
@@ -16,15 +17,39 @@ const Auth = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { secureSignIn, secureSignUp, sanitizeInput, session } = useSecureAuth();
+  const { secureSignIn, secureSignUp, sanitizeInput, session, loading: authLoading } = useSecureAuth();
   const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   useEffect(() => {
     // Check if user is already logged in and redirect to home page
-    if (session) {
+    if (session && !authLoading) {
+      console.log('User already authenticated, redirecting...');
       window.location.href = '/';
     }
-  }, [session]);
+  }, [session, authLoading]);
+
+  // Show loading spinner while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ry-yellow mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render the form if user is already authenticated
+  if (session) {
+    return (
+      <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   const validateForm = (): boolean => {
     const errors: Record<string, string[]> = {};
@@ -91,6 +116,7 @@ const Auth = () => {
           description: "Please wait before trying again.",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
@@ -115,6 +141,7 @@ const Auth = () => {
             description: sanitizeErrorMessage(error),
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
 
@@ -128,8 +155,8 @@ const Auth = () => {
           description: "You've been signed in successfully.",
         });
         
-        // Redirect to home page after successful login
-        window.location.href = '/';
+        // Don't redirect manually - let the useEffect handle it
+        // The loading state will remain true until redirect happens
       } else {
         // Sign up
         await logSecurityEvent('auth_signup_attempt', {
@@ -157,6 +184,7 @@ const Auth = () => {
             description: sanitizeErrorMessage(error),
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
 
@@ -169,6 +197,8 @@ const Auth = () => {
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
+        
+        setLoading(false);
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -185,7 +215,7 @@ const Auth = () => {
         description: sanitizeErrorMessage(error),
         variant: "destructive",
       });
-    } finally {
+      
       setLoading(false);
     }
   };
@@ -277,6 +307,7 @@ const Auth = () => {
             type="button"
             onClick={() => setIsLogin(!isLogin)}
             className="text-ry-yellow hover:text-ry-black transition-colors"
+            disabled={loading}
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </button>
