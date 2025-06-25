@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -10,9 +9,13 @@ export const useAuthSecurity = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener with security logging
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.email);
         
         // Log authentication events for security monitoring
@@ -31,7 +34,6 @@ export const useAuthSecurity = () => {
             resource_type: 'auth'
           });
           
-          // Clean session properly without manual localStorage manipulation
           setSession(null);
           setUser(null);
           setLoading(false);
@@ -46,13 +48,18 @@ export const useAuthSecurity = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const logSecurityEventWrapper = async (action: string, metadata: Record<string, any>) => {

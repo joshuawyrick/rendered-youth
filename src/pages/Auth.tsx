@@ -13,17 +13,17 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in and redirect to home page
     if (session && !authLoading) {
-      console.log('User already authenticated, redirecting...');
+      console.log('User already authenticated, redirecting...', session.user?.email);
       window.location.href = '/';
     }
   }, [session, authLoading]);
 
-  // Don't render anything while checking initial auth state
-  if (authLoading) {
+  // Only show loading spinner for the initial auth check, not indefinitely
+  if (authLoading && !session) {
     return <AuthLoadingSpinner />;
   }
 
-  // Don't render the form if user is already authenticated
+  // If we have a session, show redirecting message
   if (session) {
     return (
       <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
