@@ -37,7 +37,8 @@ export const useProductImageManager = ({ images, onImagesUpdate }: UseProductIma
     addImageByUrl: performAddImageByUrl,
     addImageFromFile,
     removeImage,
-    updateImageAltText
+    updateImageAltText,
+    reorderImages
   } = useImageOperations({ images, onImagesUpdate });
 
   const addImageByUrl = () => {
@@ -84,6 +85,7 @@ export const useProductImageManager = ({ images, onImagesUpdate }: UseProductIma
     handleFileUpload,
     removeImage,
     updateImageAltText,
+    reorderImages,
     cancelAdding
   };
 };

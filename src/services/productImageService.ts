@@ -117,20 +117,15 @@ export const saveProductImages = async (productId: string, images: ProductImage[
     const currentMainDesignUrl = currentProduct?.designs?.file_url;
     console.log('Current main design URL:', currentMainDesignUrl?.substring(0, 50) + '...');
 
-    // Check if the main design image is still present in the new images
-    const hasMainDesignInCurrent = images.some(img => img.sortOrder === 1 && img.url === currentMainDesignUrl);
-    console.log('Main design still present:', hasMainDesignInCurrent);
-    
-    // Separate main design image (sortOrder 1) from additional images
-    const mainDesignImage = images.find(img => img.sortOrder === 1);
-    const additionalImages = images
-      .filter(img => img.sortOrder > 1)
-      .map(img => ({
-        url: img.url,
-        altText: img.altText,
-        sortOrder: img.sortOrder
-      }));
+    // The first image in the array is now the main image
+    const newMainImage = images[0];
+    const additionalImages = images.slice(1).map((img, index) => ({
+      url: img.url,
+      altText: img.altText,
+      sortOrder: index + 2 // Start from 2 since main image is 1
+    }));
 
+    console.log('New main image:', newMainImage?.url?.substring(0, 50) + '...');
     console.log('Additional images to save:', additionalImages.length);
 
     // Find images that were removed (existed in previousImages but not in current images)
@@ -144,10 +139,30 @@ export const saveProductImages = async (productId: string, images: ProductImage[
       await deleteStorageFile(removedImage.url);
     }
 
-    // If main design was removed or changed, handle the design update
-    if (currentMainDesignUrl && (!hasMainDesignInCurrent || (mainDesignImage && mainDesignImage.url !== currentMainDesignUrl))) {
-      // Delete the old main design file if it was removed
-      if (!hasMainDesignInCurrent) {
+    // If the main image has changed, we need to handle the design update
+    if (newMainImage && currentMainDesignUrl && newMainImage.url !== currentMainDesignUrl) {
+      console.log('Main image has changed, updating design');
+      
+      // Update the design with the new main image URL
+      const { data: productData } = await supabase
+        .from('products')
+        .select('design_id')
+        .eq('id', productId)
+        .single();
+
+      if (productData?.design_id) {
+        const { error: designUpdateError } = await supabase
+          .from('designs')
+          .update({ file_url: newMainImage.url })
+          .eq('id', productData.design_id);
+
+        if (designUpdateError) {
+          console.error('Error updating design file_url:', designUpdateError);
+        }
+      }
+
+      // Delete the old main design file if it's different from any of the current images
+      if (!currentUrls.has(currentMainDesignUrl)) {
         console.log('Deleting old main design file');
         await deleteStorageFile(currentMainDesignUrl);
       }
@@ -167,7 +182,7 @@ export const saveProductImages = async (productId: string, images: ProductImage[
       productId, 
       imageCount: additionalImages.length,
       removedCount: removedImages.length,
-      mainDesignRemoved: currentMainDesignUrl && !hasMainDesignInCurrent
+      mainImageChanged: newMainImage?.url !== currentMainDesignUrl
     });
     console.log('=== END SAVE DEBUG ===');
   } catch (error) {

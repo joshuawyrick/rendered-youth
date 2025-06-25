@@ -83,15 +83,12 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       altText: imageToRemove.altText
     });
     
-    // Check if this is the main image (sortOrder 1)
-    const isMainImage = imageToRemove.sortOrder === 1;
-    console.log('Is main image:', isMainImage);
-    
-    if (isMainImage) {
-      console.log('Cannot delete main design image');
+    // Check if this is the only image
+    if (images.length === 1) {
+      console.log('Cannot delete the only remaining image');
       toast({
         title: "Cannot Delete",
-        description: "The main image cannot be deleted as it's the core design. You can only delete additional images.",
+        description: "You must have at least one product image.",
         variant: "destructive",
       });
       return;
@@ -101,21 +98,11 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     const filteredImages = images.filter((_, i) => i !== index);
     console.log('Images after filtering by index:', filteredImages.length);
     
-    // Reorder the remaining images, preserving the main image at position 1
-    const reorderedImages = filteredImages.map((img, newIndex) => {
-      if (img.sortOrder === 1) {
-        // Keep main image at sortOrder 1
-        return img;
-      } else {
-        // Reorder additional images starting from 2
-        const mainImageExists = filteredImages.some(i => i.sortOrder === 1);
-        const newSortOrder = mainImageExists ? newIndex + 1 : newIndex + 1;
-        return {
-          ...img,
-          sortOrder: newSortOrder
-        };
-      }
-    }).sort((a, b) => a.sortOrder - b.sortOrder);
+    // Reorder the remaining images sequentially
+    const reorderedImages = filteredImages.map((img, newIndex) => ({
+      ...img,
+      sortOrder: newIndex + 1
+    }));
     
     console.log('Final reordered images:', reorderedImages.map(img => ({ 
       sortOrder: img.sortOrder, 
@@ -127,7 +114,7 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     
     toast({
       title: "Image Removed",
-      description: "Additional image has been removed from the product",
+      description: "Image has been removed from the product",
     });
   };
 
@@ -139,29 +126,50 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       return;
     }
     
-    const imageToUpdate = images[index];
-    
-    // Check if this is the main image
-    if (imageToUpdate.sortOrder === 1) {
-      console.log('Cannot update alt text for main design image');
-      toast({
-        title: "Cannot Edit",
-        description: "The main image's text cannot be edited as it's tied to the design.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     const updatedImages = images.map((img, i) => 
       i === index ? { ...img, altText } : img
     );
     onImagesUpdate(updatedImages);
   };
 
+  const reorderImages = (startIndex: number, endIndex: number) => {
+    console.log('=== REORDER IMAGES DEBUG START ===');
+    console.log('Moving image from index:', startIndex, 'to index:', endIndex);
+    
+    if (startIndex < 0 || startIndex >= images.length || endIndex < 0 || endIndex >= images.length) {
+      console.error('Invalid indices for reordering:', { startIndex, endIndex });
+      return;
+    }
+
+    const reorderedImages = [...images];
+    const [draggedImage] = reorderedImages.splice(startIndex, 1);
+    reorderedImages.splice(endIndex, 0, draggedImage);
+
+    // Update sort orders to match new positions
+    const updatedImages = reorderedImages.map((img, index) => ({
+      ...img,
+      sortOrder: index + 1
+    }));
+
+    console.log('Reordered images:', updatedImages.map(img => ({ 
+      sortOrder: img.sortOrder, 
+      url: img.url.substring(0, 30) + '...' 
+    })));
+    console.log('=== REORDER IMAGES DEBUG END ===');
+
+    onImagesUpdate(updatedImages);
+    
+    toast({
+      title: "Images Reordered",
+      description: "Product images have been reordered successfully",
+    });
+  };
+
   return {
     addImageByUrl,
     addImageFromFile,
     removeImage,
-    updateImageAltText
+    updateImageAltText,
+    reorderImages
   };
 };

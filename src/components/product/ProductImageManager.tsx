@@ -42,6 +42,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
     handleFileUpload,
     removeImage,
     updateImageAltText,
+    reorderImages,
     cancelAdding
   } = useProductImageManager({ images, onImagesUpdate });
 
@@ -58,6 +59,7 @@ const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         images={images}
         onRemoveImage={removeImage}
         onUpdateAltText={updateImageAltText}
+        onReorderImages={reorderImages}
       />
 
       {/* Add New Image */}
