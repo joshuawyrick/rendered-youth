@@ -64,9 +64,9 @@ class SessionSecurityService {
     this.checkInterval = setInterval(() => {
       const inactiveTime = Date.now() - this.lastActivity;
 
-      if (inactiveTime >= this.maxInactiveTime) {
+      if (inactiveTime >= this.config.maxInactiveTime) {
         this.handleSessionTimeout();
-      } else if (inactiveTime >= this.warningTime && !this.warningShown) {
+      } else if (inactiveTime >= this.config.warningTime && !this.warningShown) {
         this.showInactivityWarning();
       }
     }, this.config.checkInterval);
