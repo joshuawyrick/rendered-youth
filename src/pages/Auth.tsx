@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { useToast } from '@/components/ui/use-toast';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
-import { useAuthSecurity } from '@/hooks/useAuthSecurity';
+import { useAuth } from '@/hooks/useAuth';
 import { validateEmail, validatePassword } from '@/services/inputValidation';
 import { sanitizeErrorMessage } from '@/services/enhancedSecurityService';
 
@@ -17,8 +16,7 @@ const Auth = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { secureSignIn, secureSignUp, sanitizeInput, session, loading: authLoading } = useSecureAuth();
-  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
+  const { session, loading: authLoading } = useAuth();
 
   useEffect(() => {
     // Check if user is already logged in and redirect to home page
@@ -78,7 +76,14 @@ const Auth = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    const sanitizedValue = sanitizeInput(value);
+    // Basic sanitization
+    const sanitizedValue = value
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+      .trim();
+      
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
     
     // Clear validation errors for this field
@@ -106,36 +111,16 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const action = isLogin ? 'signin' : 'signup';
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      // Check rate limits
-      const canProceed = await checkRateLimit(action, formData.email);
-      if (!canProceed) {
-        toast({
-          title: "Too Many Attempts",
-          description: "Please wait before trying again.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
       if (isLogin) {
         // Sign in
-        await logSecurityEvent('auth_signin_attempt', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password
         });
 
-        const { error } = await secureSignIn(formData.email, formData.password);
-
         if (error) {
-          await logSecurityEvent('auth_signin_failed', {
-            email: formData.email,
-            error: error.message,
-            timestamp: new Date().toISOString()
-          });
-          
           toast({
             title: "Error signing in",
             description: sanitizeErrorMessage(error),
@@ -144,11 +129,6 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-
-        await logSecurityEvent('auth_signin_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
 
         toast({
           title: "Welcome back!",
@@ -159,26 +139,20 @@ const Auth = () => {
         // The loading state will remain true until redirect happens
       } else {
         // Sign up
-        await logSecurityEvent('auth_signup_attempt', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
+        const redirectUrl = `${window.location.origin}/`;
+
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              account_type: 'customer'
+            }
+          }
         });
 
-        const { error } = await secureSignUp(
-          formData.email,
-          formData.password,
-          {
-            account_type: 'customer'
-          }
-        );
-
         if (error) {
-          await logSecurityEvent('auth_signup_failed', {
-            email: formData.email,
-            error: error.message,
-            timestamp: new Date().toISOString()
-          });
-          
           toast({
             title: "Error creating account",
             description: sanitizeErrorMessage(error),
@@ -187,11 +161,6 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-
-        await logSecurityEvent('auth_signup_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
 
         toast({
           title: "Account created!",
@@ -202,13 +171,6 @@ const Auth = () => {
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      
-      await logSecurityEvent('auth_error', {
-        email: formData.email,
-        action: isLogin ? 'signin' : 'signup',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
       
       toast({
         title: "Unexpected error",
