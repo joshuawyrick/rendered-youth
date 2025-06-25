@@ -35,7 +35,9 @@ export const useFeaturedProducts = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      // Fetch recent active products with designs
+      console.log('=== FEATURED: Starting optimized single query fetch ===');
+      
+      // Single optimized query that joins everything at once
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -51,7 +53,13 @@ export const useFeaturedProducts = () => {
             id,
             file_url,
             user_id,
-            status
+            status,
+            profiles!inner (
+              id,
+              first_name,
+              last_name,
+              age_bracket
+            )
           ),
           product_variants (
             id,
@@ -66,6 +74,9 @@ export const useFeaturedProducts = () => {
         .order('created_at', { ascending: false })
         .limit(4);
 
+      console.log('Featured products optimized query result:', products);
+      console.log('Featured products query error:', productsError);
+
       if (productsError) {
         console.error('Error fetching featured products:', productsError);
         setLoading(false);
@@ -73,36 +84,22 @@ export const useFeaturedProducts = () => {
       }
 
       if (!products || products.length === 0) {
+        console.log('No featured products found');
         setLoading(false);
         return;
       }
 
-      // Get creator profiles
-      const designUserIds = products.map(product => product.designs?.user_id).filter(Boolean);
-      let profilesData = [];
-      
-      if (designUserIds.length > 0) {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, age_bracket')
-          .in('id', designUserIds);
-
-        if (!profilesError) {
-          profilesData = profiles || [];
-        }
-      }
-
-      // Format products for display
+      // Format products for display - now with profile data already included
       const formattedProducts: FeaturedProduct[] = products.map((product: any) => {
-        const profile = profilesData.find(p => p.id === product.designs?.user_id);
+        const profile = product.designs?.profiles;
         return {
           id: product.id,
           title: product.title,
           slug: product.title.toLowerCase().replace(/\s+/g, '-'),
           price: Number(product.base_price || product.price),
-          creatorName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Young Creator',
+          creatorName: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Young Creator',
           creatorAge: profile?.age_bracket || 'Unknown',
-          creatorState: 'Unknown',
+          creatorState: 'Unknown', // This could be added to profiles table if needed
           creatorUserId: product.designs?.user_id || '',
           imageUrl: product.designs?.file_url,
           collectionId: product.collection_id,
@@ -113,9 +110,12 @@ export const useFeaturedProducts = () => {
         };
       });
 
+      console.log('Final optimized featured products:', formattedProducts);
+      console.log('=== FEATURED: Optimized fetch complete ===');
+      
       setFeaturedProducts(formattedProducts);
     } catch (error) {
-      console.error('Error in fetchFeaturedProducts:', error);
+      console.error('Error in optimized fetchFeaturedProducts:', error);
     } finally {
       setLoading(false);
     }
