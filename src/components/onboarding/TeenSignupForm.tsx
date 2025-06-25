@@ -1,8 +1,12 @@
+
 import React, { useState } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { useAuthSecurity } from '@/hooks/useAuthSecurity';
+import { validateEmail, validatePassword, validateName } from '@/services/inputValidation';
+import { sanitizeErrorMessage } from '@/services/enhancedSecurityService';
 
 interface TeenSignupFormProps {
   age: number;
@@ -16,96 +20,154 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
     password: '',
     confirmPassword: ''
   });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { secureSignUp, sanitizeInput } = useSecureAuth();
+  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string[]> = {};
+
+    // Validate first name
+    const firstNameValidation = validateName(formData.firstName, 'First name');
+    if (!firstNameValidation.isValid) {
+      errors.firstName = firstNameValidation.errors;
+    }
+
+    // Validate last name
+    const lastNameValidation = validateName(formData.lastName, 'Last name');
+    if (!lastNameValidation.isValid) {
+      errors.lastName = lastNameValidation.errors;
+    }
+
+    // Validate email
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.errors;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.errors;
+    }
+
+    // Validate password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = ['Passwords do not match'];
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const sanitizedValue = sanitizeInput(value);
+    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+    
+    // Clear validation errors for this field
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors below and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (formData.password !== formData.confirmPassword) {
+      // Check rate limits
+      const canProceed = await checkRateLimit('signup', formData.email);
+      if (!canProceed) {
         toast({
-          title: "Password Mismatch",
-          description: "Passwords do not match. Please try again.",
+          title: "Too Many Attempts",
+          description: "Please wait before trying again.",
           variant: "destructive",
         });
         return;
       }
 
-      if (formData.password.length < 6) {
-        toast({
-          title: "Password Too Short",
-          description: "Password must be at least 6 characters long.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const redirectUrl = `${window.location.origin}/`;
-
-      const { data, error } = await supabase.auth.signUp({
+      // Log signup attempt
+      await logSecurityEvent('teen_signup_attempt', {
         email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            account_type: 'creator',
-            age_bracket: '13-17',
-            is_minor: true
-          }
-        }
+        age_bracket: '13-17',
+        timestamp: new Date().toISOString()
       });
 
+      const { error } = await secureSignUp(
+        formData.email,
+        formData.password,
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          account_type: 'creator',
+          age_bracket: '13-17',
+          is_minor: true
+        }
+      );
+
       if (error) {
+        await logSecurityEvent('teen_signup_failed', {
+          email: formData.email,
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+        
         toast({
           title: "Signup Failed",
-          description: error.message,
+          description: sanitizeErrorMessage(error),
           variant: "destructive",
         });
         return;
       }
 
-      if (data.user) {
-        // Update profile with creator account type and teen info
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ 
-            account_type: 'creator',
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            age_bracket: '13-17',
-            is_minor: true
-          })
-          .eq('id', data.user.id);
+      await logSecurityEvent('teen_signup_success', {
+        email: formData.email,
+        timestamp: new Date().toISOString()
+      });
 
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-        }
+      toast({
+        title: "Welcome, Young Creator!",
+        description: "Your creator account has been set up. Please check your email for verification.",
+      });
 
-        toast({
-          title: "Welcome, Young Creator!",
-          description: "Your creator account has been set up. Start uploading your designs!",
-        });
-
-        window.location.href = '/creator/dashboard';
-      }
+      window.location.href = '/creator/dashboard';
     } catch (error) {
       console.error('Unexpected error:', error);
+      
+      await logSecurityEvent('teen_signup_error', {
+        email: formData.email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+      
       toast({
         title: "Unexpected Error",
-        description: "Something went wrong. Please try again.",
+        description: sanitizeErrorMessage(error),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const getFieldError = (field: string): string | undefined => {
+    return validationErrors[field]?.[0];
   };
 
   return (
@@ -131,9 +193,15 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent ${
+                  getFieldError('firstName') ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
+                maxLength={50}
               />
+              {getFieldError('firstName') && (
+                <p className="text-red-500 text-sm mt-1">{getFieldError('firstName')}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-ry-black mb-2">
@@ -143,9 +211,15 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent ${
+                  getFieldError('lastName') ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
+                maxLength={50}
               />
+              {getFieldError('lastName') && (
+                <p className="text-red-500 text-sm mt-1">{getFieldError('lastName')}</p>
+              )}
             </div>
           </div>
 
@@ -157,9 +231,15 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent ${
+                getFieldError('email') ? 'border-red-500' : 'border-gray-300'
+              }`}
               required
+              maxLength={254}
             />
+            {getFieldError('email') && (
+              <p className="text-red-500 text-sm mt-1">{getFieldError('email')}</p>
+            )}
           </div>
 
           <div>
@@ -170,10 +250,19 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
               type="password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent ${
+                getFieldError('password') ? 'border-red-500' : 'border-gray-300'
+              }`}
               required
-              minLength={6}
+              maxLength={128}
             />
+            {getFieldError('password') && (
+              <div className="text-red-500 text-sm mt-1">
+                {validationErrors.password?.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -184,10 +273,15 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent ${
+                getFieldError('confirmPassword') ? 'border-red-500' : 'border-gray-300'
+              }`}
               required
-              minLength={6}
+              maxLength={128}
             />
+            {getFieldError('confirmPassword') && (
+              <p className="text-red-500 text-sm mt-1">{getFieldError('confirmPassword')}</p>
+            )}
           </div>
 
           <RYButton
@@ -203,11 +297,11 @@ const TeenSignupForm = ({ age }: TeenSignupFormProps) => {
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>As a teen creator, you can:</strong><br />
-            • Upload and submit your artwork<br />
-            • Track your design submissions<br />
-            • Earn 15% commission on sales<br />
-            • Access your creator dashboard
+            <strong>Password Requirements:</strong><br />
+            • At least 8 characters long<br />
+            • Include uppercase and lowercase letters<br />
+            • Include at least one number<br />
+            • Include at least one special character
           </p>
         </div>
       </RYCard>

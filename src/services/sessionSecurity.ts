@@ -1,147 +1,121 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { logSecurityEvent } from './securityService';
-
 interface SessionConfig {
-  maxIdleTime: number; // 30 minutes
-  maxSessionTime: number; // 8 hours
-  renewThreshold: number; // 5 minutes before expiry
+  maxInactiveTime: number; // 30 minutes in milliseconds
+  warningTime: number; // 5 minutes in milliseconds
+  checkInterval: number; // 1 minute in milliseconds
 }
 
 class SessionSecurityService {
   private config: SessionConfig = {
-    maxIdleTime: 30 * 60 * 1000, // 30 minutes
-    maxSessionTime: 8 * 60 * 60 * 1000, // 8 hours
-    renewThreshold: 5 * 60 * 1000 // 5 minutes
+    maxInactiveTime: 30 * 60 * 1000, // 30 minutes
+    warningTime: 25 * 60 * 1000, // 25 minutes (warn 5 min before timeout)
+    checkInterval: 60 * 1000 // 1 minute
   };
 
   private lastActivity: number = Date.now();
-  private sessionStart: number = Date.now();
-  private activityTimer: NodeJS.Timeout | null = null;
-  private renewalTimer: NodeJS.Timeout | null = null;
+  private warningShown: boolean = false;
+  private checkInterval: NodeJS.Timeout | null = null;
+  private listeners: Array<() => void> = [];
 
   public startSessionMonitoring(): void {
-    this.updateActivity();
-    this.startActivityMonitoring();
-    this.startSessionRenewalCheck();
-  }
-
-  public updateActivity(): void {
-    this.lastActivity = Date.now();
-    
-    // Reset activity timer
-    if (this.activityTimer) {
-      clearTimeout(this.activityTimer);
-    }
-    
-    this.activityTimer = setTimeout(() => {
-      this.handleSessionTimeout();
-    }, this.config.maxIdleTime);
-  }
-
-  private startActivityMonitoring(): void {
-    // Monitor user activity
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    
-    events.forEach(event => {
-      document.addEventListener(event, () => {
-        this.updateActivity();
-      }, { passive: true });
-    });
-  }
-
-  private startSessionRenewalCheck(): void {
-    this.renewalTimer = setInterval(async () => {
-      await this.checkSessionRenewal();
-    }, 60000); // Check every minute
-  }
-
-  private async checkSessionRenewal(): Promise<void> {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) return;
-
-    const now = Date.now();
-    const sessionAge = now - this.sessionStart;
-    const timeSinceActivity = now - this.lastActivity;
-
-    // Force logout if session is too old
-    if (sessionAge > this.config.maxSessionTime) {
-      await this.forceLogout('SESSION_EXPIRED_MAX_TIME');
-      return;
-    }
-
-    // Force logout if idle too long
-    if (timeSinceActivity > this.config.maxIdleTime) {
-      await this.forceLogout('SESSION_EXPIRED_IDLE');
-      return;
-    }
-
-    // Renew session if close to expiry
-    const expiresAt = new Date(session.expires_at! * 1000).getTime();
-    const timeToExpiry = expiresAt - now;
-
-    if (timeToExpiry < this.config.renewThreshold) {
-      await this.renewSession();
-    }
-  }
-
-  private async renewSession(): Promise<void> {
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-      
-      if (error || !data.session) {
-        await this.forceLogout('SESSION_RENEWAL_FAILED');
-        return;
-      }
-
-      await logSecurityEvent({
-        action: 'SESSION_RENEWED',
-        resource_type: 'session',
-        metadata: { renewalTime: new Date().toISOString() }
-      });
-    } catch (error) {
-      console.error('Session renewal error:', error);
-      await this.forceLogout('SESSION_RENEWAL_ERROR');
-    }
-  }
-
-  private async handleSessionTimeout(): Promise<void> {
-    await this.forceLogout('SESSION_TIMEOUT_ACTIVITY');
-  }
-
-  private async forceLogout(reason: string): Promise<void> {
-    await logSecurityEvent({
-      action: 'FORCED_LOGOUT',
-      resource_type: 'session',
-      metadata: { reason }
-    });
-
-    // Clean up timers
-    if (this.activityTimer) {
-      clearTimeout(this.activityTimer);
-    }
-    if (this.renewalTimer) {
-      clearInterval(this.renewalTimer);
-    }
-
-    // Sign out and redirect
-    await supabase.auth.signOut();
-    window.location.href = '/auth?reason=' + encodeURIComponent(reason);
+    this.resetSession();
+    this.setupActivityListeners();
+    this.startInactivityCheck();
   }
 
   public stopSessionMonitoring(): void {
-    if (this.activityTimer) {
-      clearTimeout(this.activityTimer);
-    }
-    if (this.renewalTimer) {
-      clearInterval(this.renewalTimer);
+    this.removeActivityListeners();
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
     }
   }
 
   public resetSession(): void {
-    this.sessionStart = Date.now();
     this.lastActivity = Date.now();
+    this.warningShown = false;
+  }
+
+  private setupActivityListeners(): void {
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    const activityHandler = () => {
+      this.resetSession();
+    };
+
+    events.forEach(event => {
+      document.addEventListener(event, activityHandler, true);
+    });
+
+    // Store reference for cleanup
+    this.listeners.push(() => {
+      events.forEach(event => {
+        document.removeEventListener(event, activityHandler, true);
+      });
+    });
+  }
+
+  private removeActivityListeners(): void {
+    this.listeners.forEach(cleanup => cleanup());
+    this.listeners = [];
+  }
+
+  private startInactivityCheck(): void {
+    this.checkInterval = setInterval(() => {
+      const inactiveTime = Date.now() - this.lastActivity;
+
+      if (inactiveTime >= this.maxInactiveTime) {
+        this.handleSessionTimeout();
+      } else if (inactiveTime >= this.warningTime && !this.warningShown) {
+        this.showInactivityWarning();
+      }
+    }, this.config.checkInterval);
+  }
+
+  private showInactivityWarning(): void {
+    this.warningShown = true;
+    
+    // Show a toast warning about session timeout
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      const event = new CustomEvent('session-warning', {
+        detail: {
+          message: 'Your session will expire in 5 minutes due to inactivity',
+          remainingTime: this.config.maxInactiveTime - (Date.now() - this.lastActivity)
+        }
+      });
+      window.dispatchEvent(event);
+    }
+  }
+
+  private handleSessionTimeout(): void {
+    this.stopSessionMonitoring();
+    
+    // Dispatch session timeout event
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      const event = new CustomEvent('session-timeout', {
+        detail: {
+          message: 'Your session has expired due to inactivity',
+          reason: 'inactivity'
+        }
+      });
+      window.dispatchEvent(event);
+    }
+
+    // Force logout - redirect to auth page
+    setTimeout(() => {
+      window.location.href = '/auth';
+    }, 100);
+  }
+
+  public getSessionInfo(): { lastActivity: number; isActive: boolean; timeRemaining: number } {
+    const inactiveTime = Date.now() - this.lastActivity;
+    const timeRemaining = Math.max(0, this.config.maxInactiveTime - inactiveTime);
+    
+    return {
+      lastActivity: this.lastActivity,
+      isActive: inactiveTime < this.config.maxInactiveTime,
+      timeRemaining
+    };
   }
 }
 
