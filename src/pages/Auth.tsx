@@ -2,11 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
-import { useToast } from '@/components/ui/use-toast';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
-import { useAuthSecurity } from '@/hooks/useAuthSecurity';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { validateEmail, validatePassword } from '@/services/inputValidation';
-import { sanitizeErrorMessage } from '@/services/enhancedSecurityService';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,13 +15,11 @@ const Auth = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { secureSignIn, secureSignUp, sanitizeInput } = useSecureAuth();
-  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   useEffect(() => {
-    // Check if user is already logged in and redirect to home page
+    // Check if user is already logged in
     const checkAuth = async () => {
-      const { session } = useSecureAuth();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         window.location.href = '/';
       }
@@ -40,14 +36,13 @@ const Auth = () => {
       errors.email = emailValidation.errors;
     }
 
-    // Validate password for signup
+    // Validate password
     if (!isLogin) {
       const passwordValidation = validatePassword(formData.password);
       if (!passwordValidation.isValid) {
         errors.password = passwordValidation.errors;
       }
     } else {
-      // For login, just check if password is provided
       if (!formData.password) {
         errors.password = ['Password is required'];
       }
@@ -58,8 +53,7 @@ const Auth = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    const sanitizedValue = sanitizeInput(value);
-    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear validation errors for this field
     if (validationErrors[field]) {
@@ -86,89 +80,52 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const action = isLogin ? 'signin' : 'signup';
-      
-      // Check rate limits
-      const canProceed = await checkRateLimit(action, formData.email);
-      if (!canProceed) {
-        toast({
-          title: "Too Many Attempts",
-          description: "Please wait before trying again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       if (isLogin) {
         // Sign in
-        await logSecurityEvent('auth_signin_attempt', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password
         });
 
-        const { error } = await secureSignIn(formData.email, formData.password);
-
         if (error) {
-          await logSecurityEvent('auth_signin_failed', {
-            email: formData.email,
-            error: error.message,
-            timestamp: new Date().toISOString()
-          });
-          
           toast({
             title: "Error signing in",
-            description: sanitizeErrorMessage(error),
+            description: error.message,
             variant: "destructive",
           });
           return;
         }
-
-        await logSecurityEvent('auth_signin_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
 
         toast({
           title: "Welcome back!",
           description: "You've been signed in successfully.",
         });
         
-        // Redirect to home page after successful login
+        // Redirect will happen automatically via auth state change
         window.location.href = '/';
       } else {
         // Sign up
-        await logSecurityEvent('auth_signup_attempt', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
+        const redirectUrl = `${window.location.origin}/`;
+
+        const { error } = await supabase.auth.signUp({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              account_type: 'customer'
+            }
+          }
         });
 
-        const { error } = await secureSignUp(
-          formData.email,
-          formData.password,
-          {
-            account_type: 'customer'
-          }
-        );
-
         if (error) {
-          await logSecurityEvent('auth_signup_failed', {
-            email: formData.email,
-            error: error.message,
-            timestamp: new Date().toISOString()
-          });
-          
           toast({
             title: "Error creating account",
-            description: sanitizeErrorMessage(error),
+            description: error.message,
             variant: "destructive",
           });
           return;
         }
-
-        await logSecurityEvent('auth_signup_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
 
         toast({
           title: "Account created!",
@@ -177,17 +134,9 @@ const Auth = () => {
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      
-      await logSecurityEvent('auth_error', {
-        email: formData.email,
-        action: isLogin ? 'signin' : 'signup',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-      
       toast({
         title: "Unexpected error",
-        description: sanitizeErrorMessage(error),
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -225,6 +174,7 @@ const Auth = () => {
               }`}
               required
               maxLength={254}
+              disabled={loading}
             />
             {getFieldError('email') && (
               <p className="text-red-500 text-sm mt-1">{getFieldError('email')}</p>
@@ -244,6 +194,7 @@ const Auth = () => {
               }`}
               required
               maxLength={128}
+              disabled={loading}
             />
             {getFieldError('password') && (
               <div className="text-red-500 text-sm mt-1">
@@ -282,6 +233,7 @@ const Auth = () => {
             type="button"
             onClick={() => setIsLogin(!isLogin)}
             className="text-ry-yellow hover:text-ry-black transition-colors"
+            disabled={loading}
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </button>
