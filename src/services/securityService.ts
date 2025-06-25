@@ -1,5 +1,6 @@
 
-// Temporary security service without database logging until types are updated
+import { supabase } from '@/integrations/supabase/client';
+
 export interface SecurityLogEntry {
   action: string;
   resource_type?: string;
@@ -9,8 +10,35 @@ export interface SecurityLogEntry {
 
 export const logSecurityEvent = async (entry: SecurityLogEntry): Promise<void> => {
   try {
-    // Log to console for now until security_logs table types are available
-    console.log('Security Event:', {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const { error } = await supabase
+      .from('security_logs')
+      .insert({
+        action: entry.action,
+        resource_type: entry.resource_type,
+        resource_id: entry.resource_id,
+        metadata: entry.metadata,
+        user_id: user?.id || null,
+        user_agent: navigator.userAgent
+      });
+
+    if (error) {
+      console.error('Failed to log security event:', error);
+      // Fallback to console logging if database logging fails
+      console.log('Security Event (fallback):', {
+        action: entry.action,
+        resource_type: entry.resource_type,
+        resource_id: entry.resource_id,
+        metadata: entry.metadata,
+        timestamp: new Date().toISOString(),
+        user_agent: navigator.userAgent
+      });
+    }
+  } catch (error) {
+    console.error('Security logging error:', error);
+    // Fallback to console logging
+    console.log('Security Event (fallback):', {
       action: entry.action,
       resource_type: entry.resource_type,
       resource_id: entry.resource_id,
@@ -18,10 +46,6 @@ export const logSecurityEvent = async (entry: SecurityLogEntry): Promise<void> =
       timestamp: new Date().toISOString(),
       user_agent: navigator.userAgent
     });
-    
-    // TODO: Implement database logging once security_logs table types are regenerated
-  } catch (error) {
-    console.error('Security logging error:', error);
   }
 };
 
@@ -64,4 +88,38 @@ export const validateAge = (dateOfBirth: string): { isValid: boolean; age: numbe
     isValid: !isNaN(actualAge) && actualAge >= 0 && actualAge <= 120,
     age: actualAge
   };
+};
+
+// Enhanced file validation with magic number checking
+export const validateFileMagicNumber = (file: File): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (!e.target?.result) {
+        resolve(false);
+        return;
+      }
+      
+      const arrayBuffer = e.target.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Check magic numbers for common image formats
+      const magicNumbers = {
+        jpeg: [0xFF, 0xD8, 0xFF],
+        png: [0x89, 0x50, 0x4E, 0x47],
+        webp: [0x52, 0x49, 0x46, 0x46], // RIFF header for WebP
+        svg: [0x3C, 0x3F, 0x78, 0x6D] // <?xml for SVG
+      };
+      
+      // Check if file starts with any valid magic number
+      const isValid = Object.values(magicNumbers).some(magic => 
+        magic.every((byte, index) => uint8Array[index] === byte)
+      );
+      
+      resolve(isValid);
+    };
+    
+    reader.onerror = () => resolve(false);
+    reader.readAsArrayBuffer(file.slice(0, 20)); // Read first 20 bytes
+  });
 };

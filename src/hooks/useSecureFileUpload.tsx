@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { validateFileType, validateFileSize, logSecurityEvent } from '@/services/securityService';
+import { validateFileType, validateFileSize, validateFileMagicNumber, logSecurityEvent } from '@/services/securityService';
 
 export const useSecureFileUpload = () => {
   const [uploading, setUploading] = useState(false);
@@ -45,6 +45,22 @@ export const useSecureFileUpload = () => {
         action: 'FILE_UPLOAD_REJECTED',
         resource_type: 'file',
         metadata: { reason: 'size_exceeded', filename: file.name, size: file.size }
+      });
+      return null;
+    }
+
+    // Magic number validation for additional security
+    const isValidMagicNumber = await validateFileMagicNumber(file);
+    if (!isValidMagicNumber) {
+      toast({
+        title: "Invalid file format",
+        description: "File appears to be corrupted or not a valid image",
+        variant: "destructive",
+      });
+      await logSecurityEvent({
+        action: 'FILE_UPLOAD_REJECTED',
+        resource_type: 'file',
+        metadata: { reason: 'invalid_magic_number', filename: file.name }
       });
       return null;
     }

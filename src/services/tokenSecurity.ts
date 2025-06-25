@@ -9,7 +9,7 @@ export const generateObfuscatedToken = (): string => {
   return `${timestamp}-${random}`;
 };
 
-// Hash token for secure storage
+// Hash token for secure storage using Web Crypto API
 export const hashToken = async (token: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(token);
@@ -83,6 +83,16 @@ export const verifyParentToken = async (token: string): Promise<any> => {
       return null;
     }
 
+    // Mark token as verified
+    const { error: updateError } = await supabase
+      .from('parent_verification_tokens')
+      .update({ verified_at: new Date().toISOString() })
+      .eq('id', tokenData.id);
+
+    if (updateError) {
+      console.error('Error marking token as verified:', updateError);
+    }
+
     await logSecurityEvent({
       action: 'PARENT_VERIFICATION_TOKEN_VERIFIED',
       resource_type: 'token',
@@ -99,5 +109,27 @@ export const verifyParentToken = async (token: string): Promise<any> => {
       metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
     });
     return null;
+  }
+};
+
+// Clean up expired tokens (should be called periodically)
+export const cleanupExpiredTokens = async (): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('parent_verification_tokens')
+      .delete()
+      .lt('expires_at', new Date().toISOString());
+
+    if (error) {
+      console.error('Error cleaning up expired tokens:', error);
+    } else {
+      await logSecurityEvent({
+        action: 'EXPIRED_TOKENS_CLEANUP',
+        resource_type: 'token',
+        metadata: { cleanup_date: new Date().toISOString() }
+      });
+    }
+  } catch (error) {
+    console.error('Error during token cleanup:', error);
   }
 };
