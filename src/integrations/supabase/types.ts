@@ -93,6 +93,66 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_earnings: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          creator_share: number
+          creator_user_id: string
+          gross_amount: number
+          id: string
+          payout_date: string | null
+          payout_status: string
+          platform_fee: number
+          product_id: string
+          sale_id: string
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          commission_rate: number
+          created_at?: string
+          creator_share: number
+          creator_user_id: string
+          gross_amount: number
+          id?: string
+          payout_date?: string | null
+          payout_status?: string
+          platform_fee: number
+          product_id: string
+          sale_id: string
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          creator_share?: number
+          creator_user_id?: string
+          gross_amount?: number
+          id?: string
+          payout_date?: string | null
+          payout_status?: string
+          platform_fee?: number
+          product_id?: string
+          sale_id?: string
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_earnings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_earnings_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       design_mockups: {
         Row: {
           created_at: string
@@ -289,6 +349,66 @@ export type Database = {
           },
         ]
       }
+      payout_batches: {
+        Row: {
+          batch_name: string
+          created_at: string
+          created_by: string
+          creator_count: number
+          id: string
+          processed_at: string | null
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          batch_name: string
+          created_at?: string
+          created_by: string
+          creator_count?: number
+          id?: string
+          processed_at?: string | null
+          status?: string
+          total_amount: number
+        }
+        Update: {
+          batch_name?: string
+          created_at?: string
+          created_by?: string
+          creator_count?: number
+          id?: string
+          processed_at?: string | null
+          status?: string
+          total_amount?: number
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       printful_products: {
         Row: {
           created_at: string
@@ -453,6 +573,10 @@ export type Database = {
           profile_image_url: string | null
           requires_parent_consent: boolean | null
           state: string | null
+          stripe_charges_enabled: boolean | null
+          stripe_connect_account_id: string | null
+          stripe_onboarding_completed: boolean | null
+          stripe_payouts_enabled: boolean | null
           tiktok_handle: string | null
           updated_at: string
           username: string | null
@@ -472,6 +596,10 @@ export type Database = {
           profile_image_url?: string | null
           requires_parent_consent?: boolean | null
           state?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_connect_account_id?: string | null
+          stripe_onboarding_completed?: boolean | null
+          stripe_payouts_enabled?: boolean | null
           tiktok_handle?: string | null
           updated_at?: string
           username?: string | null
@@ -491,6 +619,10 @@ export type Database = {
           profile_image_url?: string | null
           requires_parent_consent?: boolean | null
           state?: string | null
+          stripe_charges_enabled?: boolean | null
+          stripe_connect_account_id?: string | null
+          stripe_onboarding_completed?: boolean | null
+          stripe_payouts_enabled?: boolean | null
           tiktok_handle?: string | null
           updated_at?: string
           username?: string | null
@@ -712,6 +844,21 @@ export type Database = {
           revenue_last_30_days: number | null
           selected_count: number | null
           units_sold_last_30_days: number | null
+        }
+        Relationships: []
+      }
+      creator_earnings_summary: {
+        Row: {
+          creator_user_id: string | null
+          first_name: string | null
+          last_name: string | null
+          paid_earnings: number | null
+          pending_earnings: number | null
+          stripe_connect_account_id: string | null
+          stripe_onboarding_completed: boolean | null
+          total_earnings: number | null
+          total_gross: number | null
+          total_sales: number | null
         }
         Relationships: []
       }
