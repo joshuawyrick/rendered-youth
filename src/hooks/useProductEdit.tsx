@@ -88,14 +88,17 @@ export const useProductEdit = (product: Product | null, open: boolean) => {
 
     setLoading(true);
     try {
-      // Update product basic info
+      console.log('Saving product with description:', description);
+      
+      // Update product basic info including description
       const { error: productError } = await supabase
         .from('products')
         .update({
           title,
-          description,
+          description: description || null, // Ensure description is saved
           base_price: basePrice,
-          price: basePrice
+          price: basePrice,
+          updated_at: new Date().toISOString()
         })
         .eq('id', product.id);
 

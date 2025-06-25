@@ -16,6 +16,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
     navigate(`/creator/${product.designs.user_id}`);
   };
 
+  // Get creator display name
+  const creatorFirstName = product.designs.profiles?.first_name || 'Unknown';
+  const creatorLastName = product.designs.profiles?.last_name || 'Creator';
+  const creatorFullName = `${creatorFirstName} ${creatorLastName}`.trim();
+
   return (
     <div className="space-y-6">
       {/* Title and Creator */}
@@ -29,7 +34,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
             onClick={handleCreatorClick}
             className="text-lg font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
           >
-            {product.designs.profiles?.first_name} {product.designs.profiles?.last_name}
+            {creatorFullName}
           </button>
           {product.designs.profiles?.age_bracket && (
             <span className="ml-2 px-2 py-1 bg-ry-yellow text-ry-black text-sm rounded-full">
@@ -51,6 +56,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
           <span className="text-gray-600 ml-2">(42 reviews)</span>
         </div>
       </div>
+
+      {/* Product Description */}
+      {product.description && (
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold text-ry-black mb-2">About This Design</h3>
+          <p className="text-gray-700 leading-relaxed">
+            {product.description}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

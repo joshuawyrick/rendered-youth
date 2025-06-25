@@ -16,6 +16,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     navigate(`/creator/${product.designs.user_id}`);
   };
 
+  // Get creator display name
+  const creatorFirstName = product.designs.profiles?.first_name || 'Unknown';
+  const creatorLastName = product.designs.profiles?.last_name || 'Creator';
+  const creatorFullName = `${creatorFirstName} ${creatorLastName}`.trim();
+
   return (
     <div className="space-y-6">
       {/* Product Info */}
@@ -41,7 +46,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
             onClick={handleViewCreatorProfile}
             className="font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
           >
-            {product.designs.profiles?.first_name}
+            {creatorFirstName}
           </button>{' '}
           and helping young artists turn their creativity into income. 70% of your purchase goes 
           directly to the creator!
@@ -52,7 +57,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           onClick={handleViewCreatorProfile}
           className="w-full sm:w-auto"
         >
-          View {product.designs.profiles?.first_name}'s Profile
+          View {creatorFirstName}'s Profile
         </RYButton>
       </RYCard>
     </div>

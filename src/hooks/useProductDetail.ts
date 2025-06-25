@@ -95,10 +95,10 @@ export const useProductDetail = (slug: string | undefined) => {
         throw new Error('Product not found');
       }
 
-      // Get the profile data separately
+      // Get the profile data separately with more complete information
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, age_bracket')
+        .select('first_name, last_name, age_bracket, state, bio, profile_image_url')
         .eq('id', productData.designs.user_id)
         .single();
 
