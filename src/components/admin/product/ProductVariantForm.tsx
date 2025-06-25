@@ -19,7 +19,8 @@ interface ProductVariantFormProps {
   onAddVariant: () => void;
 }
 
-const PREDEFINED_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+// Updated size order from smallest to largest, including youth sizes
+const PREDEFINED_SIZES = ['Youth XS', 'Youth S', 'Youth M', 'Youth L', 'Youth XL', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
 const PREDEFINED_COLORS = ['Black', 'White', 'Navy', 'Gray', 'Red', 'Green', 'Blue', 'Purple', 'Yellow', 'Orange', 'Pink', 'Brown'];
 
 const ProductVariantForm: React.FC<ProductVariantFormProps> = ({

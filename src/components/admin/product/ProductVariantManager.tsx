@@ -3,6 +3,7 @@ import React from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import ProductVariantForm from './ProductVariantForm';
 import ProductVariantList from './ProductVariantList';
+import ProductBulkVariantCreator from './ProductBulkVariantCreator';
 
 interface ProductVariant {
   id?: string;
@@ -80,6 +81,11 @@ const ProductVariantManager: React.FC<ProductVariantManagerProps> = ({
 
   return (
     <div className="space-y-6">
+      <ProductBulkVariantCreator
+        variants={variants}
+        onVariantsChange={onVariantsChange}
+      />
+      
       <ProductVariantForm
         newVariantSize={newVariantSize}
         newVariantColor={newVariantColor}

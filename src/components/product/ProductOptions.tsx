@@ -11,6 +11,9 @@ interface ProductOptionsProps {
   onPriceChange: (basePrice: number, adjustment: number) => void;
 }
 
+// Size order from smallest to largest
+const SIZE_ORDER = ['Youth XS', 'Youth S', 'Youth M', 'Youth L', 'Youth XL', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+
 const ProductOptions: React.FC<ProductOptionsProps> = ({
   variants,
   selectedSize,
@@ -19,8 +22,25 @@ const ProductOptions: React.FC<ProductOptionsProps> = ({
   onColorChange,
   onPriceChange
 }) => {
-  // Get unique sizes and colors from variants
-  const availableSizes = [...new Set(variants.filter(v => v.is_available).map(v => v.size))];
+  // Get unique sizes and colors from variants, then sort sizes by order
+  const availableSizes = [...new Set(variants.filter(v => v.is_available).map(v => v.size))]
+    .sort((a, b) => {
+      const aIndex = SIZE_ORDER.indexOf(a);
+      const bIndex = SIZE_ORDER.indexOf(b);
+      
+      // If both sizes are in our predefined order, sort by that
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      
+      // If only one is in predefined order, that one comes first
+      if (aIndex !== -1 && bIndex === -1) return -1;
+      if (aIndex === -1 && bIndex !== -1) return 1;
+      
+      // If neither is in predefined order, sort alphabetically
+      return a.localeCompare(b);
+    });
+
   const availableColors = [...new Set(variants.filter(v => v.is_available).map(v => v.color))];
 
   // Find the current variant to get price adjustment
