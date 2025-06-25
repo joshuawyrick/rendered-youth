@@ -29,25 +29,24 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
           {product.title}
         </h1>
         
-        {/* Creator Info Section - Improved Layout */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        {/* Creator Info Section - Enhanced Layout */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Created by + Name in one group */}
           <div className="flex items-center gap-2">
-            <span className="text-base sm:text-lg text-gray-600 whitespace-nowrap">Created by</span>
+            <span className="text-sm sm:text-base text-gray-600 whitespace-nowrap">Created by</span>
             <button
               onClick={handleCreatorClick}
-              className="text-base sm:text-lg font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
+              className="text-sm sm:text-base font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
             >
               {creatorFullName}
             </button>
           </div>
           
-          {/* Age Badge - Better positioned */}
+          {/* Age Badge - Compact design */}
           {product.designs.profiles?.age_bracket && (
-            <div className="flex-shrink-0">
-              <span className="inline-block px-3 py-1 bg-ry-yellow text-ry-black text-sm font-medium rounded-full whitespace-nowrap">
-                Age {product.designs.profiles.age_bracket}
-              </span>
-            </div>
+            <span className="inline-flex items-center px-2.5 py-0.5 bg-ry-yellow text-ry-black text-xs sm:text-sm font-medium rounded-full whitespace-nowrap">
+              Age {product.designs.profiles.age_bracket}
+            </span>
           )}
         </div>
       </div>
