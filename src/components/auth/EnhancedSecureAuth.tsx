@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/useAuth';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { useAuthSecurity } from '@/hooks/useAuthSecurity';
 import { toast } from 'sonner';
@@ -30,8 +30,7 @@ export const EnhancedSecureAuth = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signIn, signUp } = useAuth();
-  const { validateInput, sanitizeInput } = useSecureAuth();
+  const { secureSignIn, secureSignUp, validateInput, sanitizeInput } = useSecureAuth();
   const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   const validatePassword = (password: string): string | null => {
@@ -90,7 +89,7 @@ export const EnhancedSecureAuth = () => {
         timestamp: new Date().toISOString()
       });
 
-      const { error } = await signIn(formData.email, formData.password);
+      const { error } = await secureSignIn(formData.email, formData.password);
       
       if (error) {
         await logSecurityEvent('signin_failed', {
@@ -163,13 +162,13 @@ export const EnhancedSecureAuth = () => {
         timestamp: new Date().toISOString()
       });
 
-      const redirectUrl = `${window.location.origin}/`;
-      const { error } = await signUp(
+      const { error } = await secureSignUp(
         formData.email, 
         formData.password, 
-        formData.firstName, 
-        formData.lastName,
-        redirectUrl
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        }
       );
       
       if (error) {
