@@ -35,87 +35,88 @@ export const useFeaturedProducts = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      console.log('=== FEATURED: Starting optimized single query fetch ===');
+      console.log('=== FEATURED: Starting design-first query fetch ===');
       
-      // Single optimized query that joins everything at once
-      const { data: products, error: productsError } = await supabase
-        .from('products')
+      // Design-first query - get the 4 newest published designs that have products
+      const { data: designs, error: designsError } = await supabase
+        .from('designs')
         .select(`
           id,
           title,
-          description,
-          base_price,
-          price,
-          collection_id,
-          design_id,
-          status,
-          designs!inner (
+          file_url,
+          user_id,
+          created_at,
+          profiles!inner (
             id,
-            file_url,
-            user_id,
-            status,
-            profiles!inner (
-              id,
-              first_name,
-              last_name,
-              age_bracket
-            )
+            first_name,
+            last_name,
+            age_bracket
           ),
-          product_variants (
+          products!inner (
             id,
-            size,
-            color,
-            price_adjustment,
-            is_available
+            title,
+            base_price,
+            price,
+            collection_id,
+            status,
+            product_variants (
+              id,
+              size,
+              color,
+              price_adjustment,
+              is_available
+            )
           )
         `)
-        .eq('status', 'active')
-        .eq('designs.status', 'published')
+        .eq('status', 'published')
+        .eq('products.status', 'active')
         .order('created_at', { ascending: false })
         .limit(4);
 
-      console.log('Featured products optimized query result:', products);
-      console.log('Featured products query error:', productsError);
+      console.log('Featured designs query result:', designs);
+      console.log('Featured designs query error:', designsError);
 
-      if (productsError) {
-        console.error('Error fetching featured products:', productsError);
+      if (designsError) {
+        console.error('Error fetching featured designs:', designsError);
         setLoading(false);
         return;
       }
 
-      if (!products || products.length === 0) {
-        console.log('No featured products found');
+      if (!designs || designs.length === 0) {
+        console.log('No featured designs found');
         setLoading(false);
         return;
       }
 
-      // Format products for display - now with profile data already included
-      const formattedProducts: FeaturedProduct[] = products.map((product: any) => {
-        const profile = product.designs?.profiles;
+      // Format designs for display - using the first product if multiple exist
+      const formattedProducts: FeaturedProduct[] = designs.map((design: any) => {
+        const profile = design.profiles;
+        const product = Array.isArray(design.products) ? design.products[0] : design.products;
+        
         return {
-          id: product.id,
-          title: product.title,
-          slug: product.title.toLowerCase().replace(/\s+/g, '-'),
+          id: product.id, // Use product ID for navigation
+          title: design.title, // Use design title
+          slug: design.title.toLowerCase().replace(/\s+/g, '-'),
           price: Number(product.base_price || product.price),
           creatorName: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Young Creator',
           creatorAge: profile?.age_bracket || 'Unknown',
           creatorState: 'Unknown', // This could be added to profiles table if needed
-          creatorUserId: product.designs?.user_id || '',
-          imageUrl: product.designs?.file_url,
+          creatorUserId: design.user_id,
+          imageUrl: design.file_url,
           collectionId: product.collection_id,
           design: {
-            file_url: product.designs?.file_url || ''
+            file_url: design.file_url
           },
           variants: product.product_variants || []
         };
       });
 
-      console.log('Final optimized featured products:', formattedProducts);
-      console.log('=== FEATURED: Optimized fetch complete ===');
+      console.log('Final formatted featured designs:', formattedProducts);
+      console.log('=== FEATURED: Design-first fetch complete ===');
       
       setFeaturedProducts(formattedProducts);
     } catch (error) {
-      console.error('Error in optimized fetchFeaturedProducts:', error);
+      console.error('Error in design-first fetchFeaturedProducts:', error);
     } finally {
       setLoading(false);
     }
