@@ -15,7 +15,7 @@ const CreatorUpload = () => {
   const [inspiration, setInspiration] = useState('');
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  const { uploadFile, uploading } = useSecureFileUpload();
+  const { uploadFile } = useSecureFileUpload();
   
   const {
     file,
@@ -166,7 +166,6 @@ const CreatorUpload = () => {
             inspiration={inspiration}
             file={file}
             dragActive={dragActive}
-            uploading={uploading}
             setTitle={setTitle}
             setInspiration={setInspiration}
             onDragEnter={handleDrag}

@@ -1,6 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
-
+// Temporary security service without database logging until types are updated
 export interface SecurityLogEntry {
   action: string;
   resource_type?: string;
@@ -10,20 +9,17 @@ export interface SecurityLogEntry {
 
 export const logSecurityEvent = async (entry: SecurityLogEntry): Promise<void> => {
   try {
-    const { error } = await supabase
-      .from('security_logs')
-      .insert({
-        action: entry.action,
-        resource_type: entry.resource_type,
-        resource_id: entry.resource_id,
-        metadata: entry.metadata,
-        ip_address: null, // Would need server-side implementation for real IP
-        user_agent: navigator.userAgent
-      });
-
-    if (error) {
-      console.error('Failed to log security event:', error);
-    }
+    // Log to console for now until security_logs table types are available
+    console.log('Security Event:', {
+      action: entry.action,
+      resource_type: entry.resource_type,
+      resource_id: entry.resource_id,
+      metadata: entry.metadata,
+      timestamp: new Date().toISOString(),
+      user_agent: navigator.userAgent
+    });
+    
+    // TODO: Implement database logging once security_logs table types are regenerated
   } catch (error) {
     console.error('Security logging error:', error);
   }
