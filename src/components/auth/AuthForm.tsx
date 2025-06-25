@@ -106,8 +106,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           description: "You've been signed in successfully.",
         });
         
-        // Don't redirect manually - let the useEffect handle it
-        // The loading state will remain true until redirect happens
+        // Redirect will be handled by the useEffect in Auth component
       } else {
         // Sign up
         const redirectUrl = `${window.location.origin}/`;

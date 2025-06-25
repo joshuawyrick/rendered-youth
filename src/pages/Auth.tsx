@@ -18,7 +18,7 @@ const Auth = () => {
     }
   }, [session, authLoading]);
 
-  // Show loading spinner while auth is being checked
+  // Don't render anything while checking initial auth state
   if (authLoading) {
     return <AuthLoadingSpinner />;
   }
