@@ -25,27 +25,35 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
     <div className="space-y-6">
       {/* Title and Creator */}
       <div>
-        <h1 className="text-3xl md:text-4xl font-bold text-ry-black mb-2">
+        <h1 className="text-3xl md:text-4xl font-bold text-ry-black mb-3">
           {product.title}
         </h1>
-        <div className="flex items-center gap-2">
-          <span className="text-lg text-gray-600">Created by</span>
-          <button
-            onClick={handleCreatorClick}
-            className="text-lg font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
-          >
-            {creatorFullName}
-          </button>
+        
+        {/* Creator Info Section - Improved Layout */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base sm:text-lg text-gray-600 whitespace-nowrap">Created by</span>
+            <button
+              onClick={handleCreatorClick}
+              className="text-base sm:text-lg font-medium text-ry-black hover:text-ry-yellow transition-colors underline decoration-2 underline-offset-2 hover:decoration-ry-yellow"
+            >
+              {creatorFullName}
+            </button>
+          </div>
+          
+          {/* Age Badge - Better positioned */}
           {product.designs.profiles?.age_bracket && (
-            <span className="ml-2 px-2 py-1 bg-ry-yellow text-ry-black text-sm rounded-full">
-              Age {product.designs.profiles.age_bracket}
-            </span>
+            <div className="flex-shrink-0">
+              <span className="inline-block px-3 py-1 bg-ry-yellow text-ry-black text-sm font-medium rounded-full whitespace-nowrap">
+                Age {product.designs.profiles.age_bracket}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
       {/* Price */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <span className="text-3xl font-bold text-ry-black">
           ${Number(product.price).toFixed(2)}
         </span>
