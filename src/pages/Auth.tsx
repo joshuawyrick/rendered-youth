@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
@@ -17,19 +16,15 @@ const Auth = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { secureSignIn, secureSignUp, sanitizeInput } = useSecureAuth();
+  const { secureSignIn, secureSignUp, sanitizeInput, session } = useSecureAuth();
   const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   useEffect(() => {
     // Check if user is already logged in and redirect to home page
-    const checkAuth = async () => {
-      const { session } = useSecureAuth();
-      if (session) {
-        window.location.href = '/';
-      }
-    };
-    checkAuth();
-  }, []);
+    if (session) {
+      window.location.href = '/';
+    }
+  }, [session]);
 
   const validateForm = (): boolean => {
     const errors: Record<string, string[]> = {};
