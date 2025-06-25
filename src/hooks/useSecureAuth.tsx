@@ -166,6 +166,44 @@ export const useSecureAuth = () => {
     }
   };
 
+  const validateInput = (input: string, type: 'email' | 'password' | 'name'): { isValid: boolean; error?: string } => {
+    if (!input || input.trim().length === 0) {
+      return { isValid: false, error: 'Input cannot be empty' };
+    }
+
+    switch (type) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input)) {
+          return { isValid: false, error: 'Invalid email format' };
+        }
+        break;
+      case 'password':
+        if (input.length < 8) {
+          return { isValid: false, error: 'Password must be at least 8 characters' };
+        }
+        break;
+      case 'name':
+        const nameRegex = /^[a-zA-Z\s'-]+$/;
+        if (!nameRegex.test(input)) {
+          return { isValid: false, error: 'Name contains invalid characters' };
+        }
+        break;
+    }
+
+    return { isValid: true };
+  };
+
+  const sanitizeInput = (input: string): string => {
+    // Basic HTML sanitization - remove potential XSS vectors
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+      .trim();
+  };
+
   const signOut = async () => {
     try {
       console.log('Attempting secure sign out...');
@@ -216,6 +254,8 @@ export const useSecureAuth = () => {
     loading,
     signOut,
     secureSignIn,
-    secureSignUp
+    secureSignUp,
+    validateInput,
+    sanitizeInput
   };
 };

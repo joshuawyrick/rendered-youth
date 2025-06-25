@@ -55,6 +55,33 @@ export const useAuthSecurity = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const logSecurityEventWrapper = async (action: string, metadata: Record<string, any>) => {
+    await logSecurityEvent({
+      action,
+      resource_type: 'auth',
+      metadata
+    });
+  };
+
+  const checkRateLimit = async (action: string, identifier?: string): Promise<boolean> => {
+    // Simple rate limiting implementation
+    const key = `${action}_${identifier || 'anonymous'}`;
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000; // 15 minutes
+    const maxAttempts = 5;
+
+    const attempts = JSON.parse(localStorage.getItem(key) || '[]');
+    const validAttempts = attempts.filter((timestamp: number) => now - timestamp < windowMs);
+
+    if (validAttempts.length >= maxAttempts) {
+      return false;
+    }
+
+    validAttempts.push(now);
+    localStorage.setItem(key, JSON.stringify(validAttempts));
+    return true;
+  };
+
   const signOut = async () => {
     try {
       console.log('Attempting to sign out...');
@@ -101,5 +128,7 @@ export const useAuthSecurity = () => {
     session,
     loading,
     signOut,
+    logSecurityEvent: logSecurityEventWrapper,
+    checkRateLimit
   };
 };
