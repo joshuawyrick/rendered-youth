@@ -12,7 +12,8 @@ export const logSecurityEvent = async (entry: SecurityLogEntry): Promise<void> =
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
-    const { error } = await supabase
+    // Use generic query since security_logs table might not be in types yet
+    const { error } = await (supabase as any)
       .from('security_logs')
       .insert({
         action: entry.action,
