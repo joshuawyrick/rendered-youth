@@ -1,10 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { verifyParentToken } from '@/services/tokenSecurity';
+import { logSecurityEvent } from '@/services/securityService';
 
 const ParentVerification = () => {
   const [searchParams] = useSearchParams();
@@ -29,28 +30,9 @@ const ParentVerification = () => {
 
     setLoading(true);
     try {
-      // Hash the token to match what's stored in the database
-      const tokenHash = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(token)
-      );
-      const tokenHashHex = Array.from(new Uint8Array(tokenHash))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      // Look up the verification token
-      const { data: tokenData, error: tokenError } = await supabase
-        .from('parent_verification_tokens')
-        .select(`
-          *,
-          age_verification (*)
-        `)
-        .eq('token_hash', tokenHashHex)
-        .is('verified_at', null)
-        .gt('expires_at', new Date().toISOString())
-        .single();
-
-      if (tokenError || !tokenData) {
+      const tokenData = await verifyParentToken(token);
+      
+      if (!tokenData) {
         setError('Invalid or expired verification link');
         return;
       }
@@ -69,21 +51,21 @@ const ParentVerification = () => {
 
     setLoading(true);
     try {
-      const tokenHash = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(token)
-      );
-      const tokenHashHex = Array.from(new Uint8Array(tokenHash))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
       if (giveConsent) {
         // Mark token as verified
+        const tokenHash = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(token)
+        );
+        const tokenHashHex = Array.from(new Uint8Array(tokenHash))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+
         const { error: updateError } = await supabase
           .from('parent_verification_tokens')
           .update({ 
             verified_at: new Date().toISOString(),
-            verification_ip_address: null // Could capture real IP if needed
+            verification_ip_address: null
           })
           .eq('token_hash', tokenHashHex);
 
@@ -109,17 +91,25 @@ const ParentVerification = () => {
 
         if (consentError) throw consentError;
 
+        // Log security event
+        await logSecurityEvent({
+          action: 'PARENT_CONSENT_GRANTED',
+          resource_type: 'consent',
+          resource_id: childInfo.id,
+          metadata: { parent_email: childInfo.parent_email }
+        });
+
         setVerified(true);
         toast({
           title: "Consent Recorded",
           description: "Your child can now create their account and start uploading artwork!",
         });
       } else {
-        // Mark token as used but not consented
-        await supabase
-          .from('parent_verification_tokens')
-          .update({ verified_at: new Date().toISOString() })
-          .eq('token_hash', tokenHashHex);
+        await logSecurityEvent({
+          action: 'PARENT_CONSENT_DECLINED',
+          resource_type: 'consent',
+          metadata: { parent_email: childInfo.parent_email }
+        });
 
         toast({
           title: "Consent Declined",

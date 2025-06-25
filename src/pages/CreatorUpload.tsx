@@ -2,18 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
-import UploadForm from '@/components/upload/UploadForm';
+import SecureUploadForm from '@/components/upload/SecureUploadForm';
 import { useAuth } from '@/hooks/useAuth';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { useSecureFileUpload } from '@/hooks/useSecureFileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { sanitizeInput, logSecurityEvent } from '@/services/securityService';
 
 const CreatorUpload = () => {
   const [title, setTitle] = useState('');
   const [inspiration, setInspiration] = useState('');
-  const [uploading, setUploading] = useState(false);
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const { uploadFile, uploading } = useSecureFileUpload();
   
   const {
     file,
@@ -31,27 +33,13 @@ const CreatorUpload = () => {
     }
   }, [user, loading]);
 
-  const uploadFileToStorage = async (file: File): Promise<string> => {
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `designs/${fileName}`;
-
-    const { data, error } = await supabase.storage
-      .from('design-uploads')
-      .upload(filePath, file);
-
-    if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('design-uploads')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) {
+    const sanitizedTitle = sanitizeInput(title.trim());
+    const sanitizedInspiration = sanitizeInput(inspiration.trim());
+    
+    if (!sanitizedTitle) {
       toast({
         title: "Missing title",
         description: "Please enter a title for your design",
@@ -78,19 +66,25 @@ const CreatorUpload = () => {
       return;
     }
 
-    setUploading(true);
-
     try {
-      // Upload file to storage
-      const fileUrl = await uploadFileToStorage(file);
+      // Log upload attempt
+      await logSecurityEvent({
+        action: 'DESIGN_UPLOAD_INITIATED',
+        resource_type: 'design',
+        metadata: { title: sanitizedTitle, file_size: file.size }
+      });
+
+      // Upload file using secure upload service
+      const fileUrl = await uploadFile(file, 'designs');
+      if (!fileUrl) return;
 
       // Save design to database
       const { data, error } = await supabase
         .from('designs')
         .insert({
           user_id: user.id,
-          title: title.trim(),
-          inspiration: inspiration.trim() || null,
+          title: sanitizedTitle,
+          inspiration: sanitizedInspiration || null,
           file_url: fileUrl,
           file_name: file.name,
           file_size: file.size,
@@ -101,6 +95,14 @@ const CreatorUpload = () => {
 
       if (error) throw error;
 
+      // Log successful upload
+      await logSecurityEvent({
+        action: 'DESIGN_UPLOAD_SUCCESS',
+        resource_type: 'design',
+        resource_id: data.id,
+        metadata: { title: sanitizedTitle }
+      });
+
       toast({
         title: "Upload successful!",
         description: "Your artwork has been submitted for review",
@@ -110,13 +112,21 @@ const CreatorUpload = () => {
       window.location.href = '/creator/submitted';
     } catch (error) {
       console.error('Upload error:', error);
+      
+      await logSecurityEvent({
+        action: 'DESIGN_UPLOAD_ERROR',
+        resource_type: 'design',
+        metadata: { 
+          title: sanitizedTitle, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        }
+      });
+
       toast({
         title: "Upload failed",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -151,7 +161,7 @@ const CreatorUpload = () => {
             </p>
           </div>
 
-          <UploadForm
+          <SecureUploadForm
             title={title}
             inspiration={inspiration}
             file={file}

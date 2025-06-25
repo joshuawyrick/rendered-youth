@@ -1,0 +1,128 @@
+
+import React from 'react';
+import { RYCard } from '@/components/ui/ry-card';
+import { RYButton } from '@/components/ui/ry-button';
+import { useSecureFileUpload } from '@/hooks/useSecureFileUpload';
+import { sanitizeInput } from '@/services/securityService';
+import FileUploadZone from './FileUploadZone';
+
+interface SecureUploadFormProps {
+  title: string;
+  inspiration: string;
+  file: File | null;
+  dragActive: boolean;
+  setTitle: (title: string) => void;
+  setInspiration: (inspiration: string) => void;
+  onDragEnter: (e: React.DragEvent) => void;
+  onDragLeave: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFile: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+const SecureUploadForm = ({
+  title,
+  inspiration,
+  file,
+  dragActive,
+  setTitle,
+  setInspiration,
+  onDragEnter,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+  onFileSelect,
+  onRemoveFile,
+  onSubmit
+}: SecureUploadFormProps) => {
+  const { uploading } = useSecureFileUpload();
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedTitle = sanitizeInput(e.target.value);
+    if (sanitizedTitle.length <= 100) { // Enforce length limit
+      setTitle(sanitizedTitle);
+    }
+  };
+
+  const handleInspirationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const sanitizedInspiration = sanitizeInput(e.target.value);
+    if (sanitizedInspiration.length <= 500) { // Enforce length limit
+      setInspiration(sanitizedInspiration);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-8">
+      {/* Title */}
+      <RYCard className="p-6">
+        <label className="block text-lg font-semibold text-ry-black mb-3">
+          Design Title * <span className="text-sm text-gray-500">({title.length}/100)</span>
+        </label>
+        <input
+          type="text"
+          value={title}
+          onChange={handleTitleChange}
+          placeholder="Give your artwork a catchy name..."
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent text-lg"
+          required
+          disabled={uploading}
+          maxLength={100}
+        />
+      </RYCard>
+
+      {/* Inspiration */}
+      <RYCard className="p-6">
+        <label className="block text-lg font-semibold text-ry-black mb-3">
+          Inspiration Notes <span className="text-sm text-gray-500">({inspiration.length}/500)</span>
+        </label>
+        <textarea
+          value={inspiration}
+          onChange={handleInspirationChange}
+          placeholder="Tell us what inspired this design... (optional)"
+          rows={4}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent resize-none"
+          disabled={uploading}
+          maxLength={500}
+        />
+      </RYCard>
+
+      {/* File Upload */}
+      <RYCard className="p-6">
+        <label className="block text-lg font-semibold text-ry-black mb-3">
+          Upload Your Artwork *
+        </label>
+        <p className="text-sm text-gray-600 mb-4">
+          Accepted formats: JPG, PNG, SVG, WebP | Maximum size: 25MB
+        </p>
+
+        <FileUploadZone
+          file={file}
+          dragActive={dragActive}
+          uploading={uploading}
+          onDragEnter={onDragEnter}
+          onDragLeave={onDragLeave}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onFileSelect={onFileSelect}
+          onRemoveFile={onRemoveFile}
+        />
+      </RYCard>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <RYButton 
+          type="submit" 
+          variant="primary" 
+          size="lg"
+          disabled={uploading}
+        >
+          {uploading ? 'Uploading...' : 'Submit for Review'}
+        </RYButton>
+      </div>
+    </form>
+  );
+};
+
+export default SecureUploadForm;
