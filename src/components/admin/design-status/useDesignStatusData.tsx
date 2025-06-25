@@ -7,6 +7,13 @@ export const useDesignStatusData = () => {
   return useQuery({
     queryKey: ['admin-designs-by-status'],
     queryFn: async (): Promise<Design[]> => {
+      // First check if user is admin to ensure proper access
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user found');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('designs')
         .select(`
