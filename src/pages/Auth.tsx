@@ -11,28 +11,36 @@ const Auth = () => {
   const { session, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    // Check if user is already logged in and redirect to home page
+    // If we have a session and we're not loading, redirect immediately
     if (session && !authLoading) {
       console.log('User already authenticated, redirecting...', session.user?.email);
-      window.location.href = '/';
+      // Use setTimeout to ensure this runs after the current render cycle
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 0);
     }
   }, [session, authLoading]);
 
-  // Only show loading spinner for the initial auth check, not indefinitely
+  // Show loading only during the initial auth check AND when we don't have a session
   if (authLoading && !session) {
+    console.log('Showing loading spinner - authLoading:', authLoading, 'session:', !!session);
     return <AuthLoadingSpinner />;
   }
 
-  // If we have a session, show redirecting message
+  // If we have a session, show a brief redirecting message instead of the form
   if (session) {
+    console.log('User has session, showing redirecting message');
     return (
       <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-gray-600">Redirecting...</p>
+          <p className="text-gray-600">Redirecting to dashboard...</p>
         </div>
       </div>
     );
   }
+
+  // If we reach here, user is not authenticated and we can show the form
+  console.log('Showing auth form - authLoading:', authLoading, 'session:', !!session);
 
   return (
     <div className="min-h-screen bg-ry-white flex items-center justify-center px-4">
