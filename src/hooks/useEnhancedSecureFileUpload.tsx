@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useAuthSecurity } from './useAuthSecurity';
+import { useAuth } from './useAuth';
 
 interface UploadOptions {
   bucket: string;
@@ -22,7 +21,7 @@ interface UploadResult {
 export const useEnhancedSecureFileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
+  const { user } = useAuth();
 
   // File magic number validation
   const validateFileType = async (file: File): Promise<boolean> => {
@@ -102,33 +101,24 @@ export const useEnhancedSecureFileUpload = () => {
     setUploadProgress(0);
 
     try {
-      // Rate limiting check
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const canProceed = await checkRateLimit('file_upload', user.id);
-        if (!canProceed) {
-          throw new Error('Upload rate limit exceeded. Please try again later.');
-        }
-      }
-
       // Log upload attempt
-      await logSecurityEvent('file_upload_attempt', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        timestamp: new Date().toISOString()
-      });
+      // await logSecurityEvent('file_upload_attempt', {
+      //   fileName: file.name,
+      //   fileSize: file.size,
+      //   fileType: file.type,
+      //   timestamp: new Date().toISOString()
+      // });
 
       setUploadProgress(20);
 
       // Validate file
       const validationError = await validateFile(file, options);
       if (validationError) {
-        await logSecurityEvent('file_upload_validation_failed', {
-          fileName: file.name,
-          error: validationError,
-          timestamp: new Date().toISOString()
-        });
+        // await logSecurityEvent('file_upload_validation_failed', {
+        //   fileName: file.name,
+        //   error: validationError,
+        //   timestamp: new Date().toISOString()
+        // });
         throw new Error(validationError);
       }
 
@@ -138,10 +128,10 @@ export const useEnhancedSecureFileUpload = () => {
       if (options.enableVirusScanning) {
         const isSafe = await simulateVirusScanning(file);
         if (!isSafe) {
-          await logSecurityEvent('file_upload_virus_detected', {
-            fileName: file.name,
-            timestamp: new Date().toISOString()
-          });
+          // await logSecurityEvent('file_upload_virus_detected', {
+          //   fileName: file.name,
+          //   timestamp: new Date().toISOString()
+          // });
           throw new Error('File failed security scan');
         }
       }
@@ -170,11 +160,11 @@ export const useEnhancedSecureFileUpload = () => {
         });
 
       if (error) {
-        await logSecurityEvent('file_upload_storage_failed', {
-          fileName: file.name,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
+        // await logSecurityEvent('file_upload_storage_failed', {
+        //   fileName: file.name,
+        //   error: error.message,
+        //   timestamp: new Date().toISOString()
+        // });
         throw error;
       }
 
@@ -188,12 +178,12 @@ export const useEnhancedSecureFileUpload = () => {
       setUploadProgress(100);
 
       // Log successful upload
-      await logSecurityEvent('file_upload_success', {
-        fileName: file.name,
-        filePath: filePath,
-        fileSize: file.size,
-        timestamp: new Date().toISOString()
-      });
+      // await logSecurityEvent('file_upload_success', {
+      //   fileName: file.name,
+      //   filePath: filePath,
+      //   fileSize: file.size,
+      //   timestamp: new Date().toISOString()
+      // });
 
       return {
         url: urlData.publicUrl,
@@ -205,11 +195,11 @@ export const useEnhancedSecureFileUpload = () => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       
-      await logSecurityEvent('file_upload_failed', {
-        fileName: file.name,
-        error: errorMessage,
-        timestamp: new Date().toISOString()
-      });
+      // await logSecurityEvent('file_upload_failed', {
+      //   fileName: file.name,
+      //   error: errorMessage,
+      //   timestamp: new Date().toISOString()
+      // });
 
       return {
         url: null,

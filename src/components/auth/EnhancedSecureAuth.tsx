@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
-import { useAuthSecurity } from '@/hooks/useAuthSecurity';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 
@@ -31,7 +29,6 @@ export const EnhancedSecureAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { secureSignIn, secureSignUp, validateInput, sanitizeInput } = useSecureAuth();
-  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -63,13 +60,6 @@ export const EnhancedSecureAuth = () => {
     setIsLoading(true);
 
     try {
-      // Rate limiting check
-      const canProceed = await checkRateLimit('signin', formData.email);
-      if (!canProceed) {
-        toast.error('Too many attempts. Please try again later.');
-        return;
-      }
-
       // Input validation
       const emailValidation = validateInput(formData.email, 'email');
       if (!emailValidation.isValid) {
@@ -83,26 +73,11 @@ export const EnhancedSecureAuth = () => {
         return;
       }
 
-      // Log security event
-      await logSecurityEvent('signin_attempt', {
-        email: formData.email,
-        timestamp: new Date().toISOString()
-      });
-
       const { error } = await secureSignIn(formData.email, formData.password);
       
       if (error) {
-        await logSecurityEvent('signin_failed', {
-          email: formData.email,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
         toast.error(error.message);
       } else {
-        await logSecurityEvent('signin_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
         toast.success('Successfully signed in!');
       }
     } catch (error) {
@@ -118,13 +93,6 @@ export const EnhancedSecureAuth = () => {
     setIsLoading(true);
 
     try {
-      // Rate limiting check
-      const canProceed = await checkRateLimit('signup', formData.email);
-      if (!canProceed) {
-        toast.error('Too many attempts. Please try again later.');
-        return;
-      }
-
       // Input validation
       const emailValidation = validateInput(formData.email, 'email');
       if (!emailValidation.isValid) {
@@ -156,12 +124,6 @@ export const EnhancedSecureAuth = () => {
         return;
       }
 
-      // Log security event
-      await logSecurityEvent('signup_attempt', {
-        email: formData.email,
-        timestamp: new Date().toISOString()
-      });
-
       const { error } = await secureSignUp(
         formData.email, 
         formData.password, 
@@ -172,17 +134,8 @@ export const EnhancedSecureAuth = () => {
       );
       
       if (error) {
-        await logSecurityEvent('signup_failed', {
-          email: formData.email,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
         toast.error(error.message);
       } else {
-        await logSecurityEvent('signup_success', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
         toast.success('Account created successfully! Please check your email for verification.');
         setActiveTab('signin');
       }

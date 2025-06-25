@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { useToast } from '@/components/ui/use-toast';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
-import { useAuthSecurity } from '@/hooks/useAuthSecurity';
 import { validateEmail, validatePassword, validateName } from '@/services/inputValidation';
 import { sanitizeErrorMessage } from '@/services/enhancedSecurityService';
 
@@ -24,7 +22,6 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { secureSignUp, sanitizeInput } = useSecureAuth();
-  const { logSecurityEvent, checkRateLimit } = useAuthSecurity();
 
   const validateForm = (): boolean => {
     const errors: Record<string, string[]> = {};
@@ -91,24 +88,6 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
     setLoading(true);
 
     try {
-      // Check rate limits
-      const canProceed = await checkRateLimit('signup', formData.email);
-      if (!canProceed) {
-        toast({
-          title: "Too Many Attempts",
-          description: "Please wait before trying again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Log signup attempt
-      await logSecurityEvent('adult_signup_attempt', {
-        email: formData.email,
-        age_bracket: '18+',
-        timestamp: new Date().toISOString()
-      });
-
       const { error } = await secureSignUp(
         formData.email,
         formData.password,
@@ -122,12 +101,6 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
       );
 
       if (error) {
-        await logSecurityEvent('adult_signup_failed', {
-          email: formData.email,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
-        
         toast({
           title: "Signup Failed",
           description: sanitizeErrorMessage(error),
@@ -135,11 +108,6 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
         });
         return;
       }
-
-      await logSecurityEvent('adult_signup_success', {
-        email: formData.email,
-        timestamp: new Date().toISOString()
-      });
 
       toast({
         title: "Welcome, Creator!",
@@ -149,13 +117,6 @@ const AdultSignupForm = ({ age }: AdultSignupFormProps) => {
       window.location.href = '/creator/dashboard';
     } catch (error) {
       console.error('Unexpected error:', error);
-      
-      await logSecurityEvent('adult_signup_error', {
-        email: formData.email,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-      
       toast({
         title: "Unexpected Error",
         description: sanitizeErrorMessage(error),
