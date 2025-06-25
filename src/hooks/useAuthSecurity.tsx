@@ -10,15 +10,10 @@ export const useAuthSecurity = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    console.log('useAuthSecurity: Setting up auth listeners');
-
     // Set up auth state listener with security logging
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
-        
-        console.log('Auth state changed:', event, 'User:', session?.user?.email, 'Loading will be set to false');
+        console.log('Auth state changed:', event, session?.user?.email);
         
         // Log authentication events for security monitoring
         if (event === 'SIGNED_IN' && session?.user) {
@@ -36,6 +31,7 @@ export const useAuthSecurity = () => {
             resource_type: 'auth'
           });
           
+          // Clean session properly without manual localStorage manipulation
           setSession(null);
           setUser(null);
           setLoading(false);
@@ -50,19 +46,13 @@ export const useAuthSecurity = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      console.log('Initial session check:', session?.user?.email, 'Loading will be set to false');
+      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => {
-      console.log('useAuthSecurity: Cleaning up auth listeners');
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const logSecurityEventWrapper = async (action: string, metadata: Record<string, any>) => {

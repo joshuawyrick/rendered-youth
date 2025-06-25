@@ -1,3 +1,3 @@
 
-// Export the main auth hook that should be used throughout the app
+// Re-export the secure auth hook to maintain compatibility
 export { useAuthSecurity as useAuth } from './useAuthSecurity';
