@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
+import { RYButton } from '@/components/ui/ry-button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { GraduationCap, Trophy, TrendingUp, Users, BookOpen, Award, ChevronDown, Lightbulb, Building, Palette, Megaphone, BarChart, Settings } from 'lucide-react';
 
@@ -370,18 +371,27 @@ const TrainingProgram = () => {
                       <div className="px-6 pb-6 border-t border-gray-200">
                         <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                           {level.modules.map((module, moduleIndex) => (
-                            <div key={moduleIndex} className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-ry-black mb-3">
+                            <div key={moduleIndex} className="bg-gray-50 rounded-lg p-6">
+                              <h4 className="font-semibold text-ry-black mb-4 text-lg">
                                 {module.title}
                               </h4>
-                              <ul className="space-y-2">
+                              <div className="space-y-2">
                                 {module.subModules.map((subModule, subIndex) => (
-                                  <li key={subIndex} className="text-sm text-gray-600 flex items-start gap-2">
-                                    <span className="w-1.5 h-1.5 bg-ry-yellow rounded-full mt-2 flex-shrink-0"></span>
+                                  <RYButton
+                                    key={subIndex}
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full text-left justify-start h-auto py-3 px-4 text-sm font-normal border-gray-300 hover:border-ry-yellow hover:bg-ry-yellow/5"
+                                    onClick={() => {
+                                      // Future functionality for opening lesson
+                                      console.log(`Opening lesson: ${subModule}`);
+                                    }}
+                                  >
+                                    <span className="w-2 h-2 bg-ry-yellow rounded-full mr-3 flex-shrink-0"></span>
                                     {subModule}
-                                  </li>
+                                  </RYButton>
                                 ))}
-                              </ul>
+                              </div>
                             </div>
                           ))}
                         </div>
