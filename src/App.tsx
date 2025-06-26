@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorUpload from "./pages/CreatorUpload";
 import Auth from "./pages/Auth";
+import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/store" element={<Store />} />
+          <Route path="/store/:slug" element={<ProductDetail />} />
           <Route path="/collections/:slug" element={<Collection />} />
           <Route path="/age-verification" element={<AgeVerification />} />
           <Route path="/creators" element={<Creators />} />
