@@ -13,6 +13,7 @@ interface AdminAccessControlProps {
 const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasChecked, setHasChecked] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -22,6 +23,7 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
     } else {
       setIsAdmin(false);
       setLoading(false);
+      setHasChecked(true);
     }
   }, [user]);
 
@@ -39,10 +41,13 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
         console.error('Error checking admin status:', error);
       }
 
-      setIsAdmin(!!data);
+      const adminStatus = !!data;
+      setIsAdmin(adminStatus);
       setLoading(false);
+      setHasChecked(true);
       
-      if (!data) {
+      // Only show access denied toast if user is not admin AND we've completed the check
+      if (!adminStatus) {
         toast({
           title: "Access Denied",
           description: "You don't have admin privileges",
@@ -53,6 +58,7 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
       setLoading(false);
+      setHasChecked(true);
     }
   };
 
@@ -91,7 +97,7 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && hasChecked) {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
