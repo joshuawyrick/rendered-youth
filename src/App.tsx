@@ -15,6 +15,7 @@ import TrainingProgram from "./pages/TrainingProgram";
 import AdminDashboard from "./pages/AdminDashboard";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorUpload from "./pages/CreatorUpload";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,8 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/upload" element={<CreatorUpload />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/sign-in" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
