@@ -45,7 +45,7 @@ export const fetchDiscountCode = async (code: string): Promise<DiscountCode | nu
     return null;
   }
 
-  return data;
+  return data as DiscountCode;
 };
 
 export const fetchAllDiscountCodes = async (): Promise<DiscountCode[]> => {
@@ -59,7 +59,7 @@ export const fetchAllDiscountCodes = async (): Promise<DiscountCode[]> => {
     return [];
   }
 
-  return data || [];
+  return (data || []) as DiscountCode[];
 };
 
 export const createDiscountCode = async (discountCode: Omit<DiscountCode, 'id' | 'created_at' | 'updated_at' | 'usage_count'>): Promise<DiscountCode | null> => {
@@ -78,7 +78,7 @@ export const createDiscountCode = async (discountCode: Omit<DiscountCode, 'id' |
     return null;
   }
 
-  return data;
+  return data as DiscountCode;
 };
 
 export const updateDiscountCode = async (id: string, updates: Partial<DiscountCode>): Promise<DiscountCode | null> => {
@@ -98,7 +98,7 @@ export const updateDiscountCode = async (id: string, updates: Partial<DiscountCo
     return null;
   }
 
-  return data;
+  return data as DiscountCode;
 };
 
 export const deleteDiscountCode = async (id: string): Promise<boolean> => {
