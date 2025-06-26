@@ -90,7 +90,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
           onClick={closeMobileMenu}
         >
-          Training Program
+          Future Founders
         </a>
         <a 
           href="/how-it-works" 

@@ -60,8 +60,8 @@ const TrainingProgram = () => {
               Coming Soon
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-ry-black mb-8">
-              Young Entrepreneurs
-              <span className="block text-ry-yellow mt-2">Training Program</span>
+              Young Entrepreneurs Area
+              <span className="block text-ry-yellow mt-2">Future Founders</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
               An innovative online learning platform designed to teach young creators the skills of entrepreneurship. 
@@ -146,7 +146,7 @@ const TrainingProgram = () => {
                 </h2>
                 <div className="space-y-4 text-lg text-gray-600">
                   <p>
-                    Our Young Entrepreneurs Training Program goes beyond just creating art. We're building 
+                    Our Young Entrepreneurs Area: Future Founders goes beyond just creating art. We're building 
                     the next generation of business leaders, innovators, and creative entrepreneurs.
                   </p>
                   <p>
