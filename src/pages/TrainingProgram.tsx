@@ -1,32 +1,267 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { RYCard } from '@/components/ui/ry-card';
-import { GraduationCap, Trophy, TrendingUp, Users, BookOpen, Award } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { GraduationCap, Trophy, TrendingUp, Users, BookOpen, Award, ChevronDown, Lightbulb, Building, Palette, Megaphone, BarChart, Settings } from 'lucide-react';
 
 const TrainingProgram = () => {
-  const milestones = [
+  const [openLevels, setOpenLevels] = useState<{ [key: string]: boolean }>({});
+
+  const toggleLevel = (levelId: string) => {
+    setOpenLevels(prev => ({
+      ...prev,
+      [levelId]: !prev[levelId]
+    }));
+  };
+
+  const curriculumLevels = [
     {
-      level: "Beginner Entrepreneur",
-      icon: <BookOpen className="h-8 w-8 text-ry-yellow" />,
-      courses: ["Business Basics", "Art & Design Fundamentals", "Understanding Customers"],
+      id: "level1",
+      level: "Level 1: Idea Explorer",
+      icon: <Lightbulb className="h-8 w-8 text-ry-yellow" />,
       profitShare: "Base Rate",
-      description: "Learn the foundations of entrepreneurship and creative business."
+      description: "Discover your spark and learn to identify opportunities.",
+      modules: [
+        {
+          title: "1.1 Discover Your Spark",
+          subModules: [
+            "Identifying your passions & strengths",
+            "Turning hobbies into product ideas",
+            "Setting your first mini-goals"
+          ]
+        },
+        {
+          title: "1.2 Creative Thinking Tools",
+          subModules: [
+            "Brainstorming & mind-mapping",
+            "SCAMPER (Substitute, Combine…)",
+            "Idea journaling & sketching"
+          ]
+        },
+        {
+          title: "1.3 Know Your Customer",
+          subModules: [
+            "Who's going to buy? (age, interests)",
+            "Empathy mapping (their wants & pain points)",
+            "Simple \"friends & family\" surveys"
+          ]
+        },
+        {
+          title: "1.4 Test Your Concept",
+          subModules: [
+            "Making a quick paper or digital mock-up",
+            "Getting feedback and iterating",
+            "Deciding \"go/no-go\" on your idea"
+          ]
+        }
+      ]
     },
     {
-      level: "Rising Creator",
-      icon: <TrendingUp className="h-8 w-8 text-ry-yellow" />,
-      courses: ["Marketing Your Art", "Financial Literacy", "Building Your Brand"],
+      id: "level2",
+      level: "Level 2: Business Fundamentals",
+      icon: <Building className="h-8 w-8 text-ry-yellow" />,
       profitShare: "Increased Share",
-      description: "Develop advanced skills in marketing and business management."
+      description: "Learn the core concepts of what makes a business work.",
+      modules: [
+        {
+          title: "2.1 What Is a Business?",
+          subModules: [
+            "Definitions: entrepreneur, profit, risk",
+            "Traits of successful kid CEOs",
+            "Growth-mindset basics"
+          ]
+        },
+        {
+          title: "2.2 Business Models & Plans",
+          subModules: [
+            "Product vs. service vs. hybrid models",
+            "Your first one-page business plan",
+            "SMART goals (Specific, Measurable…)"
+          ]
+        },
+        {
+          title: "2.3 Legal Setup & Structure",
+          subModules: [
+            "Sole proprietorship vs. LLC explained",
+            "How to register your business name",
+            "Intro to permits, EINs and basic compliance"
+          ]
+        },
+        {
+          title: "2.4 Money Management & Budgeting",
+          subModules: [
+            "Opening a kid-friendly business bank account",
+            "Income vs. expenses: the simple ledger",
+            "Planning a basic budget & break-even point"
+          ]
+        }
+      ]
     },
     {
-      level: "Master Entrepreneur",
-      icon: <Award className="h-8 w-8 text-ry-yellow" />,
-      courses: ["Leadership Skills", "Advanced Business Strategy", "Mentoring Others"],
+      id: "level3",
+      level: "Level 3: Design & Product Development",
+      icon: <Palette className="h-8 w-8 text-ry-yellow" />,
+      profitShare: "Higher Share",
+      description: "Create amazing products that customers will love.",
+      modules: [
+        {
+          title: "3.1 Fundamentals of Graphic Design",
+          subModules: [
+            "Basic design principles (color, balance)",
+            "Free tools: Canva, simplified Adobe apps",
+            "Creating your first shirt mock-up"
+          ]
+        },
+        {
+          title: "3.2 Sourcing & Production",
+          subModules: [
+            "Print-on-demand vs. small-batch printing",
+            "Comparing cost, quality & turnaround",
+            "Ordering and reviewing samples"
+          ]
+        },
+        {
+          title: "3.3 Pricing & Profit Margins",
+          subModules: [
+            "Calculating cost of goods sold (COGS)",
+            "Setting a profitable price point",
+            "Intro to discounts, bundles & value offers"
+          ]
+        },
+        {
+          title: "3.4 Building Your Online Store",
+          subModules: [
+            "Platform choices (built-in marketplace vs. standalone)",
+            "Writing clear product titles & descriptions",
+            "Setting up shipping options & policies"
+          ]
+        }
+      ]
+    },
+    {
+      id: "level4",
+      level: "Level 4: Branding & Marketing Basics",
+      icon: <Megaphone className="h-8 w-8 text-ry-yellow" />,
+      profitShare: "Premium Share",
+      description: "Build your brand and attract customers through marketing.",
+      modules: [
+        {
+          title: "4.1 Brand Identity",
+          subModules: [
+            "Choosing a memorable name & logo",
+            "Crafting your brand \"voice\"",
+            "Simple brand guidelines (colors, fonts)"
+          ]
+        },
+        {
+          title: "4.2 Content Creation",
+          subModules: [
+            "Basic product photography (phone + good light)",
+            "Writing engaging product stories",
+            "Intro to short-form video (TikTok/Reels)"
+          ]
+        },
+        {
+          title: "4.3 Social Media Starter",
+          subModules: [
+            "Which platforms fit your audience",
+            "Planning your first 4-week content calendar",
+            "Hashtags, captions & timing best practices"
+          ]
+        },
+        {
+          title: "4.4 Community Engagement",
+          subModules: [
+            "Inviting reviews & user-generated content",
+            "Starting a Facebook/Discord \"fan club\"",
+            "Partnering with classmates & local friends"
+          ]
+        }
+      ]
+    },
+    {
+      id: "level5",
+      level: "Level 5: Sales Growth & Optimization",
+      icon: <BarChart className="h-8 w-8 text-ry-yellow" />,
+      profitShare: "Advanced Share",
+      description: "Scale your business and optimize for maximum growth.",
+      modules: [
+        {
+          title: "5.1 Data & Analytics 101",
+          subModules: [
+            "Tracking orders, revenue & refunds",
+            "Simple metrics: conversion rate & avg. order value",
+            "Using built-in dashboard reports"
+          ]
+        },
+        {
+          title: "5.2 Intro to Paid Ads",
+          subModules: [
+            "Basics of social media ads (budget, targeting)",
+            "Designing your first ad creative",
+            "Measuring ad performance"
+          ]
+        },
+        {
+          title: "5.3 Email Marketing Essentials",
+          subModules: [
+            "Building a subscriber list (pop-ups, signup freebies)",
+            "Writing your first newsletter",
+            "Setting up an automated \"welcome\" email"
+          ]
+        },
+        {
+          title: "5.4 Promotions & Partnerships",
+          subModules: [
+            "Planning discount codes & limited-time offers",
+            "Running giveaways & contests",
+            "Collaborating with other young creators"
+          ]
+        }
+      ]
+    },
+    {
+      id: "level6",
+      level: "Level 6: Operations & Scaling",
+      icon: <Settings className="h-8 w-8 text-ry-yellow" />,
       profitShare: "Maximum Share",
-      description: "Master entrepreneurial skills and help guide other young creators."
+      description: "Master entrepreneurial operations and plan for the future.",
+      modules: [
+        {
+          title: "6.1 Bookkeeping & Taxes",
+          subModules: [
+            "Recording all sales & costs every week",
+            "Sales tax basics & filing online",
+            "When and how to talk to an accountant"
+          ]
+        },
+        {
+          title: "6.2 Customer Service Excellence",
+          subModules: [
+            "Responding to questions & complaints",
+            "Writing friendly return/refund policies",
+            "Turning a \"problem\" into a happy fan"
+          ]
+        },
+        {
+          title: "6.3 Outsourcing & Team Building",
+          subModules: [
+            "When to ask for help (family, classmates)",
+            "Finding safe, age-appropriate freelancers",
+            "Simple task checklists & handoffs"
+          ]
+        },
+        {
+          title: "6.4 Vision & Long-Term Planning",
+          subModules: [
+            "Reinvesting profits for growth",
+            "Setting 6- and 12-month milestones",
+            "Dreaming up your next product line"
+          ]
+        }
+      ]
     }
   ];
 
@@ -34,7 +269,7 @@ const TrainingProgram = () => {
     {
       icon: <GraduationCap className="h-12 w-12 text-ry-yellow" />,
       title: "Interactive Online Courses",
-      description: "Age-appropriate lessons designed specifically for young entrepreneurs, covering everything from business basics to advanced strategy."
+      description: "Age-appropriate lessons designed specifically for young entrepreneurs, covering everything from idea generation to scaling a business."
     },
     {
       icon: <Trophy className="h-12 w-12 text-ry-yellow" />,
@@ -64,8 +299,8 @@ const TrainingProgram = () => {
               <span className="block text-ry-yellow mt-2">Future Founders</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-              An innovative online learning platform designed to teach young creators the skills of entrepreneurship. 
-              Complete courses, hit milestones, and increase your profit-sharing rate as you grow your business knowledge.
+              A comprehensive online learning platform designed to teach young creators the complete journey of entrepreneurship. 
+              Complete courses, hit milestones, and increase your profit-sharing rate as you master each level.
             </p>
           </div>
         </section>
@@ -94,42 +329,65 @@ const TrainingProgram = () => {
           </div>
         </section>
 
-        {/* Milestone Levels Section */}
+        {/* Curriculum Levels Section */}
         <section className="bg-ry-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-bold text-ry-black text-center mb-12">
-              Progress Through Entrepreneur Levels
+              Complete Entrepreneur Curriculum
             </h2>
-            <div className="space-y-8">
-              {milestones.map((milestone, index) => (
-                <RYCard key={index} className="p-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                    <div className="text-center lg:text-left">
-                      <div className="flex justify-center lg:justify-start items-center gap-4 mb-4">
-                        {milestone.icon}
-                        <h3 className="text-2xl font-bold text-ry-black">
-                          {milestone.level}
-                        </h3>
-                      </div>
-                      <p className="text-gray-600 mb-4">
-                        {milestone.description}
-                      </p>
-                      <div className="inline-block bg-ry-yellow text-ry-black px-4 py-2 rounded-full text-sm font-medium">
-                        Profit Share: {milestone.profitShare}
-                      </div>
-                    </div>
-                    
-                    <div className="lg:col-span-2">
-                      <h4 className="text-lg font-semibold text-ry-black mb-4">Course Modules:</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {milestone.courses.map((course, courseIndex) => (
-                          <div key={courseIndex} className="bg-gray-50 px-4 py-3 rounded-lg text-center">
-                            <span className="text-sm font-medium text-gray-700">{course}</span>
+            <div className="space-y-6">
+              {curriculumLevels.map((level) => (
+                <RYCard key={level.id} className="overflow-hidden">
+                  <Collapsible
+                    open={openLevels[level.id]}
+                    onOpenChange={() => toggleLevel(level.id)}
+                  >
+                    <CollapsibleTrigger className="w-full p-6 text-left hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {level.icon}
+                          <div>
+                            <h3 className="text-xl font-bold text-ry-black mb-2">
+                              {level.level}
+                            </h3>
+                            <p className="text-gray-600 mb-2">
+                              {level.description}
+                            </p>
+                            <div className="inline-block bg-ry-yellow text-ry-black px-3 py-1 rounded-full text-sm font-medium">
+                              Profit Share: {level.profitShare}
+                            </div>
                           </div>
-                        ))}
+                        </div>
+                        <ChevronDown 
+                          className={`h-6 w-6 text-gray-400 transition-transform duration-200 ${
+                            openLevels[level.id] ? 'transform rotate-180' : ''
+                          }`}
+                        />
                       </div>
-                    </div>
-                  </div>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <div className="px-6 pb-6 border-t border-gray-200">
+                        <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {level.modules.map((module, moduleIndex) => (
+                            <div key={moduleIndex} className="bg-gray-50 rounded-lg p-4">
+                              <h4 className="font-semibold text-ry-black mb-3">
+                                {module.title}
+                              </h4>
+                              <ul className="space-y-2">
+                                {module.subModules.map((subModule, subIndex) => (
+                                  <li key={subIndex} className="text-sm text-gray-600 flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 bg-ry-yellow rounded-full mt-2 flex-shrink-0"></span>
+                                    {subModule}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </RYCard>
               ))}
             </div>
@@ -147,16 +405,17 @@ const TrainingProgram = () => {
                 <div className="space-y-4 text-lg text-gray-600">
                   <p>
                     Our Young Entrepreneurs Area: Future Founders goes beyond just creating art. We're building 
-                    the next generation of business leaders, innovators, and creative entrepreneurs.
+                    the next generation of business leaders, innovators, and creative entrepreneurs through a 
+                    comprehensive 6-level curriculum.
                   </p>
                   <p>
-                    As young creators complete courses and demonstrate their growing business knowledge, 
-                    they'll earn higher profit-sharing rates on their designs - rewarding learning with 
-                    increased earning potential.
+                    As young creators progress through each level—from Idea Explorer to Operations & Scaling—they'll 
+                    earn higher profit-sharing rates on their designs, rewarding learning with increased earning potential.
                   </p>
                   <p>
                     This program embodies our mission: to inspire children to become entrepreneurs, 
-                    teach them along the way, and allow them to earn money from an early age.
+                    teach them real business skills along the way, and allow them to earn money from an early age 
+                    while building a foundation for lifelong success.
                   </p>
                 </div>
               </div>
@@ -166,7 +425,7 @@ const TrainingProgram = () => {
                   Coming Soon
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  We're currently developing this exciting program. Sign up to be notified 
+                  We're currently developing this comprehensive curriculum. Sign up to be notified 
                   when enrollment opens!
                 </p>
                 <div className="space-y-3">
