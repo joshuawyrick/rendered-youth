@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import ProductGrid from '@/components/store/ProductGrid';
+import StoreFilters from '@/components/store/StoreFilters';
 import { useStoreData } from '@/hooks/useStoreData';
 import { filterProducts } from '@/utils/storeFilters';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,7 +24,12 @@ const Collection = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   
-  const { products, loading: productsLoading } = useStoreData();
+  // Filter states
+  const [selectedAge, setSelectedAge] = useState<string | undefined>();
+  const [selectedState, setSelectedState] = useState<string | undefined>();
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const { collections, products, loading: productsLoading } = useStoreData();
 
   useEffect(() => {
     if (slug) {
@@ -63,7 +69,9 @@ const Collection = () => {
   const filteredProducts = collection 
     ? filterProducts(products, { 
         selectedCollection: collection.id,
-        searchTerm: ''
+        selectedAge,
+        selectedState,
+        searchTerm
       })
     : [];
 
@@ -71,13 +79,30 @@ const Collection = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16">
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ry-yellow mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading collection...</p>
+        <div className="pt-16 flex">
+          {/* Fixed Left Sidebar - Filters */}
+          <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+            <div className="p-6">
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              </div>
             </div>
-          </main>
+          </div>
+          
+          {/* Main Content */}
+          <div className="flex-1 ml-80">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ry-yellow mx-auto"></div>
+                <p className="mt-4 text-gray-600">Loading collection...</p>
+              </div>
+            </main>
+          </div>
         </div>
         <Footer />
       </div>
@@ -88,21 +113,41 @@ const Collection = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16">
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-ry-black mb-4">Collection Not Found</h1>
-              <p className="text-xl text-gray-600 mb-8">
-                The collection you're looking for doesn't exist or has been removed.
-              </p>
-              <a 
-                href="/store"
-                className="inline-block bg-ry-yellow text-ry-black px-6 py-3 rounded-lg font-medium hover:bg-yellow-400 transition-colors"
-              >
-                Browse All Products
-              </a>
+        <div className="pt-16 flex">
+          {/* Fixed Left Sidebar - Filters */}
+          <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+            <div className="p-6">
+              <StoreFilters
+                selectedAge={selectedAge}
+                setSelectedAge={setSelectedAge}
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
+                selectedCollection={undefined}
+                setSelectedCollection={() => {}}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                collections={collections}
+              />
             </div>
-          </main>
+          </div>
+          
+          {/* Main Content */}
+          <div className="flex-1 ml-80">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-ry-black mb-4">Collection Not Found</h1>
+                <p className="text-xl text-gray-600 mb-8">
+                  The collection you're looking for doesn't exist or has been removed.
+                </p>
+                <a 
+                  href="/store"
+                  className="inline-block bg-ry-yellow text-ry-black px-6 py-3 rounded-lg font-medium hover:bg-yellow-400 transition-colors"
+                >
+                  Browse All Products
+                </a>
+              </div>
+            </main>
+          </div>
         </div>
         <Footer />
       </div>
@@ -113,39 +158,59 @@ const Collection = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Collection Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-ry-black mb-6">
-              {collection.page_header || collection.name}
-            </h1>
-            {collection.page_description && (
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                {collection.page_description}
-              </p>
-            )}
+      <div className="pt-16 flex">
+        {/* Fixed Left Sidebar - Filters */}
+        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+          <div className="p-6">
+            <StoreFilters
+              selectedAge={selectedAge}
+              setSelectedAge={setSelectedAge}
+              selectedState={selectedState}
+              setSelectedState={setSelectedState}
+              selectedCollection={collection.id}
+              setSelectedCollection={() => {}} // Disabled since we're in a specific collection
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              collections={collections}
+            />
           </div>
+        </div>
 
-          {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-gray-600">
-              Showing {filteredProducts.length} design{filteredProducts.length !== 1 ? 's' : ''} in {collection.name}
-            </p>
-          </div>
-
-          {/* Products Grid */}
-          <ProductGrid products={filteredProducts} loading={productsLoading} />
-
-          {/* Empty State */}
-          {!productsLoading && filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🎨</div>
-              <h3 className="text-xl font-semibold text-ry-black mb-2">No designs yet</h3>
-              <p className="text-gray-600">This collection doesn't have any designs yet. Check back soon!</p>
+        {/* Main Content */}
+        <div className="flex-1 ml-80">
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            {/* Collection Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold text-ry-black mb-6">
+                {collection.page_header || collection.name}
+              </h1>
+              {collection.page_description && (
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  {collection.page_description}
+                </p>
+              )}
             </div>
-          )}
-        </main>
+
+            {/* Results Count */}
+            <div className="mb-8">
+              <p className="text-gray-600">
+                Showing {filteredProducts.length} design{filteredProducts.length !== 1 ? 's' : ''} in {collection.name}
+              </p>
+            </div>
+
+            {/* Products Grid */}
+            <ProductGrid products={filteredProducts} loading={productsLoading} />
+
+            {/* Empty State */}
+            {!productsLoading && filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🎨</div>
+                <h3 className="text-xl font-semibold text-ry-black mb-2">No designs found</h3>
+                <p className="text-gray-600">Try adjusting your search or age filters to find more designs.</p>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
 
       <Footer />
