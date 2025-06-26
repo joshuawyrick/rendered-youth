@@ -65,14 +65,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         <div className="px-4 py-2 space-y-1 text-center">
           <a 
             href="/" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             Home
           </a>
           <a 
             href="/store" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             Shop
@@ -82,28 +82,28 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <div className="pl-6 space-y-1">
             <a 
               href="/store?age=4-7" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-sm transition-colors"
+              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
               onClick={closeMobileMenu}
             >
               Ages 4-7
             </a>
             <a 
               href="/store?age=8-10" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-sm transition-colors"
+              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
               onClick={closeMobileMenu}
             >
               Ages 8-10
             </a>
             <a 
               href="/store?age=11-13" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-sm transition-colors"
+              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
               onClick={closeMobileMenu}
             >
               Ages 11-13
             </a>
             <a 
               href="/store?age=14-17" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-sm transition-colors border-b border-gray-700"
+              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors border-b border-gray-700"
               onClick={closeMobileMenu}
             >
               Ages 14-17
@@ -112,28 +112,28 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
           <a 
             href="/creators" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             Creators
           </a>
           <a 
             href="/training-program" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             Future Founders
           </a>
           <a 
             href="/how-it-works" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             How It Works
           </a>
           <a 
             href="/about" 
-            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+            className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
             onClick={closeMobileMenu}
           >
             About
@@ -145,7 +145,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               {isCreator && (
                 <a 
                   href="/creator/dashboard" 
-                  className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
                   onClick={closeMobileMenu}
                 >
                   <User className="h-4 w-4 mr-2 inline" />
@@ -155,7 +155,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               {isAdmin && (
                 <a 
                   href="/admin" 
-                  className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-base font-medium transition-colors border-b border-gray-700"
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-3 text-lg font-medium transition-colors border-b border-gray-700"
                   onClick={closeMobileMenu}
                 >
                   <Settings className="h-4 w-4 mr-2 inline" />

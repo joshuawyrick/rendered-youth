@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { AgeFilterChips } from '@/components/ui/age-filter-chips';
@@ -22,13 +21,13 @@ const HeroSection = () => {
     <section className="bg-ry-white py-12 sm:py-16 lg:py-20 xl:py-32 min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-ry-black mb-6 sm:mb-8 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-ry-black mb-6 sm:mb-8 leading-tight">
             Kids Draw It
             <span className="block text-ry-yellow mt-2">We Render It</span>
             <span className="block mt-2">You Wear It</span>
           </h1>
           
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 sm:mb-10 lg:mb-12 max-w-3xl mx-auto px-4 leading-relaxed">
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-600 mb-8 sm:mb-10 lg:mb-12 max-w-3xl mx-auto px-4 leading-relaxed">
             A magical marketplace where children's black marker masterpieces 
             become real T-shirts. Upload, create, and wear imagination.
           </p>
