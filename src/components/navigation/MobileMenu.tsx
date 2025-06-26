@@ -39,11 +39,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const [showAgeGroups, setShowAgeGroups] = useState(true);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      fetchCollections();
-      fetchNavigationSettings();
-    }
-  }, [isMobileMenuOpen]);
+    // Fetch data when component mounts, not just when menu opens
+    fetchCollections();
+    fetchNavigationSettings();
+  }, []);
 
   const fetchCollections = async () => {
     try {
@@ -62,16 +61,24 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
   const fetchNavigationSettings = async () => {
     try {
+      // Remove authentication requirement for this query
       const { data, error } = await supabase
         .from('platform_settings')
         .select('setting_value')
         .eq('setting_key', 'show_age_groups_in_nav')
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching navigation settings:', error);
+        return;
+      }
+      
+      // Default to true if no setting exists
       setShowAgeGroups(data?.setting_value !== 'false');
     } catch (error) {
       console.error('Error fetching navigation settings:', error);
+      // Default to true on error
+      setShowAgeGroups(true);
     }
   };
 
