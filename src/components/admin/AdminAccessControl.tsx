@@ -46,13 +46,16 @@ const AdminAccessControl = ({ children }: AdminAccessControlProps) => {
       setLoading(false);
       setHasChecked(true);
       
-      // Only show access denied toast if user is not admin AND we've completed the check
-      if (!adminStatus) {
-        toast({
-          title: "Access Denied",
-          description: "You don't have admin privileges",
-          variant: "destructive",
-        });
+      // Only show access denied toast if user is authenticated, check is complete, and they're not an admin
+      if (user && !adminStatus && hasChecked === false) {
+        // Use setTimeout to ensure this runs after state updates
+        setTimeout(() => {
+          toast({
+            title: "Access Denied",
+            description: "You don't have admin privileges",
+            variant: "destructive",
+          });
+        }, 100);
       }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
