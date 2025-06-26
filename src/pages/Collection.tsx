@@ -61,7 +61,10 @@ const Collection = () => {
   };
 
   const filteredProducts = collection 
-    ? filterProducts(products, { selectedCollection: collection.id })
+    ? filterProducts(products, { 
+        selectedCollection: collection.id,
+        searchTerm: ''
+      })
     : [];
 
   if (loading) {
