@@ -36,6 +36,7 @@ const CollectionManager = () => {
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deletingSubcollection, setDeletingSubcollection] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -96,6 +97,36 @@ const CollectionManager = () => {
 
   const handleEditDialogUpdate = () => {
     fetchCollections();
+  };
+
+  const handleDeleteSubcollection = async (subcollectionId: string) => {
+    setDeletingSubcollection(subcollectionId);
+    
+    try {
+      const { error } = await supabase
+        .from('subcollections')
+        .delete()
+        .eq('id', subcollectionId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setSubcollections(prev => prev.filter(sc => sc.id !== subcollectionId));
+      
+      toast({
+        title: "Success",
+        description: "Subcollection deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting subcollection:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subcollection",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingSubcollection(null);
+    }
   };
 
   if (loading) {
@@ -230,7 +261,11 @@ const CollectionManager = () => {
                         <button className="p-1 hover:bg-gray-100 rounded">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-1 hover:bg-gray-100 rounded text-red-600">
+                        <button 
+                          onClick={() => handleDeleteSubcollection(subcollection.id)}
+                          disabled={deletingSubcollection === subcollection.id}
+                          className="p-1 hover:bg-gray-100 rounded text-red-600 disabled:opacity-50"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
