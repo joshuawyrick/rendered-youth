@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
@@ -15,7 +14,7 @@ const About = () => {
     {
       name: "Joshua Wyrick",
       role: "Co-Founder & Serial Entrepreneur",
-      bio: "Tucker's father and serial entrepreneur who believes kids should learn entrepreneurship early. His mission is to help children earn money from a young age so they can pay for college or pursue any future endeavor.",
+      bio: "Tucker's father and serial entrepreneur whose mission is to inspire children to be entrepreneurs, teach them along the way, and allow them to earn money from a young age so they can pay for college or pursue any future endeavor.",
       avatar: "👨"
     },
     {
