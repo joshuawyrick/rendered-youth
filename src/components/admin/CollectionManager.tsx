@@ -1,10 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Edit, Trash2, FolderOpen } from 'lucide-react';
+import CollectionEditDialog from './CollectionEditDialog';
+import NavigationSettings from './NavigationSettings';
 
 interface Collection {
   id: string;
@@ -13,6 +14,8 @@ interface Collection {
   slug: string;
   is_active: boolean;
   sort_order: number;
+  page_header: string | null;
+  page_description: string | null;
   created_at: string;
 }
 
@@ -31,6 +34,8 @@ const CollectionManager = () => {
   const [subcollections, setSubcollections] = useState<Subcollection[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -84,35 +89,13 @@ const CollectionManager = () => {
     }
   };
 
-  const toggleCollectionStatus = async (collection: Collection) => {
-    try {
-      const { error } = await supabase
-        .from('collections')
-        .update({ is_active: !collection.is_active })
-        .eq('id', collection.id);
+  const handleEditCollection = (collection: Collection) => {
+    setEditingCollection(collection);
+    setEditDialogOpen(true);
+  };
 
-      if (error) throw error;
-
-      setCollections(prev => 
-        prev.map(c => 
-          c.id === collection.id 
-            ? { ...c, is_active: !c.is_active }
-            : c
-        )
-      );
-
-      toast({
-        title: "Success",
-        description: `Collection ${collection.is_active ? 'deactivated' : 'activated'}`,
-      });
-    } catch (error) {
-      console.error('Error updating collection:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update collection",
-        variant: "destructive",
-      });
-    }
+  const handleEditDialogUpdate = () => {
+    fetchCollections();
   };
 
   if (loading) {
@@ -132,6 +115,9 @@ const CollectionManager = () => {
           New Collection
         </RYButton>
       </div>
+
+      {/* Navigation Settings */}
+      <NavigationSettings />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Collections List */}
@@ -155,7 +141,12 @@ const CollectionManager = () => {
                       <h4 className="font-medium">{collection.name}</h4>
                       {!collection.is_active && (
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                          Inactive
+                          Hidden
+                        </span>
+                      )}
+                      {collection.is_active && (
+                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
+                          Visible in Nav
                         </span>
                       )}
                     </div>
@@ -169,7 +160,7 @@ const CollectionManager = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleCollectionStatus(collection);
+                        handleEditCollection(collection);
                       }}
                       className="p-1 hover:bg-gray-100 rounded"
                     >
@@ -251,6 +242,13 @@ const CollectionManager = () => {
           )}
         </RYCard>
       </div>
+
+      <CollectionEditDialog
+        collection={editingCollection}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={handleEditDialogUpdate}
+      />
     </div>
   );
 };

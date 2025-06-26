@@ -1,0 +1,153 @@
+
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import TopNav from '@/components/navigation/TopNav';
+import Footer from '@/components/layout/Footer';
+import ProductGrid from '@/components/store/ProductGrid';
+import { useStoreData } from '@/hooks/useStoreData';
+import { filterProducts } from '@/utils/storeFilters';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  page_header: string | null;
+  page_description: string | null;
+  is_active: boolean;
+}
+
+const Collection = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  
+  const { products, loading: productsLoading } = useStoreData();
+
+  useEffect(() => {
+    if (slug) {
+      fetchCollection();
+    }
+  }, [slug]);
+
+  const fetchCollection = async () => {
+    if (!slug) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          setNotFound(true);
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      setCollection(data);
+    } catch (error) {
+      console.error('Error fetching collection:', error);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = collection 
+    ? filterProducts(products, { selectedCollection: collection.id })
+    : [];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16">
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ry-yellow mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading collection...</p>
+            </div>
+          </main>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (notFound || !collection) {
+    return (
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16">
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-ry-black mb-4">Collection Not Found</h1>
+              <p className="text-xl text-gray-600 mb-8">
+                The collection you're looking for doesn't exist or has been removed.
+              </p>
+              <a 
+                href="/store"
+                className="inline-block bg-ry-yellow text-ry-black px-6 py-3 rounded-lg font-medium hover:bg-yellow-400 transition-colors"
+              >
+                Browse All Products
+              </a>
+            </div>
+          </main>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-ry-white">
+      <TopNav />
+      
+      <div className="pt-16">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Collection Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-ry-black mb-6">
+              {collection.page_header || collection.name}
+            </h1>
+            {collection.page_description && (
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                {collection.page_description}
+              </p>
+            )}
+          </div>
+
+          {/* Results Count */}
+          <div className="mb-8">
+            <p className="text-gray-600">
+              Showing {filteredProducts.length} design{filteredProducts.length !== 1 ? 's' : ''} in {collection.name}
+            </p>
+          </div>
+
+          {/* Products Grid */}
+          <ProductGrid products={filteredProducts} loading={productsLoading} />
+
+          {/* Empty State */}
+          {!productsLoading && filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🎨</div>
+              <h3 className="text-xl font-semibold text-ry-black mb-2">No designs yet</h3>
+              <p className="text-gray-600">This collection doesn't have any designs yet. Check back soon!</p>
+            </div>
+          )}
+        </main>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Collection;

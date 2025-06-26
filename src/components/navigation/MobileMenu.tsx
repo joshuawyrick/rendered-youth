@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { User, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MobileMenuProps {
   isMobileMenuOpen: boolean;
@@ -15,6 +16,14 @@ interface MobileMenuProps {
   handleSignInClick: () => void;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
 const MobileMenu: React.FC<MobileMenuProps> = ({
   isMobileMenuOpen,
   user,
@@ -26,6 +35,46 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   handleBecomeCreatorClick,
   handleSignInClick
 }) => {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [showAgeGroups, setShowAgeGroups] = useState(true);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      fetchCollections();
+      fetchNavigationSettings();
+    }
+  }, [isMobileMenuOpen]);
+
+  const fetchCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('id, name, slug, is_active, sort_order')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+    }
+  };
+
+  const fetchNavigationSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('setting_value')
+        .eq('setting_key', 'show_age_groups_in_nav')
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setShowAgeGroups(data?.setting_value !== 'false');
+    } catch (error) {
+      console.error('Error fetching navigation settings:', error);
+    }
+  };
+
   if (!isMobileMenuOpen) return null;
 
   // Prevent background scroll when menu is open
@@ -78,36 +127,64 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             Shop
           </a>
           
-          {/* Mobile Shop by Age submenu */}
+          {/* Mobile Shop submenu */}
           <div className="pl-6 space-y-1">
-            <a 
-              href="/store?age=4-7" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
-              onClick={closeMobileMenu}
-            >
-              Ages 4-7
-            </a>
-            <a 
-              href="/store?age=8-10" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
-              onClick={closeMobileMenu}
-            >
-              Ages 8-10
-            </a>
-            <a 
-              href="/store?age=11-13" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
-              onClick={closeMobileMenu}
-            >
-              Ages 11-13
-            </a>
-            <a 
-              href="/store?age=14-17" 
-              className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors border-b border-gray-700"
-              onClick={closeMobileMenu}
-            >
-              Ages 14-17
-            </a>
+            {/* Age groups */}
+            {showAgeGroups && (
+              <>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-3 py-2">
+                  Shop by Age
+                </div>
+                <a 
+                  href="/store?age=4-7" 
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Ages 4-7
+                </a>
+                <a 
+                  href="/store?age=8-10" 
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Ages 8-10
+                </a>
+                <a 
+                  href="/store?age=11-13" 
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Ages 11-13
+                </a>
+                <a 
+                  href="/store?age=14-17" 
+                  className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Ages 14-17
+                </a>
+              </>
+            )}
+
+            {/* Collections */}
+            {collections.length > 0 && (
+              <>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-3 py-2">
+                  Collections
+                </div>
+                {collections.map((collection) => (
+                  <a 
+                    key={collection.id}
+                    href={`/collections/${collection.slug}`} 
+                    className="block text-ry-yellow hover:text-ry-white px-3 py-2 text-base transition-colors"
+                    onClick={closeMobileMenu}
+                  >
+                    {collection.name}
+                  </a>
+                ))}
+                <div className="border-b border-gray-700 mt-2"></div>
+              </>
+            )}
           </div>
 
           <a 
