@@ -52,26 +52,37 @@ const Store = () => {
           {/* Tucker's Tees Special Section */}
           <TuckersTees />
           
-          <StoreFilters
-            selectedAge={selectedAge}
-            setSelectedAge={setSelectedAge}
-            selectedState={selectedState}
-            setSelectedState={setSelectedState}
-            selectedCollection={selectedCollection}
-            setSelectedCollection={setSelectedCollection}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            collections={collections}
-          />
+          {/* Main Content with Sidebar Layout */}
+          <div className="flex flex-col lg:flex-row gap-8 mt-12">
+            {/* Left Sidebar - Filters */}
+            <aside className="lg:w-64 flex-shrink-0">
+              <div className="sticky top-24">
+                <StoreFilters
+                  selectedAge={selectedAge}
+                  setSelectedAge={setSelectedAge}
+                  selectedState={selectedState}
+                  setSelectedState={setSelectedState}
+                  selectedCollection={selectedCollection}
+                  setSelectedCollection={setSelectedCollection}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  collections={collections}
+                />
+              </div>
+            </aside>
 
-          {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-gray-600">
-              Showing {filteredProducts.length} design{filteredProducts.length !== 1 ? 's' : ''}
-            </p>
+            {/* Main Content - Products */}
+            <div className="flex-1">
+              {/* Results Count */}
+              <div className="mb-6">
+                <p className="text-gray-600 text-sm">
+                  Showing {filteredProducts.length} design{filteredProducts.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+
+              <ProductGrid products={filteredProducts} loading={false} />
+            </div>
           </div>
-
-          <ProductGrid products={filteredProducts} loading={false} />
         </main>
       </div>
 

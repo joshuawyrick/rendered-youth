@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { fetchProductsForStore } from '@/services/productService';
+import { fetchProductsForStore } from '@/services/storeProductService';
 
 interface Collection {
   id: string;
@@ -16,7 +16,7 @@ interface Product {
   creatorName: string;
   creatorAge: string;
   creatorState: string;
-  creatorUserId: string; // Added creator user ID for linking
+  creatorUserId: string;
   imageUrl?: string;
   collectionId?: string;
   design?: {
@@ -45,39 +45,53 @@ export const useStoreData = () => {
       setLoading(true);
       const data = await fetchProductsForStore();
 
+      console.log('Raw store data received:', data);
+
       // Get unique collections from products
       const uniqueCollections = data
-        .filter(product => product.collections)
-        .map(product => product.collections)
+        .filter(product => product.collections && product.collection_id)
+        .map(product => ({
+          id: product.collection_id,
+          name: product.collections?.name || 'Unnamed Collection',
+          slug: product.collections?.slug || ''
+        }))
         .filter((collection, index, self) => 
-          collection && self.findIndex(c => c && c.name === collection.name) === index
-        )
-        .map(collection => ({
-          id: collection?.name || '',
-          name: collection?.name || '',
-          slug: collection?.slug || ''
-        }));
+          self.findIndex(c => c.id === collection.id) === index
+        );
       
+      console.log('Processed collections:', uniqueCollections);
       setCollections(uniqueCollections);
 
-      // Format products for display
-      const formattedProducts: Product[] = data.map((product: any) => ({
-        id: product.id,
-        title: product.title,
-        slug: product.title.toLowerCase().replace(/\s+/g, '-'),
-        price: Number(product.base_price || product.price),
-        creatorName: `${product.designs?.profiles?.first_name || ''} ${product.designs?.profiles?.last_name || ''}`.trim(),
-        creatorAge: product.designs?.profiles?.age_bracket || 'Unknown',
-        creatorState: 'Unknown', // We'll need to add state to profiles table later
-        creatorUserId: product.designs?.user_id || '', // Added creator user ID
-        imageUrl: product.designs?.file_url,
-        collectionId: product.collection_id,
-        design: {
-          file_url: product.designs?.file_url || ''
-        },
-        variants: product.product_variants || []
-      }));
+      // Format products for display with better state handling
+      const formattedProducts: Product[] = data.map((product: any) => {
+        const profile = product.designs?.profiles;
+        const creatorName = profile 
+          ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown Creator'
+          : 'Unknown Creator';
+        
+        const creatorAge = profile?.age_bracket || 'Unknown';
+        const creatorState = profile?.state || 'Unknown';
 
+        return {
+          id: product.id,
+          title: product.title,
+          slug: product.title.toLowerCase().replace(/\s+/g, '-'),
+          price: Number(product.base_price || product.price),
+          creatorName,
+          creatorAge,
+          creatorState,
+          creatorUserId: product.designs?.user_id || '',
+          imageUrl: product.designs?.file_url,
+          collectionId: product.collection_id,
+          design: {
+            file_url: product.designs?.file_url || ''
+          },
+          variants: product.product_variants || []
+        };
+      });
+
+      console.log('Formatted products for store:', formattedProducts);
+      console.log('Sample product data:', formattedProducts[0]);
       setProducts(formattedProducts);
     } catch (error) {
       console.error('Error fetching store data:', error);

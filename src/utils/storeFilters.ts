@@ -32,13 +32,38 @@ export const filterProducts = (
 ) => {
   const { selectedAge, selectedState, selectedCollection, searchTerm } = filters;
   
+  console.log('Filtering products with filters:', filters);
+  console.log('Total products before filtering:', products.length);
+  
   return products.filter(product => {
+    // Age filter - match against creator age bracket
     const matchesAge = !selectedAge || product.creatorAge === selectedAge;
+    
+    // State filter - match against creator state
     const matchesState = !selectedState || product.creatorState === selectedState;
+    
+    // Collection filter - match against product collection ID
     const matchesCollection = !selectedCollection || product.collectionId === selectedCollection;
+    
+    // Search filter - search in title and creator name (case insensitive)
     const matchesSearch = !searchTerm || 
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.creatorName.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesAge && matchesState && matchesCollection && matchesSearch;
+
+    const passes = matchesAge && matchesState && matchesCollection && matchesSearch;
+    
+    if (!passes) {
+      console.log(`Product ${product.title} filtered out:`, {
+        matchesAge,
+        matchesState, 
+        matchesCollection,
+        matchesSearch,
+        productAge: product.creatorAge,
+        productState: product.creatorState,
+        productCollection: product.collectionId
+      });
+    }
+    
+    return passes;
   });
 };

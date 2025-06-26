@@ -23,11 +23,11 @@ const AgeFilterChips = ({ selectedAge, onAgeChange, className }: AgeFilterChipsP
           key={range.value}
           onClick={() => onAgeChange(selectedAge === range.value ? undefined : range.value)}
           className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-            "border border-ry-black hover:shadow-md",
+            "px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 w-full text-left",
+            "border border-gray-300 hover:shadow-sm",
             selectedAge === range.value
-              ? "bg-ry-yellow text-ry-black"
-              : "bg-ry-white text-ry-black hover:bg-gray-50"
+              ? "bg-ry-yellow text-ry-black border-ry-yellow"
+              : "bg-white text-gray-700 hover:bg-gray-50"
           )}
         >
           {range.label}
