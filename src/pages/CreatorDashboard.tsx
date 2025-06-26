@@ -55,7 +55,10 @@ const CreatorDashboard = () => {
       const designsData = designs || [];
       setTotalDesigns(designsData.length);
       
-      const pendingDesignsData = designsData.filter(d => d.status === 'pending_review');
+      // Include both pending_review and mockups_ready in pending designs
+      const pendingDesignsData = designsData.filter(d => 
+        d.status === 'pending_review' || d.status === 'mockups_ready'
+      );
       setPendingApprovalsCount(pendingDesignsData.length);
       setPendingDesigns(pendingDesignsData);
 
