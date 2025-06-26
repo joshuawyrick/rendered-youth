@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import CreatorDashboardHeader from '@/components/creator/CreatorDashboardHeader';
@@ -40,11 +39,12 @@ const CreatorDashboard = () => {
     if (!user) return;
 
     try {
-      // Fetch designs
+      // Fetch designs - EXCLUDE consumed designs from creator view
       const { data: designs, error: designsError } = await supabase
         .from('designs')
         .select('*')
         .eq('user_id', user.id)
+        .neq('status', 'consumed') // Filter out consumed designs
         .order('created_at', { ascending: false });
 
       if (designsError) {

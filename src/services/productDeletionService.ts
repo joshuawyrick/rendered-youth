@@ -154,9 +154,9 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
     }
     console.log('✅ Product record deleted');
 
-    // Step 6: Mark the design as "consumed" instead of deleting it
+    // Step 6: Mark the design as "consumed" (hidden from creators but accessible to admins)
     if (product.design_id) {
-      console.log('Step 6: Marking design as consumed...');
+      console.log('Step 6: Marking design as consumed (hidden from creator)...');
       
       const { error: designError } = await supabase
         .from('designs')
@@ -171,7 +171,7 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
         throw new Error(`Failed to mark design as consumed: ${designError.message}`);
       }
       
-      console.log('✅ Design marked as consumed');
+      console.log('✅ Design marked as consumed (hidden from creator view)');
     }
 
     console.log('🎉 DELETION COMPLETED SUCCESSFULLY');

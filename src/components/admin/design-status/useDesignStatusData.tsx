@@ -26,7 +26,7 @@ export const useDesignStatusData = () => {
           design_mockups(id),
           design_selections(id)
         `)
-        .neq('status', 'consumed') // Filter out consumed designs
+        .neq('status', 'consumed') // Keep this filter to prevent consumed designs from appearing in active admin workflow
         .order('created_at', { ascending: false });
 
       if (error) {
