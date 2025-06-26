@@ -287,6 +287,57 @@ export type Database = {
           },
         ]
       }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_amount: number
+          discount_type: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          usage_count: number
+          usage_limit: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount: number
+          discount_type: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           created_at: string

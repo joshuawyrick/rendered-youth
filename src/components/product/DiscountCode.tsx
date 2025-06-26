@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { RYButton } from '@/components/ui/ry-button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { fetchDiscountCode } from '@/services/discountCodeService';
 
 interface DiscountCodeProps {
   onDiscountApplied: (discount: { code: string; amount: number; type: 'percentage' | 'fixed' }) => void;
@@ -13,34 +14,36 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ onDiscountApplied }) => {
   const [isApplying, setIsApplying] = useState(false);
   const { toast } = useToast();
 
-  // Mock discount codes for demo
-  const validCodes = {
-    'SAVE10': { amount: 10, type: 'percentage' as const },
-    'STUDENT': { amount: 15, type: 'percentage' as const },
-    'WELCOME5': { amount: 5, type: 'fixed' as const },
-    'CREATOR20': { amount: 20, type: 'percentage' as const }
-  };
-
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return;
 
     setIsApplying(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const code = discountCode.toUpperCase();
-    if (validCodes[code as keyof typeof validCodes]) {
-      const discount = validCodes[code as keyof typeof validCodes];
-      onDiscountApplied({ code, ...discount });
+    try {
+      const code = await fetchDiscountCode(discountCode.trim());
+      
+      if (code) {
+        onDiscountApplied({ 
+          code: code.code, 
+          amount: code.discount_amount, 
+          type: code.discount_type 
+        });
+        toast({
+          title: "Discount Applied!",
+          description: `${code.code} discount has been applied to your order.`,
+        });
+      } else {
+        toast({
+          title: "Invalid Code",
+          description: "The discount code you entered is not valid or has expired.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error applying discount:', error);
       toast({
-        title: "Discount Applied!",
-        description: `${code} discount has been applied to your order.`,
-      });
-    } else {
-      toast({
-        title: "Invalid Code",
-        description: "The discount code you entered is not valid.",
+        title: "Error",
+        description: "There was an error applying the discount code. Please try again.",
         variant: "destructive",
       });
     }
@@ -65,9 +68,6 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ onDiscountApplied }) => {
         >
           {isApplying ? 'Applying...' : 'Apply'}
         </RYButton>
-      </div>
-      <div className="mt-2 text-xs text-gray-500">
-        Try: SAVE10, STUDENT, WELCOME5, or CREATOR20
       </div>
     </div>
   );
