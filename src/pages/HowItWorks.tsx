@@ -30,9 +30,9 @@ const HowItWorks = () => {
     {
       number: 4,
       icon: "💵",
-      title: "Kids Get Paid",
-      description: "Young creators earn money from each sale, encouraging their artistic journey.",
-      details: "Creators earn 70% of each sale. Payments are processed weekly through Stripe Connect, helping kids learn about entrepreneurship."
+      title: "Kids Share in Profits",
+      description: "Young creators share in the profits from each sale, encouraging their artistic journey.",
+      details: "Creators share in the profits after we handle design, printing, and shipping. Payments are processed weekly through Stripe Connect, helping kids learn about entrepreneurship."
     }
   ];
 
@@ -50,7 +50,7 @@ const HowItWorks = () => {
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
               From sketch to shirt in four simple steps. Join thousands of young artists 
-              who are turning their creativity into wearable art and earning money.
+              who are turning their creativity into wearable art and sharing in the profits.
             </p>
           </div>
         </section>
@@ -90,7 +90,7 @@ const HowItWorks = () => {
               Ready to Start Creating?
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join our community of young artists and start earning from your creativity today.
+              Join our community of young artists and start sharing in the profits from your creativity today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="/auth/sign-up" className="bg-ry-yellow text-ry-black px-8 py-3 rounded-lg font-medium hover:bg-yellow-600 transition-colors">

@@ -25,8 +25,8 @@ const ProcessSection = () => {
     {
       number: 4,
       icon: "💵",
-      title: "Kids Get Paid",
-      description: "Young creators earn money from each sale, encouraging their artistic journey."
+      title: "Kids Share in Profits",
+      description: "Young creators share in the profits from each sale, encouraging their artistic journey."
     }
   ];
 
