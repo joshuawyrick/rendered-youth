@@ -1,15 +1,17 @@
 
 import React from 'react';
 import { cn } from "@/lib/utils";
+import { Loader2 } from 'lucide-react';
 
 interface RYButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
   children: React.ReactNode;
 }
 
 const RYButton = React.forwardRef<HTMLButtonElement, RYButtonProps>(
-  ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', loading = false, children, disabled, ...props }, ref) => {
     const baseClasses = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ry-yellow focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
     
     const variants = {
@@ -28,8 +30,10 @@ const RYButton = React.forwardRef<HTMLButtonElement, RYButtonProps>(
       <button
         className={cn(baseClasses, variants[variant], sizes[size], className)}
         ref={ref}
+        disabled={disabled || loading}
         {...props}
       >
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {children}
       </button>
     );

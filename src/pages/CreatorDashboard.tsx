@@ -27,6 +27,7 @@ const CreatorDashboard = () => {
   const [recentDesigns, setRecentDesigns] = useState<RecentDesign[]>([]);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const [totalDesigns, setTotalDesigns] = useState(0);
+  const [pendingDesigns, setPendingDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +54,10 @@ const CreatorDashboard = () => {
 
       const designsData = designs || [];
       setTotalDesigns(designsData.length);
-      setPendingApprovalsCount(designsData.filter(d => d.status === 'pending_review').length);
+      
+      const pendingDesignsData = designsData.filter(d => d.status === 'pending_review');
+      setPendingApprovalsCount(pendingDesignsData.length);
+      setPendingDesigns(pendingDesignsData);
 
       // Format recent designs with placeholder sales data
       const formattedDesigns: RecentDesign[] = designsData.slice(0, 5).map(design => ({
@@ -114,7 +118,7 @@ const CreatorDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RecentDesignsSection recentDesigns={recentDesigns} />
           <div className="space-y-8">
-            <PendingApprovalsSection />
+            <PendingApprovalsSection pendingDesigns={pendingDesigns} />
             <QuickActionsSection />
           </div>
         </div>
