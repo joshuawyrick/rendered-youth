@@ -38,6 +38,9 @@ const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
         <a href="/creators" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
           Creators
         </a>
+        <a href="/training-program" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
+          Training Program
+        </a>
         <a href="/how-it-works" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-sm font-medium transition-colors">
           How It Works
         </a>

@@ -20,6 +20,7 @@ import AgeVerification from "./pages/AgeVerification";
 import ParentVerification from "./pages/ParentVerification";
 import About from "./pages/About";
 import HowItWorks from "./pages/HowItWorks";
+import TrainingProgram from "./pages/TrainingProgram";
 import Creators from "./pages/Creators";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/parent-verify" element={<ParentVerification />} />
           <Route path="/about" element={<About />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/training-program" element={<TrainingProgram />} />
           <Route path="/creators" element={<Creators />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
