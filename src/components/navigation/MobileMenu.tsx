@@ -39,7 +39,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const [showAgeGroups, setShowAgeGroups] = useState(true);
 
   useEffect(() => {
-    // Fetch data when component mounts, not just when menu opens
     fetchCollections();
     fetchNavigationSettings();
   }, []);
@@ -61,38 +60,32 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
   const fetchNavigationSettings = async () => {
     try {
-      // Remove authentication requirement for this query
       const { data, error } = await supabase
         .from('platform_settings')
         .select('setting_value')
         .eq('setting_key', 'show_age_groups_in_nav')
-        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching navigation settings:', error);
         return;
       }
       
-      // Default to true if no setting exists
       setShowAgeGroups(data?.setting_value !== 'false');
     } catch (error) {
       console.error('Error fetching navigation settings:', error);
-      // Default to true on error
       setShowAgeGroups(true);
     }
   };
 
-  if (!isMobileMenuOpen) return null;
-
   // Prevent background scroll when menu is open
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -108,16 +101,18 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     }
   };
 
+  if (!isMobileMenuOpen) return null;
+
   return (
-    <>
+    <div className="lg:hidden fixed inset-0 z-50">
       {/* Backdrop overlay */}
       <div 
-        className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+        className="absolute inset-0 bg-black bg-opacity-50"
         onClick={closeMobileMenu}
       />
       
-      {/* Mobile menu */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 bottom-0 bg-ry-black border-t border-ry-yellow shadow-lg z-40 overflow-y-auto">
+      {/* Mobile menu panel */}
+      <div className="absolute top-16 left-0 right-0 bottom-0 bg-ry-black border-t border-ry-yellow shadow-lg overflow-y-auto">
         <div className="px-4 py-2 space-y-1 text-center">
           <a 
             href="/" 
@@ -298,7 +293,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
