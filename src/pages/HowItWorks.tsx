@@ -8,28 +8,28 @@ const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      icon: "✏️",
+      image: "/lovable-uploads/2c73c1b4-2414-4246-9bab-1674daf4bf59.png",
       title: "Draw & Upload",
       description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform.",
       details: "Children can upload JPG, PNG, or SVG files up to 25MB. We accept all types of drawings made with black sharpies or digital equivalents."
     },
     {
       number: 2,
-      icon: "🎨",
+      image: "/lovable-uploads/a62f0304-e913-4aba-8f6c-816c0db736c6.png",
       title: "We Perfect It",
       description: "Our team creates beautiful mockups and prepares your child's design for printing.",
       details: "Our artists create 4 different mockup options showing how the design would look on a t-shirt. The young creator then chooses their favorite."
     },
     {
       number: 3,
-      icon: "👕",
+      image: "/lovable-uploads/32425366-0bed-4dd2-9953-374508b3e36a.png",
       title: "Live on Our Site",
       description: "We put your rendered design live on our website for people to purchase as high-quality T-shirts.",
       details: "Published designs become available in our store with sizes from S to XXL. We use premium quality materials and printing techniques."
     },
     {
       number: 4,
-      icon: "💵",
+      image: "/lovable-uploads/29bec9e1-d973-40d6-a867-cbaa6be55d00.png",
       title: "Kids Share in Profits",
       description: "Young creators share in the profits from each sale, encouraging their artistic journey.",
       details: "Creators share in the profits after we handle design, printing, and shipping. Payments are processed weekly through Stripe Connect, helping kids learn about entrepreneurship."
@@ -67,7 +67,13 @@ const HowItWorks = () => {
                     </div>
                   </div>
                   
-                  <div className="text-5xl mb-6 mt-4">{step.icon}</div>
+                  <div className="mb-6 mt-4 flex justify-center">
+                    <img 
+                      src={step.image} 
+                      alt={step.title}
+                      className="w-24 h-24 object-contain rounded-lg shadow-md"
+                    />
+                  </div>
                   <h3 className="text-2xl font-bold text-ry-black mb-4">
                     {step.title}
                   </h3>

@@ -6,25 +6,25 @@ const ProcessSection = () => {
   const steps = [
     {
       number: 1,
-      icon: "✏️",
+      image: "/lovable-uploads/2c73c1b4-2414-4246-9bab-1674daf4bf59.png",
       title: "Draw & Upload",
       description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform."
     },
     {
       number: 2,
-      icon: "🎨",
+      image: "/lovable-uploads/a62f0304-e913-4aba-8f6c-816c0db736c6.png",
       title: "We Perfect It",
       description: "Our team creates beautiful mockups and prepares your child's design for printing."
     },
     {
       number: 3,
-      icon: "👕",
+      image: "/lovable-uploads/32425366-0bed-4dd2-9953-374508b3e36a.png",
       title: "Live on Our Site",
       description: "We put your rendered design live on our website for people to purchase as high-quality T-shirts."
     },
     {
       number: 4,
-      icon: "💵",
+      image: "/lovable-uploads/29bec9e1-d973-40d6-a867-cbaa6be55d00.png",
       title: "Kids Share in Profits",
       description: "Young creators share in the profits from each sale, encouraging their artistic journey."
     }
@@ -51,7 +51,13 @@ const ProcessSection = () => {
                 </div>
               </div>
               
-              <div className="text-4xl mb-4 mt-2">{step.icon}</div>
+              <div className="mb-4 mt-2 flex justify-center">
+                <img 
+                  src={step.image} 
+                  alt={step.title}
+                  className="w-20 h-20 object-contain rounded-lg"
+                />
+              </div>
               <h3 className="text-xl font-semibold text-ry-black mb-3">
                 {step.title}
               </h3>
