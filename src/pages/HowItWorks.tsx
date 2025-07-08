@@ -8,7 +8,7 @@ const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      image: "/lovable-uploads/2c73c1b4-2414-4246-9bab-1674daf4bf59.png",
+      image: "/lovable-uploads/436f6fdb-bb40-4a63-a912-d0affa7aba5f.png",
       title: "Draw & Upload",
       description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform.",
       details: "Children can upload JPG, PNG, or SVG files up to 25MB. We accept all types of drawings made with black sharpies or digital equivalents."
