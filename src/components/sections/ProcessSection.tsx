@@ -55,7 +55,7 @@ const ProcessSection = () => {
                 <img 
                   src={step.image} 
                   alt={step.title}
-                  className="w-20 h-20 object-contain rounded-lg"
+                  className="w-30 h-30 object-contain rounded-lg"
                 />
               </div>
               <h3 className="text-xl font-semibold text-ry-black mb-3">
