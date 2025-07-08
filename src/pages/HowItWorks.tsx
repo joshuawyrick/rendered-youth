@@ -29,7 +29,7 @@ const HowItWorks = () => {
     },
     {
       number: 4,
-      image: "/lovable-uploads/29bec9e1-d973-40d6-a867-cbaa6be55d00.png",
+      image: "/lovable-uploads/98f40132-69fb-40d6-84ba-f3614fe24125.png",
       title: "Kids Share in Profits",
       description: "Young creators share in the profits from each sale, encouraging their artistic journey.",
       details: "Creators share in the profits after we handle design, printing, and shipping. Payments are processed weekly through Stripe Connect, helping kids learn about entrepreneurship."
