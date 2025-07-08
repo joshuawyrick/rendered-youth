@@ -71,7 +71,7 @@ const HowItWorks = () => {
                     <img 
                       src={step.image} 
                       alt={step.title}
-                      className="w-44 h-44 object-cover rounded-lg shadow-md bg-white"
+                      className="w-56 h-56 object-contain rounded-lg shadow-md bg-white p-2"
                     />
                   </div>
                   <h3 className="text-2xl font-bold text-ry-black mb-4">
