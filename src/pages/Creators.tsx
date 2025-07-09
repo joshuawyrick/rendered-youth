@@ -1,56 +1,34 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import { AgeFilterChips } from '@/components/ui/age-filter-chips';
 import { CreatorCard } from '@/components/ui/creator-card';
 import { Search } from 'lucide-react';
+import { fetchCreatorProfiles, type CreatorProfile } from '@/services/creatorService';
 
 const Creators = () => {
   const [selectedAge, setSelectedAge] = useState<string | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
+  const [creators, setCreators] = useState<CreatorProfile[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
-  const mockCreators = [
-    {
-      id: '1',
-      displayName: 'Emma Rodriguez',
-      username: 'emma-r',
-      ageBracket: '8-10',
-      state: 'CA',
-      designCount: 5,
-      avatarUrl: undefined
-    },
-    {
-      id: '2',
-      displayName: 'Lucas Thompson',
-      username: 'lucas-t',
-      ageBracket: '11-13',
-      state: 'NY',
-      designCount: 3,
-      avatarUrl: undefined
-    },
-    {
-      id: '3',
-      displayName: 'Sofia Chen',
-      username: 'sofia-c',
-      ageBracket: '4-7',
-      state: 'TX',
-      designCount: 7,
-      avatarUrl: undefined
-    },
-    {
-      id: '4',
-      displayName: 'Max Johnson',
-      username: 'max-j',
-      ageBracket: '14-17',
-      state: 'FL',
-      designCount: 2,
-      avatarUrl: undefined
+  useEffect(() => {
+    loadCreators();
+  }, []);
+
+  const loadCreators = async () => {
+    try {
+      const creatorProfiles = await fetchCreatorProfiles();
+      setCreators(creatorProfiles);
+    } catch (error) {
+      console.error('Error loading creators:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredCreators = mockCreators.filter(creator => {
+  const filteredCreators = creators.filter(creator => {
     const matchesAge = !selectedAge || creator.ageBracket === selectedAge;
     const matchesSearch = !searchTerm || 
       creator.displayName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -110,12 +88,23 @@ const Creators = () => {
             </p>
           </div>
 
-          {/* Creators Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredCreators.map((creator) => (
-              <CreatorCard key={creator.id} creator={creator} />
-            ))}
-          </div>
+          {/* Loading State */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 rounded-lg h-64"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Creators Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCreators.map((creator) => (
+                <CreatorCard key={creator.id} creator={creator} />
+              ))}
+            </div>
+          )}
 
           {/* Empty State */}
           {filteredCreators.length === 0 && (

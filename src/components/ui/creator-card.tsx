@@ -68,7 +68,7 @@ const CreatorCard = ({ creator, className }: CreatorCardProps) => {
       <RYButton 
         variant="primary" 
         size="sm"
-        onClick={() => window.location.href = `/creator/${creator.username}`}
+        onClick={() => window.location.href = `/creator/${creator.id}`}
       >
         Shop Collection
       </RYButton>
