@@ -15,6 +15,9 @@ import TrainingProgram from "./pages/TrainingProgram";
 import AdminDashboard from "./pages/AdminDashboard";
 import CreatorDashboard from "./pages/CreatorDashboard";
 import CreatorUpload from "./pages/CreatorUpload";
+import CreatorProfile from "./pages/CreatorProfile";
+import CreatorPublicProfile from "./pages/CreatorPublicProfile";
+import DesignReview from "./pages/DesignReview";
 import Auth from "./pages/Auth";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
@@ -40,6 +43,9 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/upload" element={<CreatorUpload />} />
+          <Route path="/creator/profile" element={<CreatorProfile />} />
+          <Route path="/creator/:creatorId" element={<CreatorPublicProfile />} />
+          <Route path="/design-review" element={<DesignReview />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/sign-in" element={<Auth />} />
           <Route path="*" element={<NotFound />} />

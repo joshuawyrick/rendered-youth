@@ -1,5 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import TopNav from '@/components/navigation/TopNav';
+import Footer from '@/components/layout/Footer';
 import CreatorDashboardHeader from '@/components/creator/CreatorDashboardHeader';
 import CreatorStatsGrid from '@/components/creator/CreatorStatsGrid';
 import RecentDesignsSection from '@/components/creator/RecentDesignsSection';
@@ -82,14 +84,17 @@ const CreatorDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ry-white p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-24 bg-gray-200 rounded"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
+      <div className="min-h-screen bg-ry-white">
+        <TopNav />
+        <div className="pt-16 p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-24 bg-gray-200 rounded"></div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -99,33 +104,37 @@ const CreatorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-ry-white">
-      <div className="max-w-7xl mx-auto p-6">
-        <CreatorDashboardHeader />
-        
-        <CreatorStatsGrid
-          totalEarnings={earningsSummary.total_earnings}
-          teesSold={earningsSummary.total_sales}
-          pendingApprovalsCount={pendingApprovalsCount}
-          totalDesigns={totalDesigns}
-        />
+      <TopNav />
+      <div className="pt-16">
+        <div className="max-w-7xl mx-auto p-6">
+          <CreatorDashboardHeader />
+          
+          <CreatorStatsGrid
+            totalEarnings={earningsSummary.total_earnings}
+            teesSold={earningsSummary.total_sales}
+            pendingApprovalsCount={pendingApprovalsCount}
+            totalDesigns={totalDesigns}
+          />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <CreatorEarningsSection />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="lg:col-span-2">
+              <CreatorEarningsSection />
+            </div>
+            <div>
+              <StripeConnectSetup />
+            </div>
           </div>
-          <div>
-            <StripeConnectSetup />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <RecentDesignsSection recentDesigns={recentDesigns} />
-          <div className="space-y-8">
-            <PendingApprovalsSection pendingDesigns={pendingDesigns} />
-            <QuickActionsSection />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <RecentDesignsSection recentDesigns={recentDesigns} />
+            <div className="space-y-8">
+              <PendingApprovalsSection pendingDesigns={pendingDesigns} />
+              <QuickActionsSection />
+            </div>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
