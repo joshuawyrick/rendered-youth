@@ -6,7 +6,7 @@ const ProcessSection = () => {
   const steps = [
     {
       number: 1,
-      image: "/lovable-uploads/2c73c1b4-2414-4246-9bab-1674daf4bf59.png",
+      image: "/lovable-uploads/436f6fdb-bb40-4a63-a912-d0affa7aba5f.png",
       title: "Draw & Upload",
       description: "Kids grab their favorite black sharpie and a plain white piece of paper, create amazing artwork, then upload it to our platform."
     },
@@ -24,7 +24,7 @@ const ProcessSection = () => {
     },
     {
       number: 4,
-      image: "/lovable-uploads/29bec9e1-d973-40d6-a867-cbaa6be55d00.png",
+      image: "/lovable-uploads/98f40132-69fb-40d6-84ba-f3614fe24125.png",
       title: "Kids Share in Profits",
       description: "Young creators share in the profits from each sale, encouraging their artistic journey."
     }
@@ -55,7 +55,7 @@ const ProcessSection = () => {
                 <img 
                   src={step.image} 
                   alt={step.title}
-                  className="w-30 h-30 object-cover rounded-lg bg-white"
+                  className="w-56 h-56 object-contain rounded-lg shadow-md bg-white p-2"
                 />
               </div>
               <h3 className="text-xl font-semibold text-ry-black mb-3">
