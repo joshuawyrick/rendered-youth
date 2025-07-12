@@ -37,7 +37,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
   return (
     <RYCard className="p-4">
       <h3 className="text-lg font-semibold mb-4">Add Size & Color Variant</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
           <Label>Size</Label>
           <Select value={newVariantSize} onValueChange={onNewVariantSizeChange}>
@@ -87,10 +87,10 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
         <div className="md:col-span-2">
           <RYButton 
             onClick={onAddVariant}
-            className="w-full"
+            className="w-full h-12 text-base font-semibold"
             disabled={!newVariantSize || !newVariantColor}
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Add Variant
           </RYButton>
         </div>

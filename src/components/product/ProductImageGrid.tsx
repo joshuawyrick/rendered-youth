@@ -95,7 +95,7 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
         <strong>Tip:</strong> Drag images to reorder them. The first image will be the main product image.
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-2">
         {images.map((image, index) => {
           const isMainImage = index === 0; // First image is now the main image
           const isDraggedOver = dragOverIndex === index;
@@ -110,10 +110,10 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, index)}
             >
-              {/* Drag Handle */}
-              <div className="absolute top-1 left-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="bg-black/50 rounded p-1">
-                  <GripVertical className="w-3 h-3 text-white" />
+              {/* Drag Handle - Always visible on mobile, hover on desktop */}
+              <div className="absolute top-2 left-2 z-10 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/70 rounded p-1.5">
+                  <GripVertical className="w-4 h-4 md:w-3 md:h-3 text-white" />
                 </div>
               </div>
 
@@ -125,16 +125,16 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
                 />
               </div>
               
-              {/* Remove button - only show for non-main images or if there are multiple images */}
+              {/* Remove button - Always visible on mobile, hover on desktop */}
               {(!isMainImage || images.length > 1) && (
-                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 right-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                   <RYButton
                     variant="secondary"
                     size="sm"
                     onClick={() => handleRemoveImage(index)}
-                    className="p-1 h-6 w-6 bg-red-500 hover:bg-red-600 text-white"
+                    className="p-1.5 h-8 w-8 md:h-6 md:w-6 bg-red-500 hover:bg-red-600 text-white"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4 md:w-3 md:h-3" />
                   </RYButton>
                 </div>
               )}
@@ -143,11 +143,11 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
                 placeholder="Alt text"
                 value={image.altText}
                 onChange={(e) => handleAltTextChange(index, e.target.value)}
-                className="mt-1 text-xs"
+                className="mt-2 text-sm md:text-xs h-10 md:h-8"
               />
               
               {isMainImage && (
-                <div className="absolute bottom-8 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-12 md:bottom-8 left-1 bg-blue-500 text-white text-sm md:text-xs px-2 py-1 rounded">
                   Main Image
                 </div>
               )}
