@@ -115,17 +115,15 @@ export const useProductEdit = (product: Product | null, open: boolean) => {
 
       if (deleteError) throw deleteError;
 
-      // Insert new variants
-      const variantInserts = variants
-        .filter(variant => variant.isAvailable)
-        .map(variant => ({
-          product_id: product.id,
-          variant_type: 'size_color',
-          size: variant.size,
-          color: variant.color,
-          price_adjustment: variant.priceAdjustment,
-          is_available: variant.isAvailable
-        }));
+      // Insert new variants (including both available and unavailable)
+      const variantInserts = variants.map(variant => ({
+        product_id: product.id,
+        variant_type: 'size_color',
+        size: variant.size,
+        color: variant.color,
+        price_adjustment: variant.priceAdjustment,
+        is_available: variant.isAvailable
+      }));
 
       if (variantInserts.length > 0) {
         const { error: variantsError } = await supabase
