@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Badge } from '@/components/ui/badge';
@@ -7,23 +7,70 @@ import {
   MoreHorizontal,
   Calendar,
   Package,
-  Eye
+  Eye,
+  Trash2
 } from 'lucide-react';
 import type { Design, StatusInfo } from './types';
+import { deleteDesignAndRelatedData } from '@/services/designDeletionService';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DesignCardProps {
   design: Design;
   statusInfo: StatusInfo;
   onDesignClick: (design: Design) => void;
   onPublishClick: (design: Design) => void;
+  onDelete?: (designId: string) => void;
 }
 
 const DesignCard: React.FC<DesignCardProps> = ({
   design,
   statusInfo,
   onDesignClick,
-  onPublishClick
+  onPublishClick,
+  onDelete
 }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteDesignAndRelatedData(design.id);
+      if (result.success) {
+        toast({
+          title: "Design Deleted",
+          description: "Design and all related data have been removed.",
+        });
+        onDelete?.(design.id);
+      } else {
+        toast({
+          title: "Delete Failed",
+          description: result.error || "Failed to delete design.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <RYCard className="p-4 hover:shadow-lg transition-shadow">
       <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
@@ -77,6 +124,35 @@ const DesignCard: React.FC<DesignCardProps> = ({
           >
             <Eye className="h-4 w-4" />
           </RYButton>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <RYButton
+                variant="destructive"
+                size="sm"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+              </RYButton>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Design</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{design.title}"? This will permanently remove the design and all related data including mockups, selections, and products. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Design'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </RYCard>
