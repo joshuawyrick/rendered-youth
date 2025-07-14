@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from 'lucide-react';
 
 interface RYButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   children: React.ReactNode;
@@ -17,7 +17,8 @@ const RYButton = React.forwardRef<HTMLButtonElement, RYButtonProps>(
     const variants = {
       primary: "bg-ry-yellow text-ry-black hover:bg-yellow-600",
       secondary: "border-2 border-ry-yellow text-ry-yellow hover:bg-ry-yellow hover:text-ry-black",
-      outline: "border border-ry-black text-ry-black hover:bg-ry-black hover:text-ry-white"
+      outline: "border border-ry-black text-ry-black hover:bg-ry-black hover:text-ry-white",
+      destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
     };
     
     const sizes = {
