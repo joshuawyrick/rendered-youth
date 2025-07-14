@@ -49,20 +49,7 @@ export const useDesignReview = (designId: string | null) => {
       console.log('Design data:', designData);
       setDesign(designData);
 
-      // Check if already selected
-      const { data: selectionData } = await supabase
-        .from('design_selections')
-        .select('selected_mockup_id')
-        .eq('design_id', designId)
-        .single();
-
-      if (selectionData) {
-        console.log('Selection already exists:', selectionData);
-        setSubmitted(true);
-        setSelectedMockup(selectionData.selected_mockup_id);
-      }
-
-      // Fetch mockups
+      // Fetch mockups first
       const { data: mockupsData, error: mockupsError } = await supabase
         .from('design_mockups')
         .select('id, mockup_url, mockup_order')
@@ -75,7 +62,31 @@ export const useDesignReview = (designId: string | null) => {
       }
 
       console.log('Mockups data:', mockupsData);
-      setMockups(mockupsData || []);
+      const mockups = mockupsData || [];
+      setMockups(mockups);
+
+      // Check if already selected - only if mockups exist
+      if (mockups.length > 0) {
+        const { data: selectionData } = await supabase
+          .from('design_selections')
+          .select('selected_mockup_id')
+          .eq('design_id', designId)
+          .maybeSingle();
+
+        // Validate that the selected mockup still exists in the current mockups
+        if (selectionData && mockups.some(m => m.id === selectionData.selected_mockup_id)) {
+          console.log('Valid selection already exists:', selectionData);
+          setSubmitted(true);
+          setSelectedMockup(selectionData.selected_mockup_id);
+        } else if (selectionData) {
+          console.log('Selection exists but mockup not found, clearing selection');
+          // Clear invalid selection
+          await supabase
+            .from('design_selections')
+            .delete()
+            .eq('design_id', designId);
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
