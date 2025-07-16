@@ -20,7 +20,7 @@ export const deleteDesignAndRelatedData = async (designId: string): Promise<Desi
       return { success: false, error: 'Failed to delete related products' };
     }
 
-    // 2. Delete design selections
+    // 2. Delete design selections first (they reference mockups)
     const { error: selectionsError } = await supabase
       .from('design_selections')
       .delete()
@@ -31,7 +31,7 @@ export const deleteDesignAndRelatedData = async (designId: string): Promise<Desi
       return { success: false, error: 'Failed to delete design selections' };
     }
 
-    // 3. Delete design mockups
+    // 3. Delete design mockups (after selections are deleted)
     const { error: mockupsError } = await supabase
       .from('design_mockups')
       .delete()
