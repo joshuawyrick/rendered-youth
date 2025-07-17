@@ -51,17 +51,6 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Hero Visual Placeholder */}
-        <div className="mt-12 sm:mt-16 lg:mt-20">
-          <div className="relative mx-auto max-w-4xl px-4">
-            <div className="bg-gray-100 rounded-xl sm:rounded-2xl aspect-[16/9] sm:aspect-[16/9] md:aspect-[16/9] flex items-center justify-center border-2 border-dashed border-ry-yellow">
-              <div className="text-center p-4">
-                <div className="text-4xl sm:text-5xl lg:text-6xl mb-4">👕</div>
-                <p className="text-base sm:text-lg text-gray-600 px-2">Amazing kid art showcase coming soon!</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
