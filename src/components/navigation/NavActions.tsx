@@ -21,7 +21,7 @@ const NavActions: React.FC<NavActionsProps> = ({
   handleSignInClick
 }) => {
   return (
-    <div className="hidden lg:flex items-center space-x-3 xl:space-x-4">
+    <div className="hidden lg:flex items-center space-x-3 xl:space-x-4 absolute right-4">
       <Search className="h-5 w-5 text-ry-yellow hover:text-ry-white cursor-pointer transition-colors" />
       
       {user ? (
