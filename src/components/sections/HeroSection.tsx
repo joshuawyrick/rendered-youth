@@ -21,13 +21,13 @@ const HeroSection = () => {
     <section className="bg-ry-white py-12 sm:py-16 lg:py-20 xl:py-32 min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-ry-black mb-6 sm:mb-8 leading-tight">
+          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-9xl font-bold text-ry-black mb-6 sm:mb-8 leading-tight">
             Kids Draw It
             <span className="block text-ry-yellow mt-2">We Render It</span>
             <span className="block mt-2">You Wear It</span>
           </h1>
           
-          <p className="text-xl sm:text-2xl md:text-3xl text-gray-600 mb-8 sm:mb-10 lg:mb-12 max-w-3xl mx-auto px-4 leading-relaxed">
+          <p className="text-3xl sm:text-4xl md:text-5xl text-gray-600 mb-8 sm:mb-10 lg:mb-12 max-w-3xl mx-auto px-4 leading-relaxed">
             A magical marketplace where children's black marker masterpieces 
             become real T-shirts. Upload, create, and wear imagination.
           </p>
@@ -36,7 +36,7 @@ const HeroSection = () => {
             <RYButton 
               variant="primary" 
               size="lg"
-              className="w-full sm:w-auto min-w-[160px]"
+              className="w-full sm:w-auto min-w-[240px] px-12 py-6 text-xl"
             >
               Shop Designs
             </RYButton>
@@ -44,7 +44,7 @@ const HeroSection = () => {
               variant="outline" 
               size="lg" 
               onClick={handleBecomeCreator}
-              className="bg-ry-black text-ry-yellow hover:bg-gray-800 w-full sm:w-auto min-w-[160px]"
+              className="bg-ry-black text-ry-yellow hover:bg-gray-800 w-full sm:w-auto min-w-[240px] px-12 py-6 text-xl"
             >
               Become a Creator
             </RYButton>
