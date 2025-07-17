@@ -31,7 +31,7 @@ const NavActions: React.FC<NavActionsProps> = ({
               variant="secondary" 
               size="sm"
               onClick={() => window.location.href = '/creator/upload'}
-              className="text-xs xl:text-sm"
+              className="text-sm xl:text-base"
             >
               Upload Art
             </RYButton>
@@ -40,7 +40,7 @@ const NavActions: React.FC<NavActionsProps> = ({
             variant="primary" 
             size="sm"
             onClick={signOut}
-            className="text-xs xl:text-sm"
+            className="text-sm xl:text-base"
           >
             Sign Out
           </RYButton>
@@ -51,7 +51,7 @@ const NavActions: React.FC<NavActionsProps> = ({
             variant="secondary" 
             size="sm"
             onClick={handleBecomeCreatorClick}
-            className="text-xs xl:text-sm"
+            className="text-sm xl:text-base"
           >
             Become a Creator
           </RYButton>
@@ -59,7 +59,7 @@ const NavActions: React.FC<NavActionsProps> = ({
             variant="primary" 
             size="sm"
             onClick={handleSignInClick}
-            className="text-xs xl:text-sm"
+            className="text-sm xl:text-base"
           >
             Sign In
           </RYButton>
