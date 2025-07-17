@@ -32,7 +32,7 @@ const HeroSection = () => {
             become real T-shirts. Upload, create, and wear imagination.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-14 lg:mb-16 px-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-7 lg:mb-8 px-4">
             <RYButton 
               variant="primary" 
               size="lg"
