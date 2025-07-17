@@ -63,7 +63,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       />
       
       {/* Mobile menu panel */}
-      <div className="absolute top-16 left-0 right-0 bottom-0 bg-ry-black border-t border-ry-yellow shadow-lg overflow-y-auto">
+      <div className="absolute top-32 left-0 right-0 bottom-0 bg-ry-black border-t border-ry-yellow shadow-lg overflow-y-auto">
         <div className="px-4 py-2 space-y-1 text-center">
           <MobileMenuItems 
             collections={collections}
