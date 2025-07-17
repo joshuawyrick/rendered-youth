@@ -73,11 +73,11 @@ const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
   return (
     <div className="hidden lg:block">
       <div className="ml-10 flex items-baseline space-x-6 xl:space-x-8">
-        <a href="/" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+        <a href="/" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           Home
         </a>
         <div className="relative group">
-          <a href="/store" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+          <a href="/store" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
             Shop
           </a>
           {/* Shop dropdown */}
@@ -117,16 +117,16 @@ const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
             </div>
           </div>
         </div>
-        <a href="/creators" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+        <a href="/creators" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           Creators
         </a>
-        <a href="/training-program" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+        <a href="/training-program" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           Future Founders
         </a>
-        <a href="/how-it-works" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+        <a href="/how-it-works" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           How It Works
         </a>
-        <a href="/about" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors">
+        <a href="/about" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           About
         </a>
         
@@ -134,13 +134,13 @@ const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
         {user && !profileLoading && (
           <>
             {isCreator && (
-              <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors flex items-center">
+              <a href="/creator/dashboard" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors flex items-center">
                 <User className="h-4 w-4 mr-1" />
                 Creator Dashboard
               </a>
             )}
             {isAdmin && (
-              <a href="/admin" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-base font-medium transition-colors flex items-center">
+              <a href="/admin" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors flex items-center">
                 <Settings className="h-4 w-4 mr-1" />
                 Admin Dashboard
               </a>

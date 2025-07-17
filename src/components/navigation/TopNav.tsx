@@ -38,7 +38,7 @@ const TopNav = () => {
                 <img 
                   src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
                   alt="Rendered Youth" 
-                  className="h-12 sm:h-14 w-auto filter brightness-0 saturate-100"
+                  className="h-16 sm:h-18 w-auto filter brightness-0 saturate-100"
                   style={{ filter: 'brightness(0) saturate(100%) invert(85%) sepia(58%) saturate(586%) hue-rotate(359deg) brightness(102%) contrast(104%)' }}
                 />
               </a>
