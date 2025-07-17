@@ -18,7 +18,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="bg-ry-white py-12 sm:py-16 lg:py-20 xl:py-32 min-h-screen flex items-center">
+    <section className="bg-ry-white pt-12 sm:pt-16 lg:pt-20 xl:pt-32 pb-6 sm:pb-8 lg:pb-10 xl:pb-12 min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="text-center">
           <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-9xl font-bold text-ry-black mb-6 sm:mb-8 leading-tight">
