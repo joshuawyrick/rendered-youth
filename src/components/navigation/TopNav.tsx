@@ -33,7 +33,7 @@ const TopNav = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex justify-between items-center h-full w-full">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 -ml-[100px]">
               <a href="/" className="block">
                 <img 
                   src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
