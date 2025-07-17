@@ -31,9 +31,9 @@ const TopNav = () => {
     <>
       <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex justify-between items-center h-full w-full">
+          <div className="flex justify-between items-center h-full w-full relative">
             {/* Logo */}
-            <div className="flex-shrink-0 -ml-[100px]">
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 flex-shrink-0">
               <a href="/" className="block">
                 <img 
                   src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
