@@ -30,10 +30,10 @@ const TopNav = () => {
   return (
     <>
       <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex justify-between items-center h-full w-full">
-            {/* Logo */}
-            <div className="flex-shrink-0 -ml-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center h-full w-full">
+            {/* Logo - Far left */}
+            <div className="flex-shrink-0">
               <a href="/" className="block">
                 <img 
                   src="/lovable-uploads/23f0546f-a058-438f-a6f8-2cb6f7352d35.png" 
@@ -44,7 +44,7 @@ const TopNav = () => {
               </a>
             </div>
 
-            {/* Desktop Navigation Links */}
+            {/* Desktop Navigation Links - Center */}
             <DesktopNavLinks 
               user={user}
               profileLoading={profileLoading}
@@ -52,7 +52,7 @@ const TopNav = () => {
               isAdmin={isAdmin}
             />
 
-            {/* Right side buttons - Desktop */}
+            {/* Right side buttons - Far right */}
             <NavActions 
               user={user}
               profileLoading={profileLoading}

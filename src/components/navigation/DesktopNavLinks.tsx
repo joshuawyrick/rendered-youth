@@ -72,7 +72,7 @@ const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
 
   return (
     <div className="hidden lg:block flex-1">
-      <div className="flex items-center justify-center space-x-8 xl:space-x-12">
+      <div className="flex items-center justify-center space-x-12 xl:space-x-16 2xl:space-x-20">
         <a href="/" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-xl font-medium transition-colors">
           Home
         </a>
