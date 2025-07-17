@@ -30,7 +30,7 @@ const TopNav = () => {
   return (
     <>
       <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-32">
-        <div className="w-full px-4 sm:px-6 lg:px-8 h-full">
+        <div className="w-full px-8 sm:px-12 lg:px-16 h-full">
           <div className="flex items-center h-full w-full">
             {/* Logo - Far left */}
             <div className="flex-shrink-0">
