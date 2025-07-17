@@ -3,6 +3,7 @@ import React from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import HeroSection from '@/components/sections/HeroSection';
 import FeaturedSection from '@/components/sections/FeaturedSection';
+import ProcessSection from '@/components/sections/ProcessSection';
 import Footer from '@/components/layout/Footer';
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
         <main className="overflow-x-hidden">
           <HeroSection />
           <FeaturedSection />
+          <ProcessSection />
         </main>
       </div>
       <Footer />
