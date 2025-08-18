@@ -29,9 +29,9 @@ const TopNav = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full bg-ry-black shadow-md z-50 h-32">
+      <nav className="fixed top-0 left-0 right-0 bg-ry-black shadow-md z-50 h-32">
         <div className="w-full px-8 sm:px-12 lg:px-16 h-full">
-          <div className="flex items-center h-full w-full">
+          <div className="flex items-center justify-between h-full w-full">
             {/* Logo - Far left */}
             <div className="flex-shrink-0">
               <a href="/" className="block">

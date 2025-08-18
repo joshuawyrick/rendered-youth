@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,51 +11,40 @@ export const useTopNavLogic = () => {
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      checkUserRoles();
-    } else {
-      setIsAdmin(false);
-      setIsCreator(false);
-      setProfileLoading(false);
-    }
-  }, [user]);
-
-  const checkUserRoles = async () => {
+  const checkUserRoles = useCallback(async () => {
     if (!user) return;
     
     setProfileLoading(true);
-    console.log('Checking user roles for user:', user.id);
 
     try {
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      // Fetch both admin status and profile data in parallel for better performance
+      const [adminResponse, profileResponse] = await Promise.all([
+        supabase
+          .from('admin_users')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('account_type')
+          .eq('id', user.id)
+          .maybeSingle()
+      ]);
 
-      if (adminError && adminError.code !== 'PGRST116') {
-        console.error('Error checking admin status:', adminError);
+      // Handle admin status
+      if (adminResponse.error && adminResponse.error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', adminResponse.error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!adminResponse.data);
       }
 
-      setIsAdmin(!!adminData);
-      console.log('Admin status:', !!adminData);
-
-      // Check if user is a creator by checking their profile account_type
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('account_type')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error checking profile:', profileError);
+      // Handle creator status
+      if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
+        console.error('Error checking profile:', profileResponse.error);
         setIsCreator(false);
       } else {
-        const creatorStatus = profileData?.account_type === 'creator';
-        setIsCreator(creatorStatus);
-        console.log('Creator status:', creatorStatus, 'Account type:', profileData?.account_type);
+        setIsCreator(profileResponse.data?.account_type === 'creator');
       }
     } catch (error) {
       console.error('Error in checkUserRoles:', error);
@@ -64,7 +53,17 @@ export const useTopNavLogic = () => {
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      checkUserRoles();
+    } else {
+      setIsAdmin(false);
+      setIsCreator(false);
+      setProfileLoading(false);
+    }
+  }, [user, checkUserRoles]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

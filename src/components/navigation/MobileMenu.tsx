@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useMobileMenuData } from '@/hooks/useMobileMenuData';
+import { useNavigationData } from '@/hooks/useNavigationData';
 import MobileMenuItems from './MobileMenuItems';
 import MobileMenuActions from './MobileMenuActions';
 
@@ -27,7 +27,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   handleBecomeCreatorClick,
   handleSignInClick
 }) => {
-  const { collections, showAgeGroups } = useMobileMenuData();
+  const { collections, showAgeGroups } = useNavigationData();
 
   // Prevent background scroll when menu is open
   useEffect(() => {

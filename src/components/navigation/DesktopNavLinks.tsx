@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { User, Settings } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useNavigationData } from '@/hooks/useNavigationData';
 
 interface DesktopNavLinksProps {
   user: any;
@@ -10,69 +10,17 @@ interface DesktopNavLinksProps {
   isAdmin: boolean;
 }
 
-interface Collection {
-  id: string;
-  name: string;
-  slug: string;
-  is_active: boolean;
-  sort_order: number;
-}
-
 const DesktopNavLinks: React.FC<DesktopNavLinksProps> = ({
   user,
   profileLoading,
   isCreator,
   isAdmin
 }) => {
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [showAgeGroups, setShowAgeGroups] = useState(true);
-
-  useEffect(() => {
-    fetchCollections();
-    fetchNavigationSettings();
-  }, []);
-
-  const fetchCollections = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('collections')
-        .select('id, name, slug, is_active, sort_order')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      setCollections(data || []);
-    } catch (error) {
-      console.error('Error fetching collections:', error);
-    }
-  };
-
-  const fetchNavigationSettings = async () => {
-    try {
-      // Remove authentication requirement for this query
-      const { data, error } = await supabase
-        .from('platform_settings')
-        .select('setting_value')
-        .eq('setting_key', 'show_age_groups_in_nav')
-        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching navigation settings:', error);
-        return;
-      }
-      
-      // Default to true if no setting exists
-      setShowAgeGroups(data?.setting_value !== 'false');
-    } catch (error) {
-      console.error('Error fetching navigation settings:', error);
-      // Default to true on error
-      setShowAgeGroups(true);
-    }
-  };
+  const { collections, showAgeGroups } = useNavigationData();
 
   return (
-    <div className="hidden lg:block flex-1">
-      <div className="flex items-center justify-center space-x-12 xl:space-x-16 2xl:space-x-20">
+    <div className="hidden lg:flex flex-1 items-center justify-center">
+      <div className="flex items-center space-x-8 xl:space-x-12 2xl:space-x-16">
         <a href="/" className="text-ry-yellow hover:text-ry-white px-3 py-2 text-2xl font-medium transition-colors">
           Home
         </a>
