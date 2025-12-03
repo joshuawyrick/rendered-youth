@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Design } from '@/components/admin/product/types';
 
@@ -15,8 +14,6 @@ export interface ProductCreateData {
 }
 
 export const createProductFromDesign = async (design: Design) => {
-  console.log('Creating product from design:', design);
-  
   const { error } = await supabase
     .from('products')
     .insert({
@@ -28,51 +25,30 @@ export const createProductFromDesign = async (design: Design) => {
       status: 'active'
     });
 
-  if (error) {
-    console.error('Error creating product:', error);
-    throw error;
-  }
-  
-  console.log('Product created successfully');
+  if (error) throw error;
 };
 
 export const createProductWithDetails = async (productData: ProductCreateData) => {
-  console.log('Creating product with details:', productData);
-  
   const { data, error } = await supabase
     .from('products')
     .insert(productData)
     .select()
     .single();
 
-  if (error) {
-    console.error('Error creating product with details:', error);
-    throw error;
-  }
-  
-  console.log('Product created with details successfully:', data);
+  if (error) throw error;
   return data;
 };
 
 export const updateProductStatus = async (productId: string, status: string) => {
-  console.log('Updating product status:', productId, status);
-  
   const { error } = await supabase
     .from('products')
     .update({ status })
     .eq('id', productId);
 
-  if (error) {
-    console.error('Error updating product status:', error);
-    throw error;
-  }
-  
-  console.log('Product status updated successfully');
+  if (error) throw error;
 };
 
 export const updateProductDetails = async (productId: string, updates: Partial<ProductCreateData>) => {
-  console.log('Updating product details:', productId, updates);
-  
   const { data, error } = await supabase
     .from('products')
     .update(updates)
@@ -80,11 +56,6 @@ export const updateProductDetails = async (productId: string, updates: Partial<P
     .select()
     .single();
 
-  if (error) {
-    console.error('Error updating product details:', error);
-    throw error;
-  }
-  
-  console.log('Product details updated successfully:', data);
+  if (error) throw error;
   return data;
 };

@@ -1,14 +1,15 @@
-
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { createProductFromDesign, updateProductStatus } from '@/services/productService';
 import type { Design, Product } from '@/components/admin/product/types';
 
-export const useProductActions = (onDataChange: () => void, setProducts: (updater: (prev: Product[]) => Product[]) => void) => {
+type ProductsSetter = (updater: (prev: Product[]) => Product[]) => void;
+
+export const useProductActions = (onDataChange: () => void, setProducts: ProductsSetter) => {
   const [creating, setCreating] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const createProduct = async (design: Design) => {
+  const createProduct = useCallback(async (design: Design) => {
     setCreating(design.id);
     try {
       await createProductFromDesign(design);
@@ -29,18 +30,17 @@ export const useProductActions = (onDataChange: () => void, setProducts: (update
     } finally {
       setCreating(null);
     }
-  };
+  }, [onDataChange, toast]);
 
-  const toggleProductStatus = async (product: Product) => {
+  const toggleProductStatus = useCallback(async (product: Product) => {
+    const newStatus = product.status === 'active' ? 'inactive' : 'active';
+    
     try {
-      const newStatus = product.status === 'active' ? 'inactive' : 'active';
       await updateProductStatus(product.id, newStatus);
 
       setProducts(prev => 
         prev.map(p => 
-          p.id === product.id 
-            ? { ...p, status: newStatus }
-            : p
+          p.id === product.id ? { ...p, status: newStatus } : p
         )
       );
 
@@ -56,7 +56,7 @@ export const useProductActions = (onDataChange: () => void, setProducts: (update
         variant: "destructive",
       });
     }
-  };
+  }, [setProducts, toast]);
 
   return {
     creating,

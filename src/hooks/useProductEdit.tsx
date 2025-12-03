@@ -88,9 +88,7 @@ export const useProductEdit = (product: Product | null, open: boolean) => {
 
     setLoading(true);
     try {
-      console.log('Saving product with description:', description);
-      
-      // Update product basic info including description
+      // Update product basic info
       const { error: productError } = await supabase
         .from('products')
         .update({

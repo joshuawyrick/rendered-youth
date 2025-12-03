@@ -1,3 +1,7 @@
+export interface DesignProfile {
+  first_name: string | null;
+  last_name: string | null;
+}
 
 export interface Design {
   id: string;
@@ -8,10 +12,7 @@ export interface Design {
   user_id: string;
   design_mockups: { id: string }[];
   design_selections: { id: string }[];
-  profiles: {
-    first_name: string | null;
-    last_name: string | null;
-  };
+  profiles: DesignProfile;
 }
 
 export interface StatusInfo {
