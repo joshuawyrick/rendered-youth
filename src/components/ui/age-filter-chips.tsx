@@ -9,10 +9,10 @@ interface AgeFilterChipsProps {
 }
 
 const ageRanges = [
-  { value: '4-7', label: 'Ages 4-7' },
-  { value: '8-10', label: 'Ages 8-10' },
-  { value: '11-13', label: 'Ages 11-13' },
-  { value: '14-17', label: 'Ages 14-17' }
+  { value: '4-7', label: 'Ages 4-7', emoji: '🎨' },
+  { value: '8-10', label: 'Ages 8-10', emoji: '✏️' },
+  { value: '11-13', label: 'Ages 11-13', emoji: '🖌️' },
+  { value: '14-17', label: 'Ages 14-17', emoji: '🎭' }
 ];
 
 const AgeFilterChips = ({ selectedAge, onAgeChange, className }: AgeFilterChipsProps) => {
@@ -23,14 +23,15 @@ const AgeFilterChips = ({ selectedAge, onAgeChange, className }: AgeFilterChipsP
           key={range.value}
           onClick={() => onAgeChange(selectedAge === range.value ? undefined : range.value)}
           className={cn(
-            "px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 w-full text-left",
-            "border border-gray-300 hover:shadow-sm",
+            "px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left",
+            "border-2 flex items-center gap-2",
             selectedAge === range.value
-              ? "bg-ry-yellow text-ry-black border-ry-yellow"
-              : "bg-white text-gray-700 hover:bg-gray-50"
+              ? "bg-accent text-accent-foreground border-accent shadow-md"
+              : "bg-card text-foreground border-border hover:border-accent hover:bg-secondary"
           )}
         >
-          {range.label}
+          <span className="text-lg">{range.emoji}</span>
+          <span>{range.label}</span>
         </button>
       ))}
     </div>

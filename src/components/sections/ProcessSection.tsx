@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RYCard } from '@/components/ui/ry-card';
+import { cn } from '@/lib/utils';
 
 const ProcessSection = () => {
   const steps = [
@@ -31,40 +31,66 @@ const ProcessSection = () => {
   ];
 
   return (
-    <section className="bg-gray-50 py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-secondary py-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+        {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-ry-black mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
             How It Works
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From sketch to shirt in four simple steps
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step) => (
-            <RYCard key={step.number} className="text-center relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <div className="bg-ry-yellow text-ry-black w-8 h-8 rounded-full flex items-center justify-center font-bold">
+        {/* Steps Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {steps.map((step, index) => (
+            <div 
+              key={step.number} 
+              className="relative text-center group"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              {/* Step Number Badge */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                <div className={cn(
+                  "w-14 h-14 rounded-full flex items-center justify-center",
+                  "bg-accent text-accent-foreground border-[3px] border-foreground",
+                  "text-2xl font-bold shadow-md",
+                  "transition-transform duration-300 group-hover:scale-110"
+                )}>
                   {step.number}
                 </div>
               </div>
               
-              <div className="mb-4 mt-2 flex justify-center">
-                <img 
-                  src={step.image} 
-                  alt={step.title}
-                  className="w-56 h-56 object-contain rounded-lg shadow-md bg-white p-2"
-                />
+              {/* Card Content */}
+              <div className={cn(
+                "bg-card border border-border rounded-xl pt-12 pb-6 px-6",
+                "transition-all duration-300",
+                "hover:border-accent hover:shadow-lg hover:-translate-y-1"
+              )}>
+                {/* Step Image */}
+                <div className="mb-6 flex justify-center">
+                  <div className="w-48 h-48 rounded-lg overflow-hidden bg-background shadow-md">
+                    <img 
+                      src={step.image} 
+                      alt={step.title}
+                      className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                </div>
+                
+                {/* Step Title */}
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {step.title}
+                </h3>
+                
+                {/* Step Description */}
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-ry-black mb-3">
-                {step.title}
-              </h3>
-              <p className="text-gray-600">
-                {step.description}
-              </p>
-            </RYCard>
+            </div>
           ))}
         </div>
       </div>
