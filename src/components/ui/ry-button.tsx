@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Loader2 } from 'lucide-react';
 
 interface RYButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'destructive' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   children: React.ReactNode;
@@ -12,19 +11,51 @@ interface RYButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const RYButton = React.forwardRef<HTMLButtonElement, RYButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading = false, children, disabled, ...props }, ref) => {
-    const baseClasses = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ry-yellow focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    const baseClasses = cn(
+      "inline-flex items-center justify-center gap-2 rounded-md font-semibold",
+      "transition-all duration-200 ease-out",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ry-yellow focus-visible:ring-offset-2",
+      "disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none disabled:translate-y-0"
+    );
     
     const variants = {
-      primary: "bg-ry-yellow text-ry-black hover:bg-yellow-600",
-      secondary: "border-2 border-ry-yellow text-ry-yellow hover:bg-ry-yellow hover:text-ry-black",
-      outline: "border border-ry-black text-ry-black hover:bg-ry-black hover:text-ry-white",
-      destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+      // Primary: Yellow with black border and shadow (distinctive RY style)
+      primary: cn(
+        "bg-ry-yellow text-ry-black border-2 border-ry-black",
+        "shadow-button hover:shadow-button-hover",
+        "hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+      ),
+      // Secondary: Outlined black
+      secondary: cn(
+        "bg-transparent text-ry-black border-2 border-ry-black",
+        "hover:bg-ry-black hover:text-white"
+      ),
+      // Outline: Same as secondary (for compatibility)
+      outline: cn(
+        "bg-transparent text-ry-black border-2 border-ry-black",
+        "hover:bg-ry-black hover:text-white"
+      ),
+      // Tertiary: Text only
+      tertiary: cn(
+        "bg-transparent text-ry-black border-none",
+        "hover:text-ry-yellow underline-offset-4 hover:underline"
+      ),
+      // Destructive
+      destructive: cn(
+        "bg-error text-white border-2 border-error-dark",
+        "hover:bg-error-dark"
+      ),
+      // Ghost: minimal
+      ghost: cn(
+        "bg-transparent text-ry-black",
+        "hover:bg-gray-100"
+      ),
     };
     
     const sizes = {
-      sm: "px-3 py-1.5 text-sm",
-      md: "px-6 py-2.5 text-base",
-      lg: "px-8 py-3 text-lg"
+      sm: "h-9 px-4 py-2 text-sm",
+      md: "h-11 px-6 py-3 text-base",
+      lg: "h-12 px-8 py-4 text-lg",
     };
 
     return (
@@ -34,7 +65,7 @@ const RYButton = React.forwardRef<HTMLButtonElement, RYButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {children}
       </button>
     );
