@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -378,7 +378,7 @@ export type Database = {
           id: string
           parent_email: string
           token_hash: string
-          verification_ip_address: unknown | null
+          verification_ip_address: unknown
           verified_at: string | null
         }
         Insert: {
@@ -388,7 +388,7 @@ export type Database = {
           id?: string
           parent_email: string
           token_hash: string
-          verification_ip_address?: unknown | null
+          verification_ip_address?: unknown
           verified_at?: string | null
         }
         Update: {
@@ -398,7 +398,7 @@ export type Database = {
           id?: string
           parent_email?: string
           token_hash?: string
-          verification_ip_address?: unknown | null
+          verification_ip_address?: unknown
           verified_at?: string | null
         }
         Relationships: [
@@ -782,7 +782,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           resource_id: string | null
           resource_type: string | null
@@ -793,7 +793,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           resource_id?: string | null
           resource_type?: string | null
@@ -804,7 +804,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           resource_id?: string | null
           resource_type?: string | null
@@ -861,7 +861,7 @@ export type Database = {
         Row: {
           child_user_id: string | null
           consent_given_at: string
-          consent_ip_address: unknown | null
+          consent_ip_address: unknown
           consent_method: string
           created_at: string
           id: string
@@ -872,7 +872,7 @@ export type Database = {
         Insert: {
           child_user_id?: string | null
           consent_given_at?: string
-          consent_ip_address?: unknown | null
+          consent_ip_address?: unknown
           consent_method?: string
           created_at?: string
           id?: string
@@ -883,7 +883,7 @@ export type Database = {
         Update: {
           child_user_id?: string | null
           consent_given_at?: string
-          consent_ip_address?: unknown | null
+          consent_ip_address?: unknown
           consent_method?: string
           created_at?: string
           id?: string
