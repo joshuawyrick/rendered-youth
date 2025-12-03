@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import DesignActionsDialog from '@/components/admin/DesignActionsDialog';
@@ -13,183 +12,87 @@ import ProductManager from '@/components/admin/ProductManager';
 import TuckersTeesManager from '@/components/admin/TuckersTeesManager';
 import NavigationSettings from '@/components/admin/NavigationSettings';
 import DiscountCodeManager from '@/components/admin/DiscountCodeManager';
-
-interface Design {
-  id: string;
-  title: string;
-  file_url: string;
-  status: string;
-  created_at: string;
-  user_id: string;
-}
+import AdminTabs, { type AdminTabId } from '@/components/admin/AdminTabs';
+import type { Design } from '@/components/admin/design-status/types';
 
 const AdminDashboard = () => {
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'collections' | 'assign' | 'tuckers' | 'navigation' | 'discounts'>('overview');
+  const [activeTab, setActiveTab] = useState<AdminTabId>('overview');
   const designSectionRef = useRef<HTMLDivElement>(null);
 
-  const handleDesignClick = (design: Design) => {
+  const handleDesignClick = useCallback((design: Design) => {
     setSelectedDesign(design);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleDialogComplete = () => {
-    // Trigger a refresh of the data
+  const handleDialogComplete = useCallback(() => {
     setDialogOpen(false);
     setSelectedDesign(null);
-  };
+  }, []);
 
-  const handleStatusClick = (status: string) => {
-    // Switch to overview tab and scroll to designs
+  const handleStatusClick = useCallback((status: string) => {
     setActiveTab('overview');
     
-    // Scroll to the design management section first
     if (designSectionRef.current) {
       designSectionRef.current.scrollIntoView({ 
         behavior: 'smooth',
         block: 'start'
       });
       
-      // Then scroll to the specific status section after a short delay
       setTimeout(() => {
         const statusElement = document.getElementById(`status-${status}`);
-        if (statusElement) {
-          statusElement.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }
+        statusElement?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'center'
+        });
       }, 300);
+    }
+  }, []);
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <>
+            <div className="mb-12">
+              <AdminStats onStatusClick={handleStatusClick} />
+            </div>
+            <div className="mb-12" ref={designSectionRef}>
+              <h2 className="text-2xl font-semibold text-foreground mb-6">
+                Design Management
+              </h2>
+              <DesignStatusCards onDesignClick={handleDesignClick} />
+            </div>
+          </>
+        );
+      case 'products':
+        return <ProductManager />;
+      case 'collections':
+        return <CollectionManager />;
+      case 'assign':
+        return <DesignCollectionAssigner />;
+      case 'discounts':
+        return <DiscountCodeManager />;
+      case 'navigation':
+        return <NavigationSettings />;
+      case 'tuckers':
+        return <TuckersTeesManager />;
+      default:
+        return null;
     }
   };
 
   return (
     <AdminAccessControl>
-      <div className="min-h-screen bg-ry-white">
+      <div className="min-h-screen bg-background">
         <TopNav />
         
         <div className="pt-16">
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <AdminDashboardHeader />
-
-            {/* Navigation Tabs */}
-            <div className="mb-8">
-              <nav className="flex space-x-8">
-                <button
-                  onClick={() => setActiveTab('overview')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'overview'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Overview
-                </button>
-                <button
-                  onClick={() => setActiveTab('products')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'products'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Products
-                </button>
-                <button
-                  onClick={() => setActiveTab('collections')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'collections'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Collections
-                </button>
-                <button
-                  onClick={() => setActiveTab('assign')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'assign'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Assign to Collections
-                </button>
-                <button
-                  onClick={() => setActiveTab('discounts')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'discounts'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Discount Codes
-                </button>
-                <button
-                  onClick={() => setActiveTab('navigation')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'navigation'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Navigation
-                </button>
-                <button
-                  onClick={() => setActiveTab('tuckers')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'tuckers'
-                      ? 'border-ry-yellow text-ry-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Tucker's Tees
-                </button>
-              </nav>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'overview' && (
-              <>
-                {/* Stats Section */}
-                <div className="mb-12">
-                  <AdminStats onStatusClick={handleStatusClick} />
-                </div>
-
-                {/* Design Management Section */}
-                <div className="mb-12" ref={designSectionRef}>
-                  <h2 className="text-2xl font-semibold text-ry-black mb-6">
-                    Design Management
-                  </h2>
-                  <DesignStatusCards onDesignClick={handleDesignClick} />
-                </div>
-              </>
-            )}
-
-            {activeTab === 'products' && (
-              <ProductManager />
-            )}
-
-            {activeTab === 'collections' && (
-              <CollectionManager />
-            )}
-
-            {activeTab === 'assign' && (
-              <DesignCollectionAssigner />
-            )}
-
-            {activeTab === 'discounts' && (
-              <DiscountCodeManager />
-            )}
-
-            {activeTab === 'navigation' && (
-              <NavigationSettings />
-            )}
-
-            {activeTab === 'tuckers' && (
-              <TuckersTeesManager />
-            )}
+            <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            {renderTabContent()}
           </main>
         </div>
 

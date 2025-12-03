@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
@@ -10,7 +10,6 @@ import QuickActionsSection from '@/components/creator/QuickActionsSection';
 import CreatorEarningsSection from '@/components/creator/CreatorEarningsSection';
 import StripeConnectSetup from '@/components/creator/StripeConnectSetup';
 import { useCreatorEarnings } from '@/hooks/useCreatorEarnings';
-import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface RecentDesign {
@@ -22,56 +21,51 @@ interface RecentDesign {
   earnings: number;
 }
 
+interface PendingDesign {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+}
+
 const CreatorDashboard = () => {
   const { user } = useAuth();
   const { summary: earningsSummary } = useCreatorEarnings();
   const [recentDesigns, setRecentDesigns] = useState<RecentDesign[]>([]);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const [totalDesigns, setTotalDesigns] = useState(0);
-  const [pendingDesigns, setPendingDesigns] = useState<any[]>([]);
+  const [pendingDesigns, setPendingDesigns] = useState<PendingDesign[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (!user) return;
 
     try {
-      // Fetch designs - EXCLUDE consumed designs from creator view
-      const { data: designs, error: designsError } = await supabase
+      const { data: designs, error } = await supabase
         .from('designs')
-        .select('*')
+        .select('id, title, status, created_at')
         .eq('user_id', user.id)
-        .neq('status', 'consumed') // Filter out consumed designs
+        .neq('status', 'consumed')
         .order('created_at', { ascending: false });
 
-      if (designsError) {
-        console.error('Error fetching designs:', designsError);
-        return;
-      }
+      if (error) throw error;
 
       const designsData = designs || [];
       setTotalDesigns(designsData.length);
       
-      // Include both pending_review and mockups_ready in pending designs
       const pendingDesignsData = designsData.filter(d => 
         d.status === 'pending_review' || d.status === 'mockups_ready'
       );
       setPendingApprovalsCount(pendingDesignsData.length);
       setPendingDesigns(pendingDesignsData);
 
-      // Format recent designs with placeholder sales data
       const formattedDesigns: RecentDesign[] = designsData.slice(0, 5).map(design => ({
         id: design.id,
         title: design.title,
         status: design.status || 'pending',
         uploadDate: design.created_at,
-        sales: 0, // Will be calculated from actual sales data when available
-        earnings: 0 // Will be calculated from creator_earnings when available
+        sales: 0,
+        earnings: 0
       }));
 
       setRecentDesigns(formattedDesigns);
@@ -80,19 +74,25 @@ const CreatorDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ry-white">
+      <div className="min-h-screen bg-background">
         <TopNav />
         <div className="pt-16 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="animate-pulse space-y-6">
-              <div className="h-24 bg-gray-200 rounded"></div>
+              <div className="h-24 bg-muted rounded" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                  <div key={i} className="h-32 bg-muted rounded" />
                 ))}
               </div>
             </div>
@@ -103,7 +103,7 @@ const CreatorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-ry-white">
+    <div className="min-h-screen bg-background">
       <TopNav />
       <div className="pt-16">
         <div className="max-w-7xl mx-auto p-6">

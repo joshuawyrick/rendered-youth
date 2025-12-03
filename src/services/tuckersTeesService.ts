@@ -1,94 +1,68 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import type { Design, Collection } from '@/types/tuckersTeesTypes';
 
 export const ensureTuckersCollection = async (): Promise<void> => {
-  try {
-    const { data: existing, error: checkError } = await supabase
+  const { data: existing, error: checkError } = await supabase
+    .from('collections')
+    .select('id')
+    .eq('slug', 'tuckers-tees')
+    .maybeSingle();
+
+  if (checkError && checkError.code !== 'PGRST116') {
+    throw checkError;
+  }
+
+  if (!existing) {
+    const { error: createError } = await supabase
       .from('collections')
-      .select('id')
-      .eq('slug', 'tuckers-tees')
-      .maybeSingle();
+      .insert({
+        name: "Tucker's Tees",
+        description: "Special collection from co-founder Tucker",
+        slug: 'tuckers-tees',
+        is_active: true,
+        sort_order: 0
+      });
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      throw checkError;
-    }
-
-    if (!existing) {
-      const { error: createError } = await supabase
-        .from('collections')
-        .insert({
-          name: "Tucker's Tees",
-          description: "Special collection from co-founder Tucker",
-          slug: 'tuckers-tees',
-          is_active: true,
-          sort_order: 0
-        });
-
-      if (createError) {
-        console.error('Error creating Tucker\'s collection:', createError);
-      }
-    }
-  } catch (error) {
-    console.error('Error ensuring Tucker\'s collection:', error);
+    if (createError) throw createError;
   }
 };
 
 export const fetchTuckersData = async () => {
   await ensureTuckersCollection();
   
-  const { data: designsData, error: designsError } = await supabase
-    .from('designs')
-    .select(`
-      id, 
-      title, 
-      status, 
-      file_url, 
-      collection_id, 
-      created_at,
-      user_id
-    `)
-    .eq('status', 'published')
-    .order('created_at', { ascending: false });
+  // Parallel fetch designs and collection
+  const [designsResult, collectionResult] = await Promise.all([
+    supabase
+      .from('designs')
+      .select('id, title, status, file_url, collection_id, created_at, user_id')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('collections')
+      .select('id, name, slug')
+      .eq('slug', 'tuckers-tees')
+      .single()
+  ]);
 
-  if (designsError) throw designsError;
+  if (designsResult.error) throw designsResult.error;
 
-  console.log('Fetched designs:', designsData);
-
-  const userIds = designsData?.map(d => d.user_id).filter(Boolean) || [];
+  const designsData = designsResult.data || [];
+  const userIds = [...new Set(designsData.map(d => d.user_id).filter(Boolean))];
   
-  const { data: profilesData, error: profilesError } = await supabase
+  const { data: profilesData } = await supabase
     .from('profiles')
     .select('id, first_name, last_name')
     .in('id', userIds);
 
-  if (profilesError) {
-    console.error('Profiles query error:', profilesError);
-  }
+  const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
 
-  console.log('Fetched profiles:', profilesData);
-
-  const designsWithProfiles = designsData?.map(design => ({
+  const designsWithProfiles = designsData.map(design => ({
     ...design,
-    profiles: profilesData?.find(p => p.id === design.user_id) || {
-      first_name: 'Unknown',
-      last_name: 'Creator'
-    }
-  })) || [];
-
-  const { data: collection, error: collectionError } = await supabase
-    .from('collections')
-    .select('id, name, slug')
-    .eq('slug', 'tuckers-tees')
-    .single();
-
-  if (collectionError && collectionError.code !== 'PGRST116') {
-    throw collectionError;
-  }
+    profiles: profileMap.get(design.user_id) || { first_name: 'Unknown', last_name: 'Creator' }
+  }));
 
   return {
     designsWithProfiles,
-    collection
+    collection: collectionResult.data
   };
 };
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -11,15 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import MockupUploader from './MockupUploader';
 import { Eye, Upload, X } from 'lucide-react';
-
-interface Design {
-  id: string;
-  title: string;
-  file_url: string;
-  status: string;
-  created_at: string;
-  user_id: string;
-}
+import type { Design } from './design-status/types';
 
 interface DesignActionsDialogProps {
   design: Design | null;
@@ -35,16 +26,20 @@ const DesignActionsDialog = ({
   onComplete 
 }: DesignActionsDialogProps) => {
   const [showUploader, setShowUploader] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const { toast } = useToast();
 
   if (!design) return null;
 
   const handleReject = async () => {
+    setIsRejecting(true);
     try {
-      await supabase
+      const { error } = await supabase
         .from('designs')
         .update({ status: 'rejected' })
         .eq('id', design.id);
+
+      if (error) throw error;
 
       toast({
         title: "Design Rejected",
@@ -61,6 +56,8 @@ const DesignActionsDialog = ({
         description: "Failed to reject design",
         variant: "destructive",
       });
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -68,6 +65,14 @@ const DesignActionsDialog = ({
     setShowUploader(false);
     onComplete();
     onOpenChange(false);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatStatus = (status: string) => {
+    return status.replace(/_/g, ' ');
   };
 
   return (
@@ -82,35 +87,32 @@ const DesignActionsDialog = ({
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-semibold mb-3">Original Design</h3>
-              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+              <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                 <img
                   src={design.file_url}
                   alt={design.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-3">Design Details</h3>
-              <div className="space-y-3">
+              <dl className="space-y-3">
                 <div>
-                  <span className="font-medium">Title:</span>
-                  <p className="text-gray-600">{design.title}</p>
+                  <dt className="font-medium">Title</dt>
+                  <dd className="text-muted-foreground">{design.title}</dd>
                 </div>
                 <div>
-                  <span className="font-medium">Submitted:</span>
-                  <p className="text-gray-600">
-                    {new Date(design.created_at).toLocaleDateString()}
-                  </p>
+                  <dt className="font-medium">Submitted</dt>
+                  <dd className="text-muted-foreground">{formatDate(design.created_at)}</dd>
                 </div>
                 <div>
-                  <span className="font-medium">Status:</span>
-                  <p className="text-gray-600 capitalize">
-                    {design.status.replace('_', ' ')}
-                  </p>
+                  <dt className="font-medium">Status</dt>
+                  <dd className="text-muted-foreground capitalize">{formatStatus(design.status)}</dd>
                 </div>
-              </div>
+              </dl>
 
               <div className="mt-6">
                 <RYButton
@@ -140,9 +142,10 @@ const DesignActionsDialog = ({
                 onClick={handleReject}
                 variant="secondary"
                 className="px-6"
+                disabled={isRejecting}
               >
                 <X className="h-4 w-4 mr-2" />
-                Reject
+                {isRejecting ? 'Rejecting...' : 'Reject'}
               </RYButton>
             </div>
           ) : (

@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Design } from './types';
@@ -7,26 +6,17 @@ export const useDesignStatusData = () => {
   return useQuery({
     queryKey: ['admin-designs-by-status'],
     queryFn: async (): Promise<Design[]> => {
-      // First check if user is admin to ensure proper access
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No authenticated user found');
-        return [];
-      }
+      if (!user) return [];
 
       const { data, error } = await supabase
         .from('designs')
         .select(`
-          id,
-          title,
-          status,
-          created_at,
-          file_url,
-          user_id,
+          id, title, status, created_at, file_url, user_id,
           design_mockups(id),
           design_selections(id)
         `)
-        .neq('status', 'consumed') // Keep this filter to prevent consumed designs from appearing in active admin workflow
+        .neq('status', 'consumed')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -34,39 +24,26 @@ export const useDesignStatusData = () => {
         return [];
       }
 
-      // Fetch profile data separately for each unique user_id
-      const userIds = [...new Set((data || []).map(design => design.user_id))];
-      const { data: profilesData } = await supabase
+      // Batch fetch profiles
+      const userIds = [...new Set((data || []).map(d => d.user_id))];
+      const { data: profiles } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
         .in('id', userIds);
 
-      // Create a map of user profiles for quick lookup
-      const profilesMap = new Map();
-      (profilesData || []).forEach(profile => {
-        profilesMap.set(profile.id, profile);
-      });
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
-      // Transform the data to match our Design interface
-      const transformedData: Design[] = (data || []).map(item => {
-        const profile = profilesMap.get(item.user_id);
-        return {
-          id: item.id,
-          title: item.title,
-          status: item.status,
-          created_at: item.created_at,
-          file_url: item.file_url,
-          user_id: item.user_id,
-          design_mockups: item.design_mockups || [],
-          design_selections: item.design_selections || [],
-          profiles: {
-            first_name: profile?.first_name || null,
-            last_name: profile?.last_name || null
-          }
-        };
-      });
-
-      return transformedData;
+      return (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        status: item.status,
+        created_at: item.created_at,
+        file_url: item.file_url,
+        user_id: item.user_id,
+        design_mockups: item.design_mockups || [],
+        design_selections: item.design_selections || [],
+        profiles: profileMap.get(item.user_id) || { first_name: null, last_name: null }
+      }));
     },
   });
 };
