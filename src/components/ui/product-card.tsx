@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RYCard } from './ry-card';
+import { cn } from '@/lib/utils';
 import { RYButton } from './ry-button';
 
 interface Product {
@@ -29,71 +29,76 @@ interface Product {
 interface ProductCardProps {
   product: Product;
   showViewButton?: boolean;
+  className?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, showViewButton = false }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ 
+  product, 
+  showViewButton = false,
+  className 
+}) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // Navigate to product detail page using product ID
     navigate(`/store/${product.id}`);
   };
 
   const handleViewClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     navigate(`/store/${product.id}`);
   };
 
   return (
-    <RYCard 
-      className="group cursor-pointer overflow-hidden p-0 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+    <div 
+      className={cn(
+        "group flex flex-col bg-card border border-border rounded-xl overflow-hidden cursor-pointer",
+        "transition-all duration-300 ease-out",
+        "hover:border-accent hover:shadow-xl hover:-translate-y-1",
+        className
+      )}
       onClick={handleClick}
     >
       {/* Product Image */}
-      <div className="aspect-square bg-gray-100 overflow-hidden">
+      <div className="relative w-full pt-[100%] bg-secondary overflow-hidden">
         <img
           src={product.design?.file_url || product.imageUrl || '/placeholder.svg'}
           alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
+        {product.variants && product.variants.length > 0 && (
+          <span className="absolute top-3 right-3 px-3 py-1.5 bg-accent text-accent-foreground text-xs font-bold rounded uppercase tracking-wide">
+            {product.variants.filter(v => v.is_available).length} sizes
+          </span>
+        )}
       </div>
 
-      {/* Product Info */}
-      <div className="p-4">
-        <h3 className="font-semibold text-ry-black mb-1 line-clamp-2">
+      {/* Product Content */}
+      <div className="flex flex-col gap-2 p-4">
+        <h3 className="font-semibold text-foreground text-lg leading-tight line-clamp-2">
           {product.title}
         </h3>
         
-        <p className="text-sm text-gray-600 mb-2">
-          by {product.creatorName} • Age {product.creatorAge}
+        <p className="text-sm text-muted-foreground">
+          by <span className="font-semibold text-foreground">{product.creatorName}</span> • Age {product.creatorAge}
         </p>
         
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-lg text-ry-black">
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-xl font-bold text-foreground">
             ${Number(product.price).toFixed(2)}
           </span>
-          
-          {product.variants && product.variants.length > 0 && (
-            <span className="text-xs text-gray-500">
-              {product.variants.filter(v => v.is_available).length} variants
-            </span>
-          )}
         </div>
 
-        {/* View Button for Featured Section */}
         {showViewButton && (
-          <div className="mt-3">
-            <RYButton
-              variant="secondary"
-              size="sm"
-              className="w-full bg-ry-yellow hover:bg-ry-yellow/80 text-ry-black font-semibold"
-              onClick={handleViewClick}
-            >
-              View
-            </RYButton>
-          </div>
+          <RYButton
+            variant="primary"
+            size="sm"
+            className="w-full mt-2"
+            onClick={handleViewClick}
+          >
+            View Design
+          </RYButton>
         )}
       </div>
-    </RYCard>
+    </div>
   );
 };
