@@ -13,26 +13,57 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Verify the user from the token
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+
     const { designId, selectedMockupId } = await req.json();
 
-    // Get design and user details
+    // Get design and verify ownership
     const { data: design } = await supabaseClient
       .from('designs')
-      .select(`
-        id,
-        title,
-        user_id
-      `)
+      .select('id, title, user_id')
       .eq('id', designId)
       .single();
 
     if (!design) {
       throw new Error('Design not found');
+    }
+
+    // Verify the authenticated user owns this design
+    if (design.user_id !== userId) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: You do not own this design" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Get user email from auth.users
@@ -44,13 +75,8 @@ serve(async (req) => {
       .select('user_id');
 
     if (adminUsers && adminUsers.length > 0) {
-      // For now, just log the notification
-      // In production, integrate with Resend or another email service
       console.log(`Admin notification: Creator ${user?.email || 'Unknown'} has selected their favorite design for "${design.title}"`);
       console.log(`Design ID: ${designId}, Selected Mockup ID: ${selectedMockupId}`);
-      
-      // You can add email sending logic here using Resend
-      // Similar to the send-review-notification function
     }
 
     return new Response(
@@ -63,7 +89,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
