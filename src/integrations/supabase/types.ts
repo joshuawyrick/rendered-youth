@@ -926,7 +926,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_public_profile_fields: {
+        Args: { profile_row: Database["public"]["Tables"]["profiles"]["Row"] }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

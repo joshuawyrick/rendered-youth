@@ -3,8 +3,6 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -24,6 +22,21 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { sessionToken, parentEmail }: SendVerificationRequest = await req.json();
 
+    // Input validation
+    if (!sessionToken || typeof sessionToken !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid session token' }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    if (!parentEmail || typeof parentEmail !== 'string' || !parentEmail.includes('@')) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email address' }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -42,6 +55,25 @@ const handler = async (req: Request): Promise<Response> => {
         JSON.stringify({ error: 'Invalid session token' }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
+    }
+
+    // Rate limit: check if a token was already sent recently (within 2 minutes)
+    const { data: recentTokens } = await supabaseClient
+      .from('parent_verification_tokens')
+      .select('created_at')
+      .eq('age_verification_id', ageVerification.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (recentTokens && recentTokens.length > 0) {
+      const lastSent = new Date(recentTokens[0].created_at);
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+      if (lastSent > twoMinutesAgo) {
+        return new Response(
+          JSON.stringify({ error: 'Please wait before requesting another verification email' }),
+          { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
     }
 
     // Generate a secure verification token
@@ -82,7 +114,8 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ parent_email: parentEmail })
       .eq('session_token', sessionToken);
 
-    // Send verification email using the default Resend domain
+    // Send verification email
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const verificationUrl = `${Deno.env.get("SUPABASE_URL")?.replace('supabase.co', 'lovable.app')}/parent-verify?token=${verificationToken}`;
     
     const emailResponse = await resend.emails.send({
@@ -155,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-parent-verification:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

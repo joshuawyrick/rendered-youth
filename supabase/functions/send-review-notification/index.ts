@@ -13,41 +13,71 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Verify the caller is an admin
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const callerId = claimsData.claims.sub;
+
+    // Verify caller is an admin (only admins should trigger review notifications)
+    const { data: adminCheck } = await supabaseClient
+      .from('admin_users')
+      .select('id')
+      .eq('user_id', callerId)
+      .maybeSingle();
+
+    if (!adminCheck) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Admin access required" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { designId } = await req.json();
-    console.log('Processing review notification for design:', designId);
 
     // Get design and user details
     const { data: design, error: designError } = await supabaseClient
       .from('designs')
-      .select(`
-        id,
-        title,
-        user_id
-      `)
+      .select('id, title, user_id')
       .eq('id', designId)
       .single();
 
     if (designError || !design) {
-      console.error('Design fetch error:', designError);
       throw new Error('Design not found');
     }
-
-    console.log('Design found:', design.title);
 
     // Get user email from auth.users
     const { data: { user }, error: userError } = await supabaseClient.auth.admin.getUserById(design.user_id);
 
     if (userError || !user?.email) {
-      console.error('User fetch error:', userError);
       throw new Error('User email not found');
     }
-
-    console.log('User email found:', user.email);
 
     // Check notification preferences
     const { data: notifSettings } = await supabaseClient
@@ -60,7 +90,6 @@ serve(async (req) => {
     if (notifSettings?.email_on_review_ready !== false) {
       console.log(`Sending review notification to ${user.email} for design: ${design.title}`);
       
-      // Try to send email using Resend if API key is available
       const resendApiKey = Deno.env.get('RESEND_API_KEY');
       
       if (resendApiKey) {
@@ -88,14 +117,12 @@ serve(async (req) => {
           if (!emailResponse.ok) {
             const errorText = await emailResponse.text();
             console.error('Resend API error:', errorText);
-            throw new Error('Failed to send email via Resend');
+          } else {
+            const emailResult = await emailResponse.json();
+            console.log('Email sent successfully via Resend:', emailResult.id);
           }
-
-          const emailResult = await emailResponse.json();
-          console.log('Email sent successfully via Resend:', emailResult.id);
         } catch (emailError) {
           console.error('Email sending failed:', emailError);
-          // Continue without failing the entire function
         }
       } else {
         console.log('RESEND_API_KEY not configured, email notification skipped');
@@ -114,7 +141,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error processing notification:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,

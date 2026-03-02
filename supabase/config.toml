@@ -1,1 +1,10 @@
 project_id = "rneamwxblioxlhisxaxr"
+
+[functions.notify-admin-selection]
+verify_jwt = false
+
+[functions.send-review-notification]
+verify_jwt = false
+
+[functions.send-parent-verification]
+verify_jwt = false
