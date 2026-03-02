@@ -21,6 +21,9 @@ import DesignReview from "./pages/DesignReview";
 import Auth from "./pages/Auth";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +51,9 @@ const App = () => (
           <Route path="/design-review" element={<DesignReview />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/sign-in" element={<Auth />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
