@@ -12,7 +12,7 @@ const TrainingProgram = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
+      <div className="pt-40">
         <HeroSection />
         <FeaturesSection />
         <CurriculumSection />

@@ -85,10 +85,10 @@ const Collection = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex">
+        <div className="pt-40 flex">
           {/* Desktop sidebar loading */}
           {!isMobile && (
-            <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+            <div className="fixed left-0 top-40 h-[calc(100vh-10rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
               <div className="p-6">
                 <div className="animate-pulse">
                   <div className="h-6 bg-gray-200 rounded mb-4"></div>
@@ -121,10 +121,10 @@ const Collection = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex">
+        <div className="pt-40 flex">
           {/* Desktop Fixed Left Sidebar - Filters (hidden on mobile) */}
           {!isMobile && (
-            <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+            <div className="fixed left-0 top-40 h-[calc(100vh-10rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
               <div className="p-6">
                 <StoreFilters
                   selectedAge={selectedAge}
@@ -168,10 +168,10 @@ const Collection = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16 flex">
+      <div className="pt-40 flex">
         {/* Desktop Fixed Left Sidebar - Filters (hidden on mobile) */}
         {!isMobile && (
-          <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
+          <div className="fixed left-0 top-40 h-[calc(100vh-10rem)] w-80 bg-white border-r border-gray-200 overflow-y-auto z-10">
             <div className="p-6">
               <StoreFilters
                 selectedAge={selectedAge}

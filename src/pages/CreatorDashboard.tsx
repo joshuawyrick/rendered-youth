@@ -86,7 +86,7 @@ const CreatorDashboard = () => {
     return (
       <div className="min-h-screen bg-background">
         <TopNav />
-        <div className="pt-16 p-6">
+        <div className="pt-40 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="animate-pulse space-y-6">
               <div className="h-24 bg-muted rounded" />
@@ -105,7 +105,7 @@ const CreatorDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
-      <div className="pt-16">
+      <div className="pt-40">
         <div className="max-w-7xl mx-auto p-6">
           <CreatorDashboardHeader />
           
