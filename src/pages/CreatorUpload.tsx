@@ -134,7 +134,7 @@ const CreatorUpload = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
+        <div className="pt-40 flex items-center justify-center min-h-screen">
           <div className="text-2xl text-ry-black">Loading...</div>
         </div>
       </div>
@@ -149,7 +149,7 @@ const CreatorUpload = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
+      <div className="pt-40">
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
           <div className="text-center mb-12">

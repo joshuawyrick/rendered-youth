@@ -11,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       {/* Add top padding to account for fixed navbar with proper mobile spacing */}
-      <div className="pt-16">
+      <div className="pt-40">
         <main className="overflow-x-hidden">
           <HeroSection />
           <FeaturedSection />

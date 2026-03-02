@@ -88,7 +88,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-background">
         <TopNav />
         
-        <div className="pt-16">
+        <div className="pt-40">
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <AdminDashboardHeader />
             <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />

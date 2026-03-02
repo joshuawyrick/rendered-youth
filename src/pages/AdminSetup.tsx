@@ -60,7 +60,7 @@ const AdminSetup = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
+      <div className="pt-40">
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <RYCard className="p-8 text-center">
             <h1 className="text-2xl font-bold text-ry-black mb-4">

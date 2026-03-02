@@ -95,7 +95,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
+        <div className="pt-40 flex items-center justify-center min-h-screen">
           <div className="text-2xl text-ry-black">Loading product...</div>
         </div>
       </div>
@@ -106,7 +106,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
+        <div className="pt-40 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-ry-black mb-4">Product Not Found</h1>
             <p className="text-gray-600">The product you're looking for doesn't exist.</p>
@@ -122,7 +122,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
+      <div className="pt-40">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Left Column - Images */}

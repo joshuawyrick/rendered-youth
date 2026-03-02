@@ -31,7 +31,7 @@ const DesignReview = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
+        <div className="pt-40 flex items-center justify-center min-h-screen">
           <div className="text-2xl text-ry-black">Loading your designs...</div>
         </div>
       </div>
@@ -42,7 +42,7 @@ const DesignReview = () => {
     return (
       <div className="min-h-screen bg-ry-white">
         <TopNav />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
+        <div className="pt-40 flex items-center justify-center min-h-screen">
           <div className="text-2xl text-ry-black">No design ID provided</div>
         </div>
       </div>
@@ -71,7 +71,7 @@ const DesignReview = () => {
     <div className="min-h-screen bg-ry-white">
       <TopNav />
       
-      <div className="pt-16">
+      <div className="pt-40">
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <DesignHeader designTitle={design.title} />
           
