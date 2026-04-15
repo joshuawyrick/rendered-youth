@@ -12,5 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /creator/dashboard
+Disallow: /creator/upload
+Disallow: /creator/profile
+Disallow: /design-review
 
 Sitemap: https://renderedyouth.com/sitemap.xml
