@@ -9,9 +9,15 @@
 // an admin credential and never embed it in frontend code.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const PROTOCOL_VERSION = "2024-11-05";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, mcp-session-id",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const jsonHeaders = {
   ...corsHeaders,
