@@ -69,12 +69,6 @@ const StripeConnectSetup = () => {
               <h4 className="font-medium text-green-800 mb-1">Payment Account Connected</h4>
               <div className="space-y-2 text-sm text-green-700">
                 <div className="flex items-center justify-between">
-                  <span>Account ID:</span>
-                  <code className="bg-green-100 px-2 py-1 rounded text-xs">
-                    {stripeStatus.stripe_connect_account_id}
-                  </code>
-                </div>
-                <div className="flex items-center justify-between">
                   <span>Onboarding:</span>
                   <span className={isOnboardingComplete ? 'text-green-600' : 'text-amber-600'}>
                     {isOnboardingComplete ? '✓ Complete' : '⚠ Pending'}
