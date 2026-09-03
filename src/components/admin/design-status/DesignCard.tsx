@@ -1,17 +1,21 @@
 
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { RYCard } from '@/components/ui/ry-card';
 import { RYButton } from '@/components/ui/ry-button';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   MoreHorizontal,
   Calendar,
   Package,
   Eye,
-  Trash2
+  Trash2,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import type { Design, StatusInfo } from './types';
 import { deleteDesignAndRelatedData } from '@/services/designDeletionService';
+import { generateMockups } from '@/services/mockupGenerationService';
 import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -41,7 +45,33 @@ const DesignCard: React.FC<DesignCardProps> = ({
   onDelete
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const hasAiMockups = design.ai_status === 'ready';
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const result = await generateMockups(design.id);
+      if (result.success) {
+        toast({
+          title: "Designs generated",
+          description: `${result.generated} design${result.generated === 1 ? '' : 's'} ready for the creator to choose from.`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['admin-designs-by-status'] });
+      } else {
+        toast({
+          title: "Generation failed",
+          description: result.error || "Could not generate designs.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -94,16 +124,43 @@ const DesignCard: React.FC<DesignCardProps> = ({
           {new Date(design.created_at).toLocaleDateString()}
         </p>
 
+        {design.ai_status === 'failed' && design.ai_error && (
+          <p className="text-xs text-destructive">
+            AI generation failed: {design.ai_error}
+          </p>
+        )}
+
+        {/* AI generation */}
+        <RYButton
+          variant={hasAiMockups ? 'secondary' : 'primary'}
+          size="sm"
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className="w-full"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4 mr-1" />
+              {hasAiMockups ? 'Regenerate AI Designs' : 'Generate AI Designs'}
+            </>
+          )}
+        </RYButton>
+
         <div className="flex gap-2">
           {design.status === 'pending_review' && (
             <RYButton
-              variant="primary"
+              variant="secondary"
               size="sm"
               onClick={() => onDesignClick(design)}
               className="flex-1"
             >
               <MoreHorizontal className="h-4 w-4 mr-1" />
-              Create Mockups
+              Upload Manually
             </RYButton>
           )}
           {design.status === 'selected' && (

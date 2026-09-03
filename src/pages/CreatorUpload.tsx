@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import TopNav from '@/components/navigation/TopNav';
 import Footer from '@/components/layout/Footer';
 import SecureUploadForm from '@/components/upload/SecureUploadForm';
+import { DesignVision, EMPTY_VISION } from '@/components/upload/DesignVisionFields';
+import { generateMockups } from '@/services/mockupGenerationService';
 import { useAuth } from '@/hooks/useAuth';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useSecureFileUpload } from '@/hooks/useSecureFileUpload';
@@ -12,7 +14,7 @@ import { sanitizeInput, logSecurityEvent } from '@/services/securityService';
 
 const CreatorUpload = () => {
   const [title, setTitle] = useState('');
-  const [inspiration, setInspiration] = useState('');
+  const [vision, setVision] = useState<DesignVision>(EMPTY_VISION);
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const { uploadFile } = useSecureFileUpload();
@@ -37,7 +39,8 @@ const CreatorUpload = () => {
     e.preventDefault();
     
     const sanitizedTitle = sanitizeInput(title.trim());
-    const sanitizedInspiration = sanitizeInput(inspiration.trim());
+    const sanitizedSubject = sanitizeInput(vision.subject.trim());
+    const sanitizedDescription = sanitizeInput(vision.description.trim());
     
     if (!sanitizedTitle) {
       toast({
@@ -48,6 +51,15 @@ const CreatorUpload = () => {
       return;
     }
     
+    if (!sanitizedSubject) {
+      toast({
+        title: "Tell us what you drew",
+        description: "Please describe what your drawing shows so we can render it",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!file) {
       toast({
         title: "Missing artwork",
@@ -84,11 +96,16 @@ const CreatorUpload = () => {
         .insert({
           user_id: user.id,
           title: sanitizedTitle,
-          inspiration: sanitizedInspiration || null,
+          inspiration: sanitizedDescription || null,
+          art_subject: sanitizedSubject,
+          art_description: sanitizedDescription || null,
+          art_colors: sanitizeInput(vision.colors.trim()) || null,
+          art_mood: vision.mood || null,
           file_url: fileUrl,
           file_name: file.name,
           file_size: file.size,
-          status: 'pending_review'
+          status: 'pending_review',
+          ai_status: 'pending'
         })
         .select()
         .single();
@@ -105,11 +122,17 @@ const CreatorUpload = () => {
 
       toast({
         title: "Upload successful!",
-        description: "Your artwork has been submitted for review",
+        description: "We're creating your shirt designs now...",
+      });
+
+      // Kick off AI rendering. The confirmation page polls for the result, so
+      // a slow or failed generation never blocks the creator here.
+      generateMockups(data.id).catch(() => {
+        /* surfaced on the confirmation page and in the admin dashboard */
       });
 
       // Redirect to submission confirmation
-      window.location.href = '/creator/submitted';
+      window.location.href = `/creator/submitted?design=${data.id}`;
     } catch (error) {
       console.error('Upload error:', error);
       
@@ -163,11 +186,11 @@ const CreatorUpload = () => {
 
           <SecureUploadForm
             title={title}
-            inspiration={inspiration}
+            vision={vision}
             file={file}
             dragActive={dragActive}
             setTitle={setTitle}
-            setInspiration={setInspiration}
+            setVision={setVision}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}

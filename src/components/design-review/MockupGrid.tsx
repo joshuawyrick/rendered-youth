@@ -6,6 +6,7 @@ interface Mockup {
   id: string;
   mockup_url: string;
   mockup_order: number;
+  style_label?: string | null;
 }
 
 interface MockupGridProps {
@@ -31,7 +32,7 @@ const MockupGrid = ({ mockups, selectedMockup, onSelectMockup }: MockupGridProps
             <img
               src={mockup.mockup_url}
               alt={`Design option ${mockup.mockup_order}`}
-              className="w-full h-96 object-cover rounded-lg"
+              className="w-full h-96 object-contain rounded-lg bg-white"
               onError={(e) => {
                 console.error('Failed to load mockup image:', mockup.mockup_url);
                 e.currentTarget.src = '/placeholder.svg';
@@ -45,7 +46,7 @@ const MockupGrid = ({ mockups, selectedMockup, onSelectMockup }: MockupGridProps
           </div>
           <div className="text-center mt-4">
             <h3 className="text-lg font-semibold text-ry-black">
-              Option {mockup.mockup_order}
+              {mockup.style_label || `Option ${mockup.mockup_order}`}
             </h3>
           </div>
         </RYCard>

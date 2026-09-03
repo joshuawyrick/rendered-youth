@@ -5,14 +5,15 @@ import { RYButton } from '@/components/ui/ry-button';
 import { useSecureFileUpload } from '@/hooks/useSecureFileUpload';
 import { sanitizeInput } from '@/services/securityService';
 import FileUploadZone from './FileUploadZone';
+import DesignVisionFields, { DesignVision } from './DesignVisionFields';
 
 interface SecureUploadFormProps {
   title: string;
-  inspiration: string;
+  vision: DesignVision;
   file: File | null;
   dragActive: boolean;
   setTitle: (title: string) => void;
-  setInspiration: (inspiration: string) => void;
+  setVision: (vision: DesignVision) => void;
   onDragEnter: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -24,11 +25,11 @@ interface SecureUploadFormProps {
 
 const SecureUploadForm = ({
   title,
-  inspiration,
+  vision,
   file,
   dragActive,
   setTitle,
-  setInspiration,
+  setVision,
   onDragEnter,
   onDragLeave,
   onDragOver,
@@ -43,13 +44,6 @@ const SecureUploadForm = ({
     const sanitizedTitle = sanitizeInput(e.target.value);
     if (sanitizedTitle.length <= 100) { // Enforce length limit
       setTitle(sanitizedTitle);
-    }
-  };
-
-  const handleInspirationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const sanitizedInspiration = sanitizeInput(e.target.value);
-    if (sanitizedInspiration.length <= 500) { // Enforce length limit
-      setInspiration(sanitizedInspiration);
     }
   };
 
@@ -69,22 +63,6 @@ const SecureUploadForm = ({
           required
           disabled={uploading}
           maxLength={100}
-        />
-      </RYCard>
-
-      {/* Inspiration */}
-      <RYCard className="p-6">
-        <label className="block text-lg font-semibold text-ry-black mb-3">
-          Inspiration Notes <span className="text-sm text-gray-500">({inspiration.length}/500)</span>
-        </label>
-        <textarea
-          value={inspiration}
-          onChange={handleInspirationChange}
-          placeholder="Tell us what inspired this design... (optional)"
-          rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ry-yellow focus:border-transparent resize-none"
-          disabled={uploading}
-          maxLength={500}
         />
       </RYCard>
 
@@ -109,6 +87,13 @@ const SecureUploadForm = ({
           onRemoveFile={onRemoveFile}
         />
       </RYCard>
+
+      {/* Guided questions that steer the AI rendering */}
+      <DesignVisionFields
+        vision={vision}
+        setVision={setVision}
+        disabled={uploading}
+      />
 
       {/* Submit Button */}
       <div className="text-center">

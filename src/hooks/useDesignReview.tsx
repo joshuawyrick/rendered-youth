@@ -7,6 +7,7 @@ interface Mockup {
   id: string;
   mockup_url: string;
   mockup_order: number;
+  style_label?: string | null;
 }
 
 interface Design {
@@ -50,7 +51,7 @@ export const useDesignReview = (designId: string | null) => {
       // Fetch mockups first
       const { data: mockupsData, error: mockupsError } = await supabase
         .from('design_mockups')
-        .select('id, mockup_url, mockup_order')
+        .select('id, mockup_url, mockup_order, style_label')
         .eq('design_id', designId)
         .order('mockup_order');
 

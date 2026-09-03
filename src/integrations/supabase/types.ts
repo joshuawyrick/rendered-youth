@@ -166,6 +166,11 @@ export type Database = {
       }
       design_mockups: {
         Row: {
+          generation_batch: number | null
+          is_ai_generated: boolean | null
+          prompt_used: string | null
+          style_key: string | null
+          style_label: string | null
           created_at: string
           design_id: string
           id: string
@@ -173,6 +178,11 @@ export type Database = {
           mockup_url: string
         }
         Insert: {
+          generation_batch?: number | null
+          is_ai_generated?: boolean | null
+          prompt_used?: string | null
+          style_key?: string | null
+          style_label?: string | null
           created_at?: string
           design_id: string
           id?: string
@@ -180,6 +190,11 @@ export type Database = {
           mockup_url: string
         }
         Update: {
+          generation_batch?: number | null
+          is_ai_generated?: boolean | null
+          prompt_used?: string | null
+          style_key?: string | null
+          style_label?: string | null
           created_at?: string
           design_id?: string
           id?: string
@@ -234,6 +249,14 @@ export type Database = {
       }
       designs: {
         Row: {
+          art_colors: string | null
+          art_description: string | null
+          art_mood: string | null
+          art_subject: string | null
+          ai_error: string | null
+          ai_generated_at: string | null
+          ai_generation_count: number | null
+          ai_status: string | null
           collection_id: string | null
           created_at: string
           file_name: string
@@ -248,6 +271,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          art_colors?: string | null
+          art_description?: string | null
+          art_mood?: string | null
+          art_subject?: string | null
+          ai_error?: string | null
+          ai_generated_at?: string | null
+          ai_generation_count?: number | null
+          ai_status?: string | null
           collection_id?: string | null
           created_at?: string
           file_name: string
@@ -262,6 +293,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          art_colors?: string | null
+          art_description?: string | null
+          art_mood?: string | null
+          art_subject?: string | null
+          ai_error?: string | null
+          ai_generated_at?: string | null
+          ai_generation_count?: number | null
+          ai_status?: string | null
           collection_id?: string | null
           created_at?: string
           file_name?: string

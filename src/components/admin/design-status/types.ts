@@ -8,6 +8,8 @@ export interface Design {
   title: string;
   file_url: string;
   status: string;
+  ai_status?: string | null;
+  ai_error?: string | null;
   created_at: string;
   user_id: string;
   design_mockups: { id: string }[];

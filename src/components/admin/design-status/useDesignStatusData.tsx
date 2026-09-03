@@ -12,7 +12,9 @@ export const useDesignStatusData = () => {
       const { data, error } = await supabase
         .from('designs')
         .select(`
-          id, title, status, created_at, file_url, user_id,
+          id, title, status,
+          ai_status,
+          ai_error, created_at, file_url, user_id,
           design_mockups(id),
           design_selections(id)
         `)
