@@ -28,7 +28,9 @@ const StripeConnectSetup = () => {
     );
   }
 
-  const isConnected = stripeStatus?.stripe_connect_account_id;
+  const isConnected = stripeStatus?.stripe_onboarding_completed
+    || stripeStatus?.stripe_charges_enabled
+    || stripeStatus?.stripe_payouts_enabled;
   const isOnboardingComplete = stripeStatus?.stripe_onboarding_completed;
   const canReceivePayments = stripeStatus?.stripe_charges_enabled && stripeStatus?.stripe_payouts_enabled;
 

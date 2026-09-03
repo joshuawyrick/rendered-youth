@@ -13,7 +13,7 @@ export const useStripeConnect = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('stripe_connect_account_id, stripe_onboarding_completed, stripe_charges_enabled, stripe_payouts_enabled')
+        .select('stripe_onboarding_completed, stripe_charges_enabled, stripe_payouts_enabled')
         .eq('id', user.id)
         .single();
 
