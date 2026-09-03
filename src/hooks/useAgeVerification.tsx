@@ -35,16 +35,18 @@ export const useAgeVerification = () => {
       const isMinor = age < 18;
       const requiresParentConsent = age < 13;
 
-      // Store age verification data
-      const { data, error } = await supabase
+      // Store age verification data. The session token is generated client-side so
+      // we never need to read this sensitive row back from the database.
+      const sessionToken = crypto.randomUUID();
+
+      const { error } = await supabase
         .from('age_verification')
         .insert({
+          session_token: sessionToken,
           date_of_birth: dateOfBirth,
           is_minor: isMinor,
           requires_parent_consent: requiresParentConsent,
-        })
-        .select()
-        .single();
+        });
 
       if (error) {
         console.error('Age verification error:', error);
@@ -60,7 +62,7 @@ export const useAgeVerification = () => {
         dateOfBirth,
         isMinor,
         requiresParentConsent,
-        sessionToken: data.session_token,
+        sessionToken,
         age,
       };
     } catch (error) {
