@@ -22,6 +22,8 @@ const CreatorDashboard = lazy(() => import("./pages/CreatorDashboard"));
 const CreatorUpload = lazy(() => import("./pages/CreatorUpload"));
 const CreatorProfile = lazy(() => import("./pages/CreatorProfile"));
 const CreatorPublicProfile = lazy(() => import("./pages/CreatorPublicProfile"));
+const CreatorSubmitted = lazy(() => import("./pages/CreatorSubmitted"));
+const ParentVerification = lazy(() => import("./pages/ParentVerification"));
 const DesignReview = lazy(() => import("./pages/DesignReview"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -67,7 +69,9 @@ const App = () => (
             <Route path="/creator/dashboard" element={<CreatorDashboard />} />
             <Route path="/creator/upload" element={<CreatorUpload />} />
             <Route path="/creator/profile" element={<CreatorProfile />} />
+            <Route path="/creator/submitted" element={<CreatorSubmitted />} />
             <Route path="/creator/:creatorId" element={<CreatorPublicProfile />} />
+            <Route path="/parent-verify" element={<ParentVerification />} />
             <Route path="/design-review" element={<DesignReview />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/sign-in" element={<Auth />} />

@@ -32,8 +32,6 @@ export const filterProducts = (
 ) => {
   const { selectedAge, selectedState, selectedCollection, searchTerm } = filters;
   
-  console.log('Filtering products with filters:', filters);
-  console.log('Total products before filtering:', products.length);
   
   return products.filter(product => {
     // Age filter - match against creator age bracket
@@ -50,20 +48,7 @@ export const filterProducts = (
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.creatorName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const passes = matchesAge && matchesState && matchesCollection && matchesSearch;
-    
-    if (!passes) {
-      console.log(`Product ${product.title} filtered out:`, {
-        matchesAge,
-        matchesState, 
-        matchesCollection,
-        matchesSearch,
-        productAge: product.creatorAge,
-        productState: product.creatorState,
-        productCollection: product.collectionId
-      });
-    }
-    
+    const passes = matchesAge && matchesState && matchesCollection && matchesSearch;    
     return passes;
   });
 };

@@ -7,7 +7,7 @@ const isStorageUrl = (url: string): boolean => {
 
 const extractStoragePathFromUrl = (url: string): string | null => {
   try {
-    const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+    const match = url.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)$/);
     return match ? match[1] : null;
   } catch (error) {
     console.error('Error extracting storage path:', error);
@@ -17,7 +17,6 @@ const extractStoragePathFromUrl = (url: string): string | null => {
 
 const deleteStorageFile = async (url: string): Promise<void> => {
   if (!isStorageUrl(url)) {
-    console.log('Skipping deletion of non-storage URL:', url);
     return;
   }
 
@@ -34,8 +33,6 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 
     if (error) {
       console.error('Error deleting file from storage:', error);
-    } else {
-      console.log('Successfully deleted file from storage:', filePath);
     }
   } catch (error) {
     console.error('Error during file deletion:', error);
@@ -43,8 +40,6 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 };
 
 export const deleteEntireProduct = async (productId: string): Promise<void> => {
-  console.log('=== DELETE ENTIRE PRODUCT START ===');
-  console.log('Product ID to delete:', productId);
 
   if (!productId) {
     const error = new Error('Product ID is required for deletion');
@@ -54,7 +49,6 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
   try {
     // Step 1: Get all the product data including images and design
-    console.log('Step 1: Fetching product data...');
     const { data: product, error: fetchError } = await supabase
       .from('products')
       .select(`
@@ -83,17 +77,9 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       throw error;
     }
 
-    console.log('✅ Product fetched successfully:', {
-      id: product.id,
-      title: product.title,
-      designId: product.design_id,
-      designTitle: product.designs?.title,
-      designStatus: product.designs?.status
-    });
 
     // Step 2: Delete additional images from storage
     if (product.additional_images && Array.isArray(product.additional_images)) {
-      console.log('Step 2: Deleting additional images from storage...');
       for (const img of product.additional_images) {
         if (typeof img === 'string') {
           await deleteStorageFile(img);
@@ -104,18 +90,14 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
           }
         }
       }
-      console.log('✅ Additional images processed');
     }
 
     // Step 3: Delete main design image from storage
     if (product.designs?.file_url) {
-      console.log('Step 3: Deleting main design image from storage...');
       await deleteStorageFile(product.designs.file_url);
-      console.log('✅ Main design image processed');
     }
 
     // Step 4: Delete related records in dependency order
-    console.log('Step 4: Deleting related records...');
     
     // Delete product variants
     const { error: variantsError } = await supabase
@@ -125,8 +107,6 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
     if (variantsError) {
       console.error('⚠️ Error deleting product variants (continuing):', variantsError);
-    } else {
-      console.log('✅ Product variants deleted');
     }
 
     // Delete printful products
@@ -137,12 +117,9 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
 
     if (printfulError) {
       console.error('⚠️ Error deleting printful products (continuing):', printfulError);
-    } else {
-      console.log('✅ Printful products deleted');
     }
 
     // Step 5: Delete the product record
-    console.log('Step 5: Deleting product record...');
     const { error: productError } = await supabase
       .from('products')
       .delete()
@@ -152,11 +129,9 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
       console.error('❌ Error deleting product:', productError);
       throw new Error(`Failed to delete product: ${productError.message}`);
     }
-    console.log('✅ Product record deleted');
 
     // Step 6: Mark the design as "consumed" (hidden from creators but accessible to admins)
     if (product.design_id) {
-      console.log('Step 6: Marking design as consumed (hidden from creator)...');
       
       const { error: designError } = await supabase
         .from('designs')
@@ -171,11 +146,8 @@ export const deleteEntireProduct = async (productId: string): Promise<void> => {
         throw new Error(`Failed to mark design as consumed: ${designError.message}`);
       }
       
-      console.log('✅ Design marked as consumed (hidden from creator view)');
     }
 
-    console.log('🎉 DELETION COMPLETED SUCCESSFULLY');
-    console.log('=== DELETE ENTIRE PRODUCT END ===');
 
   } catch (error) {
     console.error('❌ CRITICAL ERROR in deleteEntireProduct:', error);

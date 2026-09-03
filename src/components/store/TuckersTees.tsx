@@ -45,7 +45,6 @@ const TuckersTees: React.FC = () => {
         .single();
 
       if (collectionError || !collection) {
-        console.log('Tucker\'s Tees collection not found');
         setLoading(false);
         return;
       }

@@ -36,7 +36,6 @@ export const useStripeConnect = () => {
     try {
       // This will be implemented when Stripe Connect is enabled
       // For now, we'll just log that the user wants to start onboarding
-      console.log('Stripe Connect onboarding requested for user:', user.id);
       
       // Placeholder for future Stripe Connect account creation
       alert('Stripe Connect onboarding will be available once Stripe Connect is enabled on the platform.');

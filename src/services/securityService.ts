@@ -27,26 +27,10 @@ export const logSecurityEvent = async (entry: SecurityLogEntry): Promise<void> =
     if (error) {
       console.error('Failed to log security event:', error);
       // Fallback to console logging if database logging fails
-      console.log('Security Event (fallback):', {
-        action: entry.action,
-        resource_type: entry.resource_type,
-        resource_id: entry.resource_id,
-        metadata: entry.metadata,
-        timestamp: new Date().toISOString(),
-        user_agent: navigator.userAgent
-      });
     }
   } catch (error) {
     console.error('Security logging error:', error);
     // Fallback to console logging
-    console.log('Security Event (fallback):', {
-      action: entry.action,
-      resource_type: entry.resource_type,
-      resource_id: entry.resource_id,
-      metadata: entry.metadata,
-      timestamp: new Date().toISOString(),
-      user_agent: navigator.userAgent
-    });
   }
 };
 

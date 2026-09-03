@@ -53,7 +53,6 @@ export const deleteDesignAndRelatedData = async (designId: string): Promise<Desi
       return { success: false, error: 'Failed to delete design' };
     }
 
-    console.log('Successfully deleted design and all related data:', designId);
     return { success: true };
 
   } catch (error) {

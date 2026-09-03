@@ -20,12 +20,10 @@ const ProductDeleteDialog: React.FC<ProductDeleteDialogProps> = ({
   loading
 }) => {
   const handleConfirm = () => {
-    console.log('Delete dialog confirmed for PERMANENT deletion:', productTitle);
     onConfirm();
   };
 
   const handleCancel = () => {
-    console.log('Delete dialog cancelled');
     onOpenChange(false);
   };
 

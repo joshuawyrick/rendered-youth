@@ -75,7 +75,6 @@ const CurriculumLevel: React.FC<CurriculumLevelProps> = ({
                         className="w-full text-left justify-start h-auto py-3 px-4 text-sm font-normal border-gray-300 hover:border-ry-yellow hover:bg-ry-yellow/5"
                         onClick={() => {
                           // Future functionality for opening lesson
-                          console.log(`Opening lesson: ${subModule}`);
                         }}
                       >
                         <span className="w-2 h-2 bg-ry-yellow rounded-full mr-3 flex-shrink-0"></span>

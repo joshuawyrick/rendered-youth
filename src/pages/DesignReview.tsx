@@ -14,7 +14,6 @@ const DesignReview = () => {
   const [searchParams] = useSearchParams();
   const designId = searchParams.get('design');
   
-  console.log('DesignReview component - designId from URL:', designId);
 
   const {
     design,

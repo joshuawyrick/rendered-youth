@@ -32,13 +32,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const handleDeleteProduct = async () => {
-    console.log('🗑️ Starting delete process for product:', product.id);
     setDeleting(true);
     
     try {
       await deleteEntireProduct(product.id);
       
-      console.log('✅ Delete completed successfully');
       toast({
         title: "Deleted Successfully",
         description: "Product and all associated data have been permanently deleted.",

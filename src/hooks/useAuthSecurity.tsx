@@ -13,7 +13,6 @@ export const useAuthSecurity = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -23,7 +22,6 @@ export const useAuthSecurity = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -34,7 +32,6 @@ export const useAuthSecurity = () => {
 
   const signOut = async () => {
     try {
-      console.log('Attempting to sign out...');
       
       // Clean local state first
       setUser(null);
@@ -45,8 +42,6 @@ export const useAuthSecurity = () => {
       
       if (error) {
         console.error('Sign out error:', error);
-      } else {
-        console.log('Sign out successful');
       }
       
     } catch (error) {
@@ -59,7 +54,6 @@ export const useAuthSecurity = () => {
 
   const logSecurityEvent = async (action: string, metadata?: any) => {
     try {
-      console.log('Security Event:', { action, metadata, timestamp: new Date().toISOString() });
       // This is a placeholder - in a real app you'd send this to your security service
     } catch (error) {
       console.error('Failed to log security event:', error);

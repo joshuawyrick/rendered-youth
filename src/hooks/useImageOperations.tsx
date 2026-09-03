@@ -61,9 +61,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const removeImage = (index: number) => {
-    console.log('=== IMAGE REMOVAL BY INDEX DEBUG START ===');
-    console.log('Attempting to remove image at index:', index);
-    console.log('Current images array length:', images.length);
     
     if (index < 0 || index >= images.length) {
       console.error('Invalid index:', index);
@@ -76,16 +73,9 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     }
     
     const imageToRemove = images[index];
-    console.log('Image to remove:', {
-      index,
-      sortOrder: imageToRemove.sortOrder,
-      url: imageToRemove.url.substring(0, 50) + '...',
-      altText: imageToRemove.altText
-    });
     
     // Check if this is the only image
     if (images.length === 1) {
-      console.log('Cannot delete the only remaining image');
       toast({
         title: "Cannot Delete",
         description: "You must have at least one product image.",
@@ -96,7 +86,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
     
     // Remove the image by index
     const filteredImages = images.filter((_, i) => i !== index);
-    console.log('Images after filtering by index:', filteredImages.length);
     
     // Reorder the remaining images sequentially
     const reorderedImages = filteredImages.map((img, newIndex) => ({
@@ -104,11 +93,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       sortOrder: newIndex + 1
     }));
     
-    console.log('Final reordered images:', reorderedImages.map(img => ({ 
-      sortOrder: img.sortOrder, 
-      url: img.url.substring(0, 30) + '...' 
-    })));
-    console.log('=== IMAGE REMOVAL BY INDEX DEBUG END ===');
     
     onImagesUpdate(reorderedImages);
     
@@ -119,7 +103,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const updateImageAltText = (index: number, altText: string) => {
-    console.log('Updating alt text for index:', index, 'to:', altText);
     
     if (index < 0 || index >= images.length) {
       console.error('Invalid index for alt text update:', index);
@@ -133,8 +116,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
   };
 
   const reorderImages = (startIndex: number, endIndex: number) => {
-    console.log('=== REORDER IMAGES DEBUG START ===');
-    console.log('Moving image from index:', startIndex, 'to index:', endIndex);
     
     if (startIndex < 0 || startIndex >= images.length || endIndex < 0 || endIndex >= images.length) {
       console.error('Invalid indices for reordering:', { startIndex, endIndex });
@@ -151,11 +132,6 @@ export const useImageOperations = ({ images, onImagesUpdate }: UseImageOperation
       sortOrder: index + 1
     }));
 
-    console.log('Reordered images:', updatedImages.map(img => ({ 
-      sortOrder: img.sortOrder, 
-      url: img.url.substring(0, 30) + '...' 
-    })));
-    console.log('=== REORDER IMAGES DEBUG END ===');
 
     onImagesUpdate(updatedImages);
     

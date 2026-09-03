@@ -15,7 +15,6 @@ export const useSecureAuth = () => {
     // Set up auth state listener with enhanced security
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
         
         // Enhanced security logging
         if (event === 'SIGNED_IN' && session?.user) {
@@ -62,7 +61,6 @@ export const useSecureAuth = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -172,23 +170,25 @@ export const useSecureAuth = () => {
     }
 
     switch (type) {
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(input)) {
           return { isValid: false, error: 'Invalid email format' };
         }
         break;
+      }
       case 'password':
         if (input.length < 8) {
           return { isValid: false, error: 'Password must be at least 8 characters' };
         }
         break;
-      case 'name':
+      case 'name': {
         const nameRegex = /^[a-zA-Z\s'-]+$/;
         if (!nameRegex.test(input)) {
           return { isValid: false, error: 'Name contains invalid characters' };
         }
         break;
+      }
     }
 
     return { isValid: true };
@@ -206,7 +206,6 @@ export const useSecureAuth = () => {
 
   const signOut = async () => {
     try {
-      console.log('Attempting secure sign out...');
       
       await logEnhancedSecurityEvent({
         action: 'USER_SIGN_OUT_INITIATED',

@@ -72,20 +72,11 @@ const ProductImageGrid: React.FC<ProductImageGridProps> = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    console.log('=== REMOVE IMAGE DEBUG ===');
-    console.log('Removing image at index:', index);
-    console.log('Image details:', {
-      sortOrder: images[index]?.sortOrder,
-      url: images[index]?.url?.substring(0, 50) + '...',
-      altText: images[index]?.altText
-    });
-    console.log('=== END REMOVE DEBUG ===');
     
     onRemoveImage?.(index);
   };
 
   const handleAltTextChange = (index: number, altText: string) => {
-    console.log('Alt text change for index:', index, 'new text:', altText);
     onUpdateAltText?.(index, altText);
   };
 

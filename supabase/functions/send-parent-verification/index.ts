@@ -116,7 +116,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send verification email
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    const verificationUrl = `${Deno.env.get("SUPABASE_URL")?.replace('supabase.co', 'lovable.app')}/parent-verify?token=${verificationToken}`;
+    // Use SITE_URL if configured (set this in Supabase Edge Function secrets to your real site address,
+    // e.g. https://renderedyouth.com); otherwise fall back to the auto-derived Lovable URL.
+    const siteUrl = Deno.env.get("SITE_URL") || Deno.env.get("SUPABASE_URL")?.replace('supabase.co', 'lovable.app');
+    const verificationUrl = `${siteUrl}/parent-verify?token=${verificationToken}`;
     
     const emailResponse = await resend.emails.send({
       from: "Rendered Youth <onboarding@resend.dev>",
@@ -171,7 +174,6 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Parent verification email sent:", emailResponse);
 
     return new Response(
       JSON.stringify({ 

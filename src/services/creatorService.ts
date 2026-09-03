@@ -13,7 +13,6 @@ export interface CreatorProfile {
 
 export const fetchCreatorProfiles = async (): Promise<CreatorProfile[]> => {
   try {
-    console.log('=== CREATORS: Fetching creator profiles ===');
     
     // Get creator profiles with published designs count
     const { data: profiles, error: profilesError } = await supabase
@@ -39,7 +38,6 @@ export const fetchCreatorProfiles = async (): Promise<CreatorProfile[]> => {
     }
 
     if (!profiles || profiles.length === 0) {
-      console.log('No creator profiles found');
       return [];
     }
 
@@ -73,8 +71,6 @@ export const fetchCreatorProfiles = async (): Promise<CreatorProfile[]> => {
       created_at: profile.created_at
     }));
 
-    console.log('Creator profiles fetched:', formattedProfiles);
-    console.log('=== CREATORS: Fetch complete ===');
     
     return formattedProfiles;
   } catch (error) {

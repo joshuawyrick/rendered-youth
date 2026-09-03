@@ -63,7 +63,7 @@ const isStorageUrl = (url: string): boolean => {
 const extractStoragePathFromUrl = (url: string): string | null => {
   try {
     // Extract the path after /storage/v1/object/public/{bucket}/
-    const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+    const match = url.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)$/);
     return match ? match[1] : null;
   } catch (error) {
     console.error('Error extracting storage path:', error);
@@ -73,7 +73,6 @@ const extractStoragePathFromUrl = (url: string): string | null => {
 
 const deleteStorageFile = async (url: string): Promise<void> => {
   if (!isStorageUrl(url)) {
-    console.log('Skipping deletion of non-storage URL:', url);
     return;
   }
 
@@ -90,8 +89,6 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 
     if (error) {
       console.error('Error deleting file from storage:', error);
-    } else {
-      console.log('Successfully deleted file from storage:', filePath);
     }
   } catch (error) {
     console.error('Error during file deletion:', error);
@@ -100,10 +97,6 @@ const deleteStorageFile = async (url: string): Promise<void> => {
 
 export const saveProductImages = async (productId: string, images: ProductImage[], previousImages: ProductImage[] = []): Promise<void> => {
   try {
-    console.log('=== SAVE IMAGES DEBUG ===');
-    console.log('Product ID:', productId);
-    console.log('Current images:', images.map(img => ({ sortOrder: img.sortOrder, url: img.url.substring(0, 50) + '...' })));
-    console.log('Previous images:', previousImages.map(img => ({ sortOrder: img.sortOrder, url: img.url.substring(0, 50) + '...' })));
 
     // Get current product data to check the main design
     const { data: currentProduct, error: fetchError } = await supabase
@@ -115,7 +108,6 @@ export const saveProductImages = async (productId: string, images: ProductImage[
     if (fetchError) throw fetchError;
 
     const currentMainDesignUrl = currentProduct?.designs?.file_url;
-    console.log('Current main design URL:', currentMainDesignUrl?.substring(0, 50) + '...');
 
     // The first image in the array is now the main image
     const newMainImage = images[0];
@@ -125,23 +117,18 @@ export const saveProductImages = async (productId: string, images: ProductImage[
       sortOrder: index + 2 // Start from 2 since main image is 1
     }));
 
-    console.log('New main image:', newMainImage?.url?.substring(0, 50) + '...');
-    console.log('Additional images to save:', additionalImages.length);
 
     // Find images that were removed (existed in previousImages but not in current images)
     const currentUrls = new Set(images.map(img => img.url));
     const removedImages = previousImages.filter(prevImg => !currentUrls.has(prevImg.url));
-    console.log('Images to delete:', removedImages.length);
 
     // Delete removed images from storage
     for (const removedImage of removedImages) {
-      console.log('Deleting storage file for:', removedImage.url.substring(0, 50) + '...');
       await deleteStorageFile(removedImage.url);
     }
 
     // If the main image has changed, we need to handle the design update
     if (newMainImage && currentMainDesignUrl && newMainImage.url !== currentMainDesignUrl) {
-      console.log('Main image has changed, updating design');
       
       // Update the design with the new main image URL
       const { data: productData } = await supabase
@@ -163,7 +150,6 @@ export const saveProductImages = async (productId: string, images: ProductImage[
 
       // Delete the old main design file if it's different from any of the current images
       if (!currentUrls.has(currentMainDesignUrl)) {
-        console.log('Deleting old main design file');
         await deleteStorageFile(currentMainDesignUrl);
       }
     }
@@ -178,13 +164,6 @@ export const saveProductImages = async (productId: string, images: ProductImage[
 
     if (error) throw error;
 
-    console.log('Successfully saved product images:', { 
-      productId, 
-      imageCount: additionalImages.length,
-      removedCount: removedImages.length,
-      mainImageChanged: newMainImage?.url !== currentMainDesignUrl
-    });
-    console.log('=== END SAVE DEBUG ===');
   } catch (error) {
     console.error('Error saving product images:', error);
     throw error;

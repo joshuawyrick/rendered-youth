@@ -1,73 +1,49 @@
-# Welcome to your Lovable project
+# Rendered Youth
 
-## Project info
+**Kids Draw It. We Render It. You Wear It.**
 
-**URL**: https://lovable.dev/projects/2d2ea40d-6318-4043-bc01-04a8f8bc4faf
+A marketplace where children's black-marker artwork becomes real T-shirts. Kids upload their drawings, the Rendered Youth team creates professional mockups, designs go live in the store, and young creators share in the profits. Originally conceived as "Tucker's Tees" — Tucker's designs live on as a special co-founder collection.
 
-## How can I edit this code?
+## Tech Stack
 
-There are several ways of editing your application.
+- **Vite + React 18 + TypeScript** — the web app
+- **Tailwind CSS + shadcn/ui** — styling (brand tokens live in `src/index.css`; black `#000` / yellow `#FFD400`)
+- **Supabase** — database, auth, file storage, and edge functions (`supabase/`)
+- **React Router** — page routing (all routes are in `src/App.tsx`)
+- **TanStack Query** — data fetching/caching
+- Built and editable with [Lovable](https://lovable.dev/projects/2d2ea40d-6318-4043-bc01-04a8f8bc4faf)
 
-**Use Lovable**
+## Project Layout
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2d2ea40d-6318-4043-bc01-04a8f8bc4faf) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+  pages/          One file per page (Store, Creators, AdminDashboard, ...)
+  components/     UI building blocks, grouped by feature (admin/, store/, onboarding/, ...)
+    ui/           Generic shadcn components + RY-branded ones (ry-button, ry-card)
+  hooks/          Reusable logic (useAuth, useStoreData, ...)
+  services/       All Supabase database calls, grouped by feature
+  integrations/   Supabase client + generated database types
+supabase/
+  functions/      Server-side edge functions (parent verification email, notifications)
+  migrations/     Database schema history
 ```
 
-**Edit a file directly in GitHub**
+## Key Flows
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Creator signup**: age gate → under-13 requires parent email consent (COPPA) → parent clicks link in email → `/parent-verify`
+- **Design upload**: creator uploads artwork → `/creator/submitted` confirmation → admin reviews → mockups → creator picks → live in store
+- **Admin**: `/admin` — design review, product/collection management, discount codes
 
-**Use GitHub Codespaces**
+## Local Development
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm install
+npm run dev      # starts dev server at http://localhost:8080
+npm run build    # production build
+npm run lint     # check code quality
+```
 
-## What technologies are used for this project?
+## Notes
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/2d2ea40d-6318-4043-bc01-04a8f8bc4faf) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- The parent-verification email builds its link from the `SITE_URL` secret in Supabase Edge Function settings — set it to the real site address when using a custom domain.
+- Changes pushed to this repo sync automatically with Lovable, and vice versa.

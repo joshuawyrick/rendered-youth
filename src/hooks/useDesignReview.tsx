@@ -32,7 +32,6 @@ export const useDesignReview = (designId: string | null) => {
     }
 
     try {
-      console.log('Fetching design data for ID:', designId);
       
       // Fetch design details
       const { data: designData, error: designError } = await supabase
@@ -46,7 +45,6 @@ export const useDesignReview = (designId: string | null) => {
         throw designError;
       }
 
-      console.log('Design data:', designData);
       setDesign(designData);
 
       // Fetch mockups first
@@ -61,7 +59,6 @@ export const useDesignReview = (designId: string | null) => {
         throw mockupsError;
       }
 
-      console.log('Mockups data:', mockupsData);
       const mockups = mockupsData || [];
       setMockups(mockups);
 
@@ -75,11 +72,9 @@ export const useDesignReview = (designId: string | null) => {
 
         // Validate that the selected mockup still exists in the current mockups
         if (selectionData && mockups.some(m => m.id === selectionData.selected_mockup_id)) {
-          console.log('Valid selection already exists:', selectionData);
           setSubmitted(true);
           setSelectedMockup(selectionData.selected_mockup_id);
         } else if (selectionData) {
-          console.log('Selection exists but mockup not found, clearing selection');
           // Clear invalid selection
           await supabase
             .from('design_selections')
@@ -128,7 +123,6 @@ export const useDesignReview = (designId: string | null) => {
             selectedMockupId: selectedMockup,
           },
         });
-        console.log('Admin notification sent successfully');
       } catch (notificationError) {
         console.error('Failed to send admin notification:', notificationError);
         // Don't fail the whole process if notification fails

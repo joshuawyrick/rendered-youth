@@ -43,7 +43,6 @@ export const useCreatorEarnings = () => {
     if (!user) return;
 
     try {
-      console.log('Fetching creator earnings for user:', user.id);
       
       // Fetch individual earnings
       const { data: earningsData, error: earningsError } = await supabase
@@ -91,12 +90,6 @@ export const useCreatorEarnings = () => {
         total_sales: formattedEarnings.length
       });
 
-      console.log('Creator earnings loaded:', {
-        totalEarnings,
-        pendingEarnings,
-        paidEarnings,
-        totalSales: formattedEarnings.length
-      });
 
     } catch (error) {
       console.error('Error in fetchCreatorEarnings:', error);

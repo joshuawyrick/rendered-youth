@@ -88,7 +88,6 @@ serve(async (req) => {
 
     // Only send if user has notifications enabled (default true)
     if (notifSettings?.email_on_review_ready !== false) {
-      console.log(`Sending review notification to ${user.email} for design: ${design.title}`);
       
       const resendApiKey = Deno.env.get('RESEND_API_KEY');
       
@@ -119,16 +118,11 @@ serve(async (req) => {
             console.error('Resend API error:', errorText);
           } else {
             const emailResult = await emailResponse.json();
-            console.log('Email sent successfully via Resend:', emailResult.id);
           }
         } catch (emailError) {
           console.error('Email sending failed:', emailError);
         }
-      } else {
-        console.log('RESEND_API_KEY not configured, email notification skipped');
       }
-    } else {
-      console.log('User has disabled email notifications');
     }
 
     return new Response(

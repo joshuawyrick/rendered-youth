@@ -31,14 +31,6 @@ const DesignCard: React.FC<DesignCardProps> = ({
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
-  console.log('DesignCard render:', { 
-    designId: design.id, 
-    designTitle: design.title,
-    designStatus: design.status,
-    hasExistingProduct, 
-    existingProductId, 
-    existingProductTitle 
-  });
 
   const handleDeleteProduct = async () => {
     if (!existingProductId) {
@@ -51,13 +43,11 @@ const DesignCard: React.FC<DesignCardProps> = ({
       return;
     }
     
-    console.log('🗑️ Starting delete process for product:', existingProductId);
     setDeleting(true);
     
     try {
       await deleteEntireProduct(existingProductId);
       
-      console.log('✅ Delete completed successfully');
       toast({
         title: "Deleted Successfully",
         description: "Product and design have been permanently deleted.",
@@ -68,7 +58,6 @@ const DesignCard: React.FC<DesignCardProps> = ({
       
       // Trigger aggressive data refresh with longer delay
       if (onProductDeleted) {
-        console.log('🔄 Triggering data refresh...');
         setTimeout(() => {
           onProductDeleted();
         }, 500); // Increased delay to ensure database changes propagate
@@ -93,11 +82,6 @@ const DesignCard: React.FC<DesignCardProps> = ({
   };
 
   const handleDeleteClick = () => {
-    console.log('🗑️ Delete Forever button clicked:', { 
-      hasExistingProduct, 
-      existingProductId, 
-      existingProductTitle 
-    });
     setDeleteDialogOpen(true);
   };
 
@@ -111,7 +95,6 @@ const DesignCard: React.FC<DesignCardProps> = ({
               alt={design.title}
               className="w-full h-full object-cover"
               onError={(e) => {
-                console.log('Image failed to load:', design.file_url);
                 e.currentTarget.style.display = 'none';
                 e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
               }}

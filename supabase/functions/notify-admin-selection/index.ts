@@ -73,12 +73,6 @@ serve(async (req) => {
     const { data: adminUsers } = await supabaseClient
       .from('admin_users')
       .select('user_id');
-
-    if (adminUsers && adminUsers.length > 0) {
-      console.log(`Admin notification: Creator ${user?.email || 'Unknown'} has selected their favorite design for "${design.title}"`);
-      console.log(`Design ID: ${designId}, Selected Mockup ID: ${selectedMockupId}`);
-    }
-
     return new Response(
       JSON.stringify({ success: true }),
       {
